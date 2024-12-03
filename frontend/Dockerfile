@@ -4,7 +4,7 @@ WORKDIR /usr/src/app/frontend
 COPY . .
 
 RUN npm install -g pnpm
-RUN RUN pnpm install
+RUN pnpm install
 
-EXPOSE 3000
-CMD [ "pnpm", "start" ]
+EXPOSE 4040
+CMD [ "pnpm", "run", "dev" ]
