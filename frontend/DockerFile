@@ -1,0 +1,10 @@
+FROM node:lts-alpine
+
+WORKDIR /usr/src/app/frontend
+COPY . .
+
+RUN npm install -g pnpm
+RUN RUN pnpm install
+
+EXPOSE 3000
+CMD [ "pnpm", "start" ]
