@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cassandra_engine',
     'myapp'
 ]
 
@@ -76,8 +77,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django_cassandra_engine',
+        'NAME': 'your_keyspace_name',
+        'TEST_NAME': 'your_test_keyspace_name',
+        'HOST': 'your_cassandra_host',
+        'PORT': 'your_cassandra_port',
     }
 }
 
