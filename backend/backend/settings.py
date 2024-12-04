@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
 from pathlib import Path
+import environ
+
+env = environ.Env()
+environ.Env.read_env()  # Reads the .env file
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,16 +78,22 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+print("DB_USER:", env('DB_USER'))  # This should print your username
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django_cassandra_engine',
-        'NAME': 'your_keyspace_name',
+        'NAME': env('DB_KEYSPACE'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
         'TEST_NAME': 'your_test_keyspace_name',
-        'HOST': 'your_cassandra_host',
-        'PORT': 'your_cassandra_port',
+        'HOST': 'localhost',
+        'PORT': '9042',
     }
 }
 
+print("DB_KEYSPACE:", env('DB_KEYSPACE')) 
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

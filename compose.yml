@@ -23,6 +23,7 @@ services:
     environment:
       - CASSANDRA_USER=${DB_USER}     
       - CASSANDRA_PASSWORD=${DB_PASSWORD}
+      - CASSANDRA_NAME=${DB_KEYSPACE}
     volumes:
       - cassandra-db:/var/lib/cassandra
       - ./initdb:/docker-entrypoint-initdb.d
