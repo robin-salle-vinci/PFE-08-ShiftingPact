@@ -3,16 +3,13 @@ FROM python:3.11
 # Install Netcat (nc) to wait for the Cassandra service
 RUN apt-get update && apt-get install -y netcat-openbsd
 
-# Télécharger et installer dockerize
+# Install dockerize
 RUN curl -sSL https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz | tar -xzv && mv dockerize /usr/local/bin/
 
 
 WORKDIR /usr/src/app
 
 COPY . .
-
-# # Script to wait for the Cassandra service
-# RUN chmod +x /usr/src/app/wait-for-it.sh
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y libev-dev
