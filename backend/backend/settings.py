@@ -13,7 +13,7 @@ from pathlib import Path
 import environ
 
 env = environ.Env()
-environ.Env.read_env()  # Reads the .env file
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,15 +85,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django_cassandra_engine',
         'NAME': env('DB_KEYSPACE'),
+        'TEST_NAME': 'testapp',
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
-        'TEST_NAME': 'your_test_keyspace_name',
-        'HOST': 'localhost',
-        'PORT': '9042',
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
     }
 }
-
-print("DB_KEYSPACE:", env('DB_KEYSPACE')) 
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
