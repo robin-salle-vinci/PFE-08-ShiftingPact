@@ -5,6 +5,10 @@ services:
     container_name: 'frontend-shiftingpact'
     ports:
       - '4040:4040'
+    depends_on:
+      - backend
+    networks:
+      - backend-network
   
   backend:
     build: 
@@ -14,6 +18,11 @@ services:
       - '8080:8080'
     depends_on:
       - cassandra
+    environment:
+      - CASSANDRA_HOST=cassandra  # Référence directe au service Cassandra via son nom
+      - CASSANDRA_PORT=9042
+    networks:
+      - backend-network
 
   cassandra:
     image: cassandra:latest
@@ -23,10 +32,15 @@ services:
     environment:
       - CASSANDRA_USER=${DB_USER}     
       - CASSANDRA_PASSWORD=${DB_PASSWORD}
-      - CASSANDRA_NAME=${DB_KEYSPACE}
     volumes:
       - cassandra-db:/var/lib/cassandra
       - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
 
 volumes:
   cassandra-db:

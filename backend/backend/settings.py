@@ -84,14 +84,23 @@ print("DB_USER:", env('DB_USER'))  # This should print your username
 DATABASES = {
     'default': {
         'ENGINE': 'django_cassandra_engine',
-        'NAME': env('DB_KEYSPACE'),
-        'TEST_NAME': 'testapp',
+        'KEYSPACE': env('DB_KEYSPACE'),
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
+        'OPTIONS': {
+            'replication': {
+                'strategy_class': 'SimpleStrategy',
+                'replication_factor': 1
+            },
+            'connection': {
+                'consistency': 'LOCAL_ONE',
+            }
+        }
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
