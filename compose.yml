@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context:  ./frontend
+    container_name: 'frontend-shiftingpact'
+    ports:
+      - '4040:4040'
+  
+  backend:
+    build: 
+      context: ./backend
+    container_name: 'backend-shiftingpact'
+    ports:
+      - '8080:8080'
+    depends_on:
+      - cassandra
+
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra-container
+    ports:
+      - 9042:9042
+    environment:
+      - CASSANDRA_USER=${DB_USER}     
+      - CASSANDRA_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - cassandra-db:/var/lib/cassandra
+      - ./initdb:/docker-entrypoint-initdb.d
+
+volumes:
+  cassandra-db:
