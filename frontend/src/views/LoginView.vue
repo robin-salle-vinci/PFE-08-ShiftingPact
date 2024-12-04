@@ -12,6 +12,7 @@
           @contextmenu.prevent
         />
       </div>
+
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <input
@@ -33,19 +34,51 @@
         </div>
         <button type="submit" class="login-button">Se connecter</button>
       </form>
+
+      <div v-if="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue'
+  import axios from 'axios'
+  import { useRouter } from 'vue-router'
+  import type { AxiosResponse, AxiosError } from 'axios'
 
-  const email = ref('')
-  const password = ref('')
+  const router = useRouter()
+
+  const email = ref<string>('')
+  const password = ref<string>('')
+  const errorMessage = ref<string | null>(null)
 
   const handleLogin = () => {
-    console.log('Email:', email.value)
-    console.log('Password:', password.value)
+    axios
+      .post('http://localhost:8000/users/login/', {
+        email: email.value,
+        password: password.value,
+      })
+      .then((response: AxiosResponse) => {
+        errorMessage.value = null
+        // TODO : Save token
+        console.log(response.data)
+        router.push('/')
+      })
+      .catch((error: AxiosError) => {
+        if (error.response) {
+          if (error.response.status === 401 || error.response.status === 404) {
+            errorMessage.value = 'Identifiants invalides, veuillez réessayer.'
+          } else {
+            errorMessage.value = 'Une erreur inconnue est survenue'
+          }
+        } else if (error.request) {
+          errorMessage.value = 'Le serveur ne répond pas. Vérifiez votre connexion.'
+        } else {
+          errorMessage.value = 'Une erreur inconnue est survenue'
+        }
+      })
   }
 
   const options = {
@@ -107,11 +140,15 @@
         value: { min: 1, max: 5 },
       },
     },
-    detectRetina: true,
+    detectRetina: false,
   }
 </script>
 
 <style scoped>
+  * {
+    font-family: Arial, sans-serif; /* Replace with your desired font */
+  }
+
   .particles-background {
     position: absolute;
     top: 0;
@@ -187,5 +224,12 @@
     box-shadow: 0 4px 8px #b5cdbf;
     transform: scale(1.05);
     transition: transform 0.3s ease;
+  }
+
+  .error-message {
+    color: red;
+    font-size: 1rem;
+    margin-top: 1rem;
+    text-align: center;
   }
 </style>
