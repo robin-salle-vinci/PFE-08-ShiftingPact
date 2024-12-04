@@ -14,6 +14,10 @@ def login_view(request):
             username = data.get('username')
             password = data.get('password')
 
+            # Check if username or password is empty
+            if not username or not password:
+                return JsonResponse({'message': 'Username or password cannot be empty'},status=400)
+
             # Check if credentials exist in Cassandra DB
             user = User.objects(username=username).first()
 
