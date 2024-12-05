@@ -14,7 +14,6 @@ def login_view(request):
         data = json.loads(request.body)
         username = data.get('email')
         password = data.get('password')
-        print(f"Received username: {username}, password: {password}")
 
         # Check if username or password is empty
         if not username or not password:
