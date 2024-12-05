@@ -2,11 +2,16 @@ from django_cassandra_engine.models import DjangoCassandraModel
 from cassandra.cqlengine import columns
 from uuid import uuid4
 
-class User(DjangoCassandraModel):
+class Users(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)  # Use UUID for unique ID
     username = columns.Text(required=True)
     password = columns.Text(required=True)
-    role = columns.Text(required=True)  # Role as 'admin' or 'client'
-    id_info_client = columns.Integer(required=False)  # Optional field for 'client' role, will link to InfoClient later
+    role = columns.Text(required=True)  # Role as 'employee' or 'client'
+    id_client_information = columns.UUID(required=False)  # Optional field for 'client' role
 
-
+# Create this before creating User
+class ClientInformation(DjangoCassandraModel):
+    id = columns.UUID(primary_key=True, default=uuid4)
+    numberWorkers = columns.Integer(required=True)
+    ownedFacility = columns.Boolean(required=True)
+    serviceOrProduct = columns.Text(required=True)

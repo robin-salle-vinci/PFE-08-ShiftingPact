@@ -13,6 +13,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: true,
   },
   define: {
     'process.env.API_URL': JSON.stringify(process.env.API_URL),
