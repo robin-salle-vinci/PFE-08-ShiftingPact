@@ -77,13 +77,13 @@
           <p>
             Identifiant: <strong>{{ username }}</strong>
           </p>
-          <button>copy</button>
+          <button @click="copyToClipboard(username)">copy</button>
         </div>
         <div class="cred-element">
           <p>
             Mot de passe: <strong>{{ password }}</strong>
           </p>
-          <button>copy</button>
+          <button @click="copyToClipboard(password)">copy</button>
         </div>
       </div>
     </div>
@@ -91,9 +91,11 @@
 </template>
 
 <script setup lang="ts">
+  import axios, { type AxiosResponse } from 'axios'
   import { ref } from 'vue'
 
-  const apiUrl = import.meta.env.BASE_URL
+  const apiUrl = import.meta.env.VITE_API_URL
+  console.log(apiUrl)
   const submited = ref<boolean>(false)
 
   const companyName = ref<string>('')
@@ -101,30 +103,33 @@
   const facilityOwner = ref<boolean>(false)
   const isService = ref<boolean>(false)
 
-  const username = ref<string>('')
-  const password = ref<string>('')
+  const username = ref<string>('username')
+  const password = ref<string>('password')
 
   const handleCreate = () => {
     if (!companyName.value) return
 
     submited.value = true
-    // TODo put cred in press papier
-    console.log(apiUrl)
-    console.log('Company name:', companyName.value)
-    console.log('Number worker:', numberWorkers.value)
-    console.log('Building owner:', facilityOwner.value)
-    console.log('Is service:', isService.value ? 'Societe service' : 'Societe produit')
+    // TODO put cred in press papier
 
-    //   axios
-    //     .post(`${apiUrl}/client`, {
-    //       // TODO SEND DATA
-    //     })
-    //     .then((response: AxiosResponse) => {
-    //       submited.value = true
-    //       // TODO display credentials
-    //       console.log(response)
-    //     })
-    //     .catch(() => {})
+    axios
+      .post(`${apiUrl}/users/register`, {
+        companyName: companyName.value,
+        numberWorkers: numberWorkers.value,
+        facilityOwner: facilityOwner.value,
+        isService: isService.value,
+      })
+      .then((response: AxiosResponse) => {
+        submited.value = true
+        const data = response.data
+        username.value = data.username
+        password.value = data.password
+      })
+      .catch(() => {})
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
   }
 </script>
 
