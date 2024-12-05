@@ -7,6 +7,6 @@ class Users(DjangoCassandraModel):
     username = columns.Text(required=True)
     password = columns.Text(required=True)
     role = columns.Text(required=True)  # Role as 'admin' or 'client'
-    id_info_client = columns.Integer(required=False)  # Optional field for 'client' role, will link to InfoClient later
+    id_info_client = columns.UUID(required=False)  # Optional field for 'client' role, will link to InfoClient later
 
 
