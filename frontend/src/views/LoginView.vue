@@ -16,9 +16,9 @@
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <input
-            type="email"
-            id="email"
-            v-model="email"
+            type="text"
+            id="username"
+            v-model="username"
             placeholder="Entrez votre login"
             required
           />
@@ -50,14 +50,15 @@
 
   const router = useRouter()
 
-  const email = ref<string>('')
+  const username = ref<string>('')
   const password = ref<string>('')
   const errorMessage = ref<string | null>(null)
 
   const handleLogin = () => {
+    console.log(username.value, password.value)
     axios
       .post('http://localhost:8000/users/login/', {
-        email: email.value,
+        username: username.value,
         password: password.value,
       })
       .then((response: AxiosResponse) => {

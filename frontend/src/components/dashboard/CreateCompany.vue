@@ -47,7 +47,7 @@
             />
           </div>
           <div class="input-element">
-            <label for="building-owner">La societe dispose d'une propriétaire</label>
+            <label for="building-owner">La societe dispose d'une propriété</label>
             <input
               id="building-owner"
               type="checkbox"
@@ -95,7 +95,6 @@
   import { ref } from 'vue'
 
   const apiUrl = import.meta.env.VITE_API_URL
-  console.log(apiUrl)
   const submited = ref<boolean>(false)
 
   const companyName = ref<string>('')
@@ -109,11 +108,8 @@
   const handleCreate = () => {
     if (!companyName.value) return
 
-    submited.value = true // Show the credentials
-
-    // TODO : FIX THE API CALL
     axios
-      .post(`${apiUrl}/users/register`, {
+      .post(`${apiUrl}/users/register/`, {
         companyName: companyName.value,
         numberWorkers: numberWorkers.value,
         facilityOwner: facilityOwner.value,
@@ -126,6 +122,8 @@
         password.value = data.password
       })
       .catch(() => {})
+
+      submited.value = true // Show the credentials
   }
 
   const copyToClipboard = (text: string) => {
