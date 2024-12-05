@@ -49,4 +49,15 @@
     flex-direction: column;
     margin-left: 2%;
   }
+  .profils-info span {
+    color: #c5fddf;
+    font-size: 1.2em;
+  }
+
+  .profils-info a {
+    color: #fde791;
+    font-size: 0.8em;
+    text-decoration: none;
+    font-weight: 900;
+  }
 </style>
