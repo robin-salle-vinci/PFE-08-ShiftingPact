@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools' // TODO : remove vueDevTools in production
 
 export default defineConfig({
@@ -13,5 +13,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+  },
+  define: {
+    'process.env.API_URL': JSON.stringify(process.env.API_URL),
   },
 })
