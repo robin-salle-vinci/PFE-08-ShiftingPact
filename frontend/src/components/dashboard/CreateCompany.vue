@@ -43,7 +43,7 @@
               type="number"
               name="number-worker"
               placeholder="Nombre d'employee"
-              v-model="numberWorker"
+              v-model="numberWorkers"
             />
           </div>
           <div class="input-element">
@@ -52,7 +52,7 @@
               id="building-owner"
               type="checkbox"
               name="building-owner"
-              v-model="buildingOwner"
+              v-model="facilityOwner"
             />
           </div>
 
@@ -75,7 +75,7 @@
       <div class="cred-container">
         <div class="cred-element">
           <p>
-            Identifiant: <strong>{{ identifier }}</strong>
+            Identifiant: <strong>{{ username }}</strong>
           </p>
           <button>copy</button>
         </div>
@@ -97,20 +97,22 @@
   const submited = ref<boolean>(false)
 
   const companyName = ref<string>('')
-  const numberWorker = ref<number>(0)
-  const buildingOwner = ref<boolean>(false)
+  const numberWorkers = ref<number>(0)
+  const facilityOwner = ref<boolean>(false)
   const isService = ref<boolean>(false)
+
+  const username = ref<string>('')
   const password = ref<string>('')
-  const identifier = ref<string>('')
 
   const handleCreate = () => {
     if (!companyName.value) return
 
     submited.value = true
+    // TODo put cred in press papier
     console.log(apiUrl)
     console.log('Company name:', companyName.value)
-    console.log('Number worker:', numberWorker.value)
-    console.log('Building owner:', buildingOwner.value)
+    console.log('Number worker:', numberWorkers.value)
+    console.log('Building owner:', facilityOwner.value)
     console.log('Is service:', isService.value ? 'Societe service' : 'Societe produit')
 
     //   axios

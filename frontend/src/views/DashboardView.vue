@@ -1,6 +1,6 @@
 <template>
   <HeaderElement />
-  <div class="">
+  <div>
     <button @click="handleCreate">Ajouter une entreprise</button>
     <button @click="handleView">Voir les formulaires</button>
   </div>
