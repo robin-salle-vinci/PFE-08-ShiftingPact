@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_cassandra_engine',
     'corsheaders',
-    'myapp',
     'users',
 ]
 

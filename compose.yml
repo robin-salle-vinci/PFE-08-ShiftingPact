@@ -1,0 +1,48 @@
+services:
+  frontend:
+    build: 
+      context:  ./frontend
+    container_name: 'frontend-shiftingpact'
+    ports:
+      - '4040:3000'
+    depends_on:
+      - backend
+    networks:
+      - backend-network
+  
+  backend:
+    build: 
+      context: ./backend
+    container_name: 'backend-shiftingpact'
+    ports:
+      - '8080:8080'
+    depends_on:
+      - cassandra
+    env_file:
+      - .env
+    networks:
+      - backend-network
+    command: ["sh", "-c", "dockerize -wait tcp://cassandra:9042 -timeout 180s python manage.py sync_cassandra && python manage.py runserver 0.0.0.0:8080"]
+
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra-container
+    ports:
+      - 9042:9042
+    environment:
+      - CASSANDRA_USER=cassandra     
+      - CASSANDRA_PASSWORD=cassandra
+      - CASSANDRA_LISTEN_ADDRESS=localhost
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0
+    volumes:
+      - cassandra-db:/var/lib/cassandra
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  cassandra-db:
