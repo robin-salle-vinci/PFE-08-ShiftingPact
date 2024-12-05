@@ -13,8 +13,8 @@ def register_view(request):
     try:
         data = json.loads(request.body)
         company_name = data.get('companyName')
-        number_workers = data.get('numberWorker')
-        owned_facility = data.get('ownedFacility')
+        number_workers = data.get('numberWorkers')
+        owned_facility = data.get('facilityOwner')
         service_or_product = 'service' if data.get('isService') else 'product'
 
         # Change the companyName to username
