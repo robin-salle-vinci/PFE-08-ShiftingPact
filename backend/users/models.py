@@ -11,7 +11,7 @@ class Users(DjangoCassandraModel):
 
 # Create this before creating User
 class ClientInformation(DjangoCassandraModel):
-    id = columns.UUID(primary_key=True)
-    number_of_workers = columns.Integer(required=True)
-    owned_facility = columns.Boolean(required=True)
-    service_or_product = columns.Text(required=True)
+    id = columns.UUID(primary_key=True, default=uuid4)
+    numberWorkers = columns.Integer(required=True)
+    ownedFacility = columns.Boolean(required=True)
+    serviceOrProduct = columns.Text(required=True)
