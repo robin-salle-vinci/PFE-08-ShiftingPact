@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_cassandra_engine',
     'corsheaders',
     'users',
+    'questions'
 ]
 
 MIDDLEWARE = [
