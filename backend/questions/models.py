@@ -24,8 +24,9 @@ class Responses(DjangoCassandraModel):
     id_question = columns.Integer(primary_key=True)
     comment = columns.Text(required=False)                     # commentaire du client
     isEngagement = columns.Boolean(required=True)              # boolean pour savoir si engagement ou pas
-    choice_QCM = columns.Text(required=False)                  # id char du choix pour question type QCM
-    text_response_open_question = columns.Text(required=False) # réponse écrite du client si type_question = question ouverte
+    value = columns.Text(required=True)                        # valeur de la réponse
+    score_response = columns.Double(required=True)             # score de la question ouverte
+    date_modification = columns.DateTime(required=True)
     class Meta:
         get_pk_field = 'id'
 
