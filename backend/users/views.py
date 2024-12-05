@@ -1,4 +1,6 @@
 # views.py
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -38,3 +40,8 @@ def login_view(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_POST  # Only allow POST requests
+def logout_view(request):
+    return JsonResponse({"message": "Successfully logged out"}, status=200)
