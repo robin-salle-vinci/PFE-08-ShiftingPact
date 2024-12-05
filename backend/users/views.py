@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 from datetime import datetime
-from .models import User
+from .models import Users
 
 @csrf_exempt
 @require_POST  # Only allow POST requests
@@ -21,7 +21,7 @@ def login_view(request):
             return JsonResponse({'message': 'Username or password cannot be empty'},status=400)
 
         # Check if credentials exist in Cassandra DB
-        user = User.objects(username=username).first()
+        user = Users.objects(username=username).first()
 
         if user:
             # Check if password matches
