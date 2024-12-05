@@ -21,7 +21,7 @@ def register_view(request):
         username = company_name.replace(' ', '').lower()
 
         # Check if any field is empty
-        if not username or not number_workers or not owned_facility or not service_or_product:
+        if username is None or number_workers is None or owned_facility is None or service_or_product is None:
             return JsonResponse({'message': 'All fields are required'}, status=400)
 
         # Create ClientInformation object
@@ -53,7 +53,7 @@ def register_view(request):
 def login_view(request):
     try:
         data = json.loads(request.body)
-        username = data.get('email')
+        username = data.get('username')
         password = data.get('password')
 
         # Check if username or password is empty

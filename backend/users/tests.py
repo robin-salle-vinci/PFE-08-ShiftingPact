@@ -40,7 +40,7 @@ class UserViewsTestCase(TestCase):
 
         # Now, test login with the registered user
         login_data = {
-            'email': 'testcompany',
+            'username': 'testcompany',
             'password': password
         }
         response = self.client.post(self.login_url, json.dumps(login_data), content_type='application/json')
