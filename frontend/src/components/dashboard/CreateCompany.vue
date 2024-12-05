@@ -109,9 +109,9 @@
   const handleCreate = () => {
     if (!companyName.value) return
 
-    submited.value = true
-    // TODO put cred in press papier
+    submited.value = true // Show the credentials
 
+    // TODO : FIX THE API CALL
     axios
       .post(`${apiUrl}/users/register`, {
         companyName: companyName.value,
@@ -153,32 +153,32 @@
   form {
     display: flex;
     flex-direction: column;
-    text-align: left; /* Permet d'aligner les labels à gauche */
+    text-align: left;
   }
   .input-element {
     display: flex;
-    flex-direction: row; /* Aligne les éléments en ligne */
+    flex-direction: row;
     align-items: center;
     margin-top: 1rem;
     gap: 1rem;
-    width: 100%; /* Assure que l'élément prend toute la largeur */
+    width: 100%;
   }
 
   .input-element input[type='checkbox'] {
-    flex: 0; /* Empêche la checkbox de s'étendre */
-    width: 20px; /* Largeur fixe */
+    flex: 0;
+    width: 20px;
     height: 20px;
-    margin: 0; /* Pas de marge supplémentaire */
+    margin: 0;
   }
 
   .input-element label {
-    flex: 1; /* Les labels occupent une partie de la ligne */
-    text-align: left; /* Texte aligné à gauche */
+    flex: 1;
+    text-align: left;
   }
 
   .input-element input[type='text'],
   .input-element input[type='number'] {
-    flex: 2; /* Les champs texte/numériques prennent plus d'espace */
+    flex: 2;
   }
 
   input[type='checkbox'] {
