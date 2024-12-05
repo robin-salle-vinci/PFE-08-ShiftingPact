@@ -14,8 +14,8 @@ class UserViewsTestCase(TestCase):
     def test_register_view(self):
         data = {
             'companyName': 'Test Company',
-            'numberWorker': 10,
-            'ownedFacility': 'Test Facility',
+            'numberWorkers': 10,
+            'facilityOwner': 'Test Facility',
             'isService': True
         }
         response = self.client.post(self.register_url, json.dumps(data), content_type='application/json')
@@ -28,8 +28,8 @@ class UserViewsTestCase(TestCase):
         # First, register a user
         register_data = {
             'companyName': 'Test Company',
-            'numberWorker': 10,
-            'ownedFacility': 'Test Facility',
+            'numberWorkers': 10,
+            'facilityOwner': 'Test Facility',
             'isService': True
         }
         self.client.post(self.register_url, json.dumps(register_data), content_type='application/json')
