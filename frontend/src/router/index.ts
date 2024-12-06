@@ -1,6 +1,6 @@
 import { getToken } from '@/utils/localstorage'
 import DashboardView from '@/views/DashboardView.vue'
-import EsgView from '../views/EsgView.vue'
+import EsgView from '@/views/EsgView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'

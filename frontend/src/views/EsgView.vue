@@ -1,70 +1,77 @@
 <template>
   <HeaderElement />
-  <button @click="handleBack">back</button>
-  <div class="outer-container">
-    <div class="container">
-      <div v-for="(question, index) in questions" :key="index" class="question">
-        <span>{{ question.text }}</span>
+  <button class="back-button" @click="handleBack"><span class="arrow-left"></span></button>
 
-        <form action="">
-          <input type="text" v-model="question.response" />
-        </form>
+  <div class="container">
+    <h1>Questionaires de l'entreprise NOM_ENTREPRISE {{ id }}</h1>
 
-        <div>
-          <button @click="modifyQuestion(index)">Modifier</button>
-        </div>
-      </div>
+    <div class="questions-container" v-for="(question, index) in questions" :key="index">
+      <QuestionElement :question="question" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  import QuestionElement from '@/components/dashboard/QuestionElement.vue'
   import HeaderElement from '@/components/structure/HeaderElement.vue'
   import router from '@/router'
   import { ref } from 'vue'
-  //import { useRoute } from 'vue-router'
+  import { useRoute } from 'vue-router'
 
-  //const route = useRoute()
-  // const id = route.params.id
+  const route = useRoute()
+  const id = route.params.id
 
   const questions = ref([
-    { text: 'loremlroororororororororoorororo', response: 'reponse client 1' },
-    { text: 'loremlroororororororororoorororo', response: 'reponse client 2' },
-    { text: 'loremlroororororororororoorororo', response: 'reponse client 3' },
+    {
+      question: 'Combien de cheval on peux mettre dans un appartement ?',
+      reponse: 'Reponse 1',
+      commentaire: 'Commentaire 1',
+      isEngagement: true,
+      value: '400',
+      choix: ['oui', 'non'],
+    },
   ])
 
   const handleBack = () => {
-    router.push('/')
-  }
-
-  const modifyQuestion = (index: number) => {
-    const answerModified = questions.value[index].response
-    console.log(answerModified)
+    router.push('/dashboard')
   }
 </script>
 
 <style scoped>
-  .outer-container {
-    display: flex;
-    justify-content: center;
-    height: 100vh;
-  }
-
   .container {
     display: flex;
     flex-direction: column;
-    width: 80%;
-    background-color: aqua;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    align-items: center;
+    height: 100vh;
+    position: relative;
   }
 
-  .question {
+  .questions-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 10px;
-    border-bottom: 2px solid black;
+    flex-direction: column;
+    width: 80%;
+  }
+
+  .back-button {
+    margin: 5%;
+    width: 50px;
+    height: 50px;
+    background-color: #b5cdbf;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .arrow-left {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-right: 5px;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid white;
   }
 </style>
