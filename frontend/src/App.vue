@@ -6,7 +6,7 @@
   <RouterView />
 </template>
 
-<style>
+<style scoped>
   body {
     padding: 0px;
     margin: 0px;
