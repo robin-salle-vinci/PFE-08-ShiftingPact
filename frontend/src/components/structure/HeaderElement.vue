@@ -7,12 +7,21 @@
     <div class="profil">
       <img src="@/assets/profils.png" alt="profil" />
       <div class="profils-info">
-        <span>YOUR NAME</span>
+        <span>{{ username }}</span>
         <a href="">se deconnecter</a>
       </div>
     </div>
   </header>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { decodeToken } from '@/utils/tokenUtils'
+const username = ref<string>('')
+
+username.value = decodeToken(localStorage.getItem('token') || '').username
+  
+</script>
 
 <style scoped>
   .topbar {
