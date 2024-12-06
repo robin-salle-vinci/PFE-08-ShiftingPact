@@ -16,9 +16,9 @@
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <input
-            type="email"
-            id="email"
-            v-model="email"
+            type="text"
+            id="username"
+            v-model="username"
             placeholder="Entrez votre login"
             required
           />
@@ -43,29 +43,40 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import type { AxiosError, AxiosResponse } from 'axios'
   import axios from 'axios'
+  import { ref } from 'vue'
   import { useRouter } from 'vue-router'
+<<<<<<< HEAD
   import type { AxiosResponse, AxiosError } from 'axios'
   import { particlesConfig } from '@/config/particles-config'
+=======
+  import { setToken, setUser } from '../utils/localstorage.ts'
+>>>>>>> 2a6946615ad6846b9d15c88c45c1be1f30e44513
 
   const router = useRouter()
 
-  const email = ref<string>('')
+  const username = ref<string>('')
   const password = ref<string>('')
   const errorMessage = ref<string | null>(null)
 
   const handleLogin = () => {
+    console.log(username.value, password.value)
     axios
       .post('http://localhost:8000/users/login/', {
-        email: email.value,
+        username: username.value,
         password: password.value,
       })
       .then((response: AxiosResponse) => {
         errorMessage.value = null
-        // TODO : Save token
-        console.log(response.data)
-        router.push('/')
+        const token = response.data.token
+        if (token) {
+          setUser(response.data.user)
+          setToken(token)
+          router.push('/')
+        } else {
+          console.error('No tokens provided in the response.')
+        }
       })
       .catch((error: AxiosError) => {
         if (error.response) {

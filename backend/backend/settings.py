@@ -43,9 +43,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_cassandra_engine',
     'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'users',
     'questions'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

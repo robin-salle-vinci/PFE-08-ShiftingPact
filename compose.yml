@@ -22,7 +22,6 @@ services:
       - .env
     networks:
       - backend-network
-    command: ["sh", "-c", "dockerize -wait tcp://cassandra:9042 -timeout 180s python manage.py sync_cassandra && python manage.py runserver 0.0.0.0:8080"]
 
   cassandra:
     image: cassandra:latest
