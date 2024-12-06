@@ -68,8 +68,6 @@
         if (token) {
           setUser(response.data.user)
           setToken(token)
-          //localStorage.setItem('token', token)
-          //localStorage.setItem('user', JSON.stringify(response.data.user))
           router.push('/')
         } else {
           console.error('No tokens provided in the response.')
