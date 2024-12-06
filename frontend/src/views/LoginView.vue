@@ -43,10 +43,11 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import type { AxiosError, AxiosResponse } from 'axios'
   import axios from 'axios'
+  import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-  import type { AxiosResponse, AxiosError } from 'axios'
+  import { setToken, setUser } from '../utils/localstorage.ts'
 
   const router = useRouter()
 
@@ -64,14 +65,13 @@
       .then((response: AxiosResponse) => {
         errorMessage.value = null
         const token = response.data.token
-        if(token) {
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(response.data.user))
-            router.push('/')
+        if (token) {
+          setUser(response.data.user)
+          setToken(token)
+          router.push('/')
         } else {
-          console.error("No tokens provided in the response.");
+          console.error('No tokens provided in the response.')
         }
-        
       })
       .catch((error: AxiosError) => {
         if (error.response) {

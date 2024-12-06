@@ -8,21 +8,24 @@
       <img src="@/assets/profils.png" alt="profil" />
       <div class="profils-info">
         <span>{{ username }}</span>
-        <a href="">se deconnecter</a>
+        <button @click="handleLogout">se deconnecter</button>
       </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const username = ref<string>('')
+  import router from '@/router'
+  import { clearStorage, getUser } from '@/utils/localstorage'
+  import { ref } from 'vue'
+  const username = ref<string>('')
 
-const user = localStorage.getItem('user')
-if (user) {
-  username.value = JSON.parse(user).username
-}
-  
+  username.value = getUser().username
+  const handleLogout = () => {
+    // rerednder the page
+    clearStorage()
+    router.push('/')
+  }
 </script>
 
 <style scoped>
