@@ -21,7 +21,7 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose necessary port
-EXPOSE 8080
+EXPOSE 8000
 
 # Command to run the Django application
-CMD ["sh", "-c", "dockerize -wait tcp://cassandra:9042 -timeout 120s  python manage.py runserver 0.0.0.0:8080 && python manage.py sync_cassandra"]
+CMD ["sh", "-c", "dockerize -wait tcp://cassandra:9042 -timeout 120s  python manage.py sync_cassandra && python manage.py runserver"]
