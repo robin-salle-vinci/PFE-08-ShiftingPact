@@ -16,10 +16,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { decodeToken } from '@/utils/tokenUtils'
 const username = ref<string>('')
 
-username.value = decodeToken(localStorage.getItem('token') || '').username
+const user = localStorage.getItem('user')
+if (user) {
+  username.value = JSON.parse(user).username
+}
   
 </script>
 

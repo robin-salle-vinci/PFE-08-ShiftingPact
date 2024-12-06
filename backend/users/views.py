@@ -8,7 +8,6 @@ import json
 from .models import Users, ClientInformation
 from .utils.token_utils import generate_token
 
-
 @csrf_exempt
 @require_POST  # Only allow POST requests
 def register_view(request):
@@ -40,12 +39,26 @@ def register_view(request):
         Users.objects(id=user.id).update(password=password)
 
         # Generate JWT tokens
-        token = generate_token(user.id, username, role='client')
+        token = generate_token(user.id, username)
+
+        response_data = {
+            'message': 'User created successfully',
+            'user': {
+                'id': str(user.id),
+                'username': user.username,
+                'role': user.role,
+                'client-info-id': str(client_info.id),
+                'numberWorkers': client_info.numberWorkers,
+                'ownedFacility': client_info.ownedFacility,
+                'serviceOrProduct': client_info.serviceOrProduct
+            },
+            'token': token,
+            'password': identifier
+        }
 
         # add password to the response
         if user:
-            return JsonResponse({'message': 'User created successfully', 'username': username, 'password': identifier, 'token' : token},
-                                status=201)
+            return JsonResponse(response_data, status=201)
         else:
             return JsonResponse({'message': 'User creation failed'}, status=500)
 
@@ -71,12 +84,24 @@ def login_view(request):
         if user:
             # Check if password matches
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                token = generate_token(user.id, username, user.role)
-                # Check role and handle accordingly
-                return JsonResponse({
+                token = generate_token(user.id, username)
+
+                client_info = ClientInformation.objects(id=user.id_client_information).first()
+                # Prepare response data
+                response_data = {
                     'message': 'Authentication successful',
+                    'user': {
+                        'id': str(user.id),
+                        'username': user.username,
+                        'role': user.role,
+                        'client-info-id': str(client_info.id),
+                        'numberWorkers': client_info.numberWorkers,
+                        'ownedFacility': client_info.ownedFacility,
+                        'serviceOrProduct': client_info.serviceOrProduct
+                    },
                     'token': token
-                }, status=200)
+                }
+                return JsonResponse(response_data, status=200)
             else:
                 return JsonResponse({'message': 'Invalid credentials'}, status=401)
         else:

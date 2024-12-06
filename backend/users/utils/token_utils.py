@@ -12,7 +12,7 @@ SECRET_KEY_JWT = env('SECRET_KEY_JWT')
 ALGORITHM = "HS256"
 
 
-def generate_token(user_id, username, role):
+def generate_token(user_id, username):
   """
   Generates a JWT token.
 
@@ -25,7 +25,6 @@ def generate_token(user_id, username, role):
     payload = {
       "id": str(user_id),  # Convert UUID to string
       "username": username,
-      "role": role,
       "iat": datetime.utcnow(),  # Issued at time
     }
     token = jwt.encode(payload, SECRET_KEY_JWT, algorithm=ALGORITHM)
