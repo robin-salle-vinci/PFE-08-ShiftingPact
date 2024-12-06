@@ -118,8 +118,12 @@
       .then((response: AxiosResponse) => {
         submited.value = true
         const data = response.data
-        username.value = data.username
+        username.value = data.user.username
         password.value = data.password
+        const token = data.token;
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(data.user))
+        console.log(data);
       })
       .catch(() => {})
 

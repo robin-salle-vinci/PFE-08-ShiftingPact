@@ -3,9 +3,10 @@ import bcrypt
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from rest_framework_simplejwt.tokens import RefreshToken
 import json
 from .models import Users, ClientInformation
-
+from .utils.token_utils import generate_token
 
 @csrf_exempt
 @require_POST  # Only allow POST requests
@@ -37,10 +38,27 @@ def register_view(request):
         password = bcrypt.hashpw(identifier.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         Users.objects(id=user.id).update(password=password)
 
+        # Generate JWT tokens
+        token = generate_token(user.id, username)
+
+        response_data = {
+            'message': 'User created successfully',
+            'user': {
+                'id': str(user.id),
+                'username': user.username,
+                'role': user.role,
+                'client-info-id': str(client_info.id),
+                'numberWorkers': client_info.numberWorkers,
+                'ownedFacility': client_info.ownedFacility,
+                'serviceOrProduct': client_info.serviceOrProduct
+            },
+            'token': token,
+            'password': identifier
+        }
+
         # add password to the response
         if user:
-            return JsonResponse({'message': 'User created successfully', 'username': username, 'password': identifier},
-                                status=201)
+            return JsonResponse(response_data, status=201)
         else:
             return JsonResponse({'message': 'User creation failed'}, status=500)
 
@@ -66,13 +84,24 @@ def login_view(request):
         if user:
             # Check if password matches
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                # Check role and handle accordingly
-                if user.role == 'admin':
-                    return JsonResponse({'message': 'Authentication successful as admin'}, status=200)
-                elif user.role == 'client':
-                    return JsonResponse(
-                        {'message': 'Authentication successful as client, id_client_information: ' + str(
-                            user.id_client_information)}, status=200)
+                token = generate_token(user.id, username)
+
+                client_info = ClientInformation.objects(id=user.id_client_information).first()
+                # Prepare response data
+                response_data = {
+                    'message': 'Authentication successful',
+                    'user': {
+                        'id': str(user.id),
+                        'username': user.username,
+                        'role': user.role,
+                        'client-info-id': str(client_info.id),
+                        'numberWorkers': client_info.numberWorkers,
+                        'ownedFacility': client_info.ownedFacility,
+                        'serviceOrProduct': client_info.serviceOrProduct
+                    },
+                    'token': token
+                }
+                return JsonResponse(response_data, status=200)
             else:
                 return JsonResponse({'message': 'Invalid credentials'}, status=401)
         else:

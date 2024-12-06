@@ -63,9 +63,15 @@
       })
       .then((response: AxiosResponse) => {
         errorMessage.value = null
-        // TODO : Save token
-        console.log(response.data)
-        router.push('/')
+        const token = response.data.token
+        if(token) {
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(response.data.user))
+            router.push('/')
+        } else {
+          console.error("No tokens provided in the response.");
+        }
+        
       })
       .catch((error: AxiosError) => {
         if (error.response) {

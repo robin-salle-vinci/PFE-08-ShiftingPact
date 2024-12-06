@@ -7,12 +7,23 @@
     <div class="profil">
       <img src="@/assets/profils.png" alt="profil" />
       <div class="profils-info">
-        <span>YOUR NAME</span>
+        <span>{{ username }}</span>
         <a href="">se deconnecter</a>
       </div>
     </div>
   </header>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+const username = ref<string>('')
+
+const user = localStorage.getItem('user')
+if (user) {
+  username.value = JSON.parse(user).username
+}
+  
+</script>
 
 <style scoped>
   .topbar {
