@@ -120,6 +120,8 @@
         const data = response.data
         username.value = data.username
         password.value = data.password
+        const token = data.token;
+        localStorage.setItem("token", token);
       })
       .catch(() => {})
 

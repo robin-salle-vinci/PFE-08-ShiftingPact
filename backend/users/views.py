@@ -3,8 +3,10 @@ import bcrypt
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from rest_framework_simplejwt.tokens import RefreshToken
 import json
 from .models import Users, ClientInformation
+from .utils.token_utils import generate_token
 
 
 @csrf_exempt
@@ -37,9 +39,12 @@ def register_view(request):
         password = bcrypt.hashpw(identifier.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         Users.objects(id=user.id).update(password=password)
 
+        # Generate JWT tokens
+        token = generate_token(user.id, username, role='client')
+
         # add password to the response
         if user:
-            return JsonResponse({'message': 'User created successfully', 'username': username, 'password': identifier},
+            return JsonResponse({'message': 'User created successfully', 'username': username, 'password': identifier, 'token' : token},
                                 status=201)
         else:
             return JsonResponse({'message': 'User creation failed'}, status=500)
@@ -66,13 +71,12 @@ def login_view(request):
         if user:
             # Check if password matches
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+                token = generate_token(user.id, username, user.role)
                 # Check role and handle accordingly
-                if user.role == 'admin':
-                    return JsonResponse({'message': 'Authentication successful as admin'}, status=200)
-                elif user.role == 'client':
-                    return JsonResponse(
-                        {'message': 'Authentication successful as client, id_client_information: ' + str(
-                            user.id_client_information)}, status=200)
+                return JsonResponse({
+                    'message': 'Authentication successful',
+                    'token': token
+                }, status=200)
             else:
                 return JsonResponse({'message': 'Invalid credentials'}, status=401)
         else:
