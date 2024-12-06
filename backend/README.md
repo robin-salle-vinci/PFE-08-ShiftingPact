@@ -33,6 +33,7 @@ DB_PASSWORD=cassandra
 DB_KEYSPACE=app
 DB_HOST=localhost
 DB_PORT=9042
+SECRET_KEY_JWT=MY_SUPER_SECRET
 ```
 
 ### run server
