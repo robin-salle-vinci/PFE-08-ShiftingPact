@@ -47,12 +47,8 @@
   import axios from 'axios'
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-<<<<<<< HEAD
-  import type { AxiosResponse, AxiosError } from 'axios'
   import { particlesConfig } from '@/config/particles-config'
-=======
   import { setToken, setUser } from '../utils/localstorage.ts'
->>>>>>> 2a6946615ad6846b9d15c88c45c1be1f30e44513
 
   const router = useRouter()
 

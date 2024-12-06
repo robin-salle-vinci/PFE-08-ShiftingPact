@@ -24,15 +24,14 @@ const router = createRouter({
       component: LoginView,
     },
     {
-<<<<<<< HEAD
       path: '/form/esg',
       name: 'esg',
       component: ESGFormView,
-=======
+    },
+    {
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
->>>>>>> 2a6946615ad6846b9d15c88c45c1be1f30e44513
     },
   ],
 })
