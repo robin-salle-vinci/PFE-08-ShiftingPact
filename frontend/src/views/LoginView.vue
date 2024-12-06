@@ -50,6 +50,8 @@
   import { particlesConfig } from '@/config/particles-config'
   import { setToken, setUser } from '../utils/localstorage.ts'
 
+  const apiUrl = import.meta.env.VITE_API_URL
+
   const router = useRouter()
 
   const username = ref<string>('')
@@ -57,9 +59,8 @@
   const errorMessage = ref<string | null>(null)
 
   const handleLogin = () => {
-    console.log(username.value, password.value)
     axios
-      .post('http://localhost:8000/users/login/', {
+      .post(`${apiUrl}/users/login/`, {
         username: username.value,
         password: password.value,
       })
