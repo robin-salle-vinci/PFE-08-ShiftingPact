@@ -1,9 +1,9 @@
 from uuid import uuid4
 from cassandra.cqlengine import columns
-from cassandra.cqlengine.usertype import UserType
+from django_cassandra_engine.models import DjangoCassandraModel
 
 
-class Answers(UserType):
+class Answers(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_challenge = columns.UUID(required=True)
     id_sub_challenge = columns.UUID(required=True)
@@ -14,9 +14,12 @@ class Answers(UserType):
     is_commitment = columns.Boolean(required=True)  # Boolean pour savoir si engagement ou pas
     score_response = columns.Double(required=False)  # Score de la question
 
+    @classmethod
+    def get_by_id(cls, idAnswer):
+        return cls.objects.get(pk=idAnswer)
 
-class Users(UserType):
-    id = columns.UUID(required=True)  # Use UUID for unique ID
+class Users(DjangoCassandraModel):
+    id = columns.UUID(primary_key=True,default=uuid4)  # Use UUID for unique ID
     username = columns.Text(required=True)
     password = columns.Text(required=True)
     role = columns.Text(required=True)  # Role as 'employee' or 'client'
@@ -26,7 +29,7 @@ class Users(UserType):
     def get_by_id(cls, idUser):
         return cls.objects.get(pk=idUser)
 
-class ModuleESG(UserType):
+class ModuleESG(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_client = columns.UUID(required=True)
     date_last_modification = columns.DateTime(required=True)  # Date of the last modification
