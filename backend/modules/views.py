@@ -40,17 +40,21 @@ def read_modules(request):
         modules_data = [{
             'id': str(module.id),
             'id_client': str(module.id_client),
-            'date_last_modification': module.date_last_modification.isoformat(),
+            'date_last_modification': str(module.date_last_modification.isoformat()),
             'original_answers': [
                 {
+                    'id': str(answer.id),
                     'id_challenge': str(answer.id_challenge),
                     'id_sub_challenge': str(answer.id_sub_challenge),
                     'id_question': str(answer.id_question),
-                    'value': answer.value,
-                    'isEngagement': answer.isEngagement,
+                    'value': str(answer.value),
+                    'commentary': str(answer.commentary),
+                    'is_commitment': bool(answer.is_commitment),
+                    'score_response': str(answer.score_response),
                 } for answer in module.original_answers
             ],
-            'state': module.state,
+            'state': str(module.state),
+            'calculated_score': int(module.calculated_score)
         } for module in modules]
 
         return JsonResponse(modules_data, safe=False ,status=200)
