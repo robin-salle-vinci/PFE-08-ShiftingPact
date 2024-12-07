@@ -26,8 +26,8 @@ def register_view(request):
             return JsonResponse({'message': 'All fields are required'}, status=400)
 
         # Create ClientInformation object
-        client_info = ClientInformation.create(number_workers=number_workers, ownedFacility=owned_facility,
-                                               serviceOrProduct=service_or_product)
+        client_info = ClientInformation.create(number_workers=number_workers, owned_facility=owned_facility,
+                                               service_or_product=service_or_product)
 
         # Create User object
         user = Users.create(username=username, password='password', role='client',
