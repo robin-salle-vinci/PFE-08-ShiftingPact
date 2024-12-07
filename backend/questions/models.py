@@ -13,7 +13,7 @@ class Questions(DjangoCassandraModel):
     value = columns.Text(required=True)         # le contenu de la question
 
 
-class Responses(DjangoCassandraModel):
+class Answers(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_client = columns.UUID(primary_key=True)
     id_question = columns.UUID(primary_key=True)
@@ -31,4 +31,6 @@ class ChoicesQCM(DjangoCassandraModel):
     score_choice = columns.Double(required=True) # score du choix
     value = columns.Text(required=True)          # le contenu du choix
     class Meta:
-        get_pk_field = 'id'                      # indique que la clé principale est id
+        get_pk_field = 'id'      # indique que la clé principale est id
+
+
