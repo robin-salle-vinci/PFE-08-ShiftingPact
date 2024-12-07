@@ -2,7 +2,9 @@ from uuid import uuid4
 from django.test import TestCase, Client
 from unittest.mock import patch
 from django.urls import reverse
-from modules.models import Users, ModuleESG, Answers
+
+from questions.models import Answers
+from users.models import Users
 
 
 class ModulesViewTests(TestCase):
@@ -34,8 +36,8 @@ class ModulesViewTests(TestCase):
 
 
     @patch('modules.views.decode_token')
-    @patch('modules.models.Users.get_by_id')
-    @patch('modules.models.Answers.get_by_id')
+    @patch('users.models.Users.get_by_id')
+    @patch('questions.models.Answers.get_by_id')
     @patch('modules.models.ModuleESG.get_all')
     def test_successful_get_modules(self, mock_get_all, mock_answers_get, mock_users_get, mock_decode):
         mock_users_get.return_value = self.user

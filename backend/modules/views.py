@@ -1,8 +1,10 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
-from .models import ModuleESG, Users, Answers
 
 from backend.utils.token_utils import decode_token
+from modules.models import ModuleESG
+from questions.models import Answers
+from users.models import Users
 
 
 @require_GET
