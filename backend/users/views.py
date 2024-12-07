@@ -25,13 +25,14 @@ def register_view(request):
         if username is None or number_workers is None or owned_facility is None or service_or_product is None:
             return JsonResponse({'message': 'All fields are required'}, status=400)
 
+        # Create User object
+        user = Users.create(username=username, password='password', role='client')
+
         # Create ClientInformation object
-        client_info = ClientInformation.create(number_workers=number_workers, owned_facility=owned_facility,
+        client_info = ClientInformation.create(id_user=user.id, number_workers=number_workers, owned_facility=owned_facility,
                                                service_or_product=service_or_product)
 
-        # Create User object
-        user = Users.create(username=username, password='password', role='client',
-                            id_client_information=client_info.id)
+        Users.objects(id=user.id).update(id_client_information=client_info.id_user)
 
         # Create a random password with BCrypt with the identifier
         identifier = str(user.id)
@@ -47,10 +48,10 @@ def register_view(request):
                 'id': str(user.id),
                 'username': user.username,
                 'role': user.role,
-                'client-info-id': str(client_info.id),
-                'numberWorkers': client_info.numberWorkers,
-                'ownedFacility': client_info.ownedFacility,
-                'serviceOrProduct': client_info.serviceOrProduct
+                'client-info-id': str(client_info.id_user),
+                'numberWorkers': client_info.number_workers,
+                'ownedFacility': client_info.owned_facility,
+                'serviceOrProduct': client_info.service_or_product
             },
             'token': token,
             'password': identifier
@@ -81,26 +82,40 @@ def login_view(request):
         # Check if credentials exist in Cassandra DB
         user = Users.objects(username=username).first()
 
+
         if user:
             # Check if password matches
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
                 token = generate_token(user.id, username)
 
-                client_info = ClientInformation.objects(id=user.id_client_information).first()
                 # Prepare response data
-                response_data = {
-                    'message': 'Authentication successful',
-                    'user': {
-                        'id': str(user.id),
-                        'username': user.username,
-                        'role': user.role,
-                        'client-info-id': str(client_info.id),
-                        'numberWorkers': client_info.numberWorkers,
-                        'ownedFacility': client_info.ownedFacility,
-                        'serviceOrProduct': client_info.serviceOrProduct
-                    },
-                    'token': token
-                }
+                if user.role != 'employee':
+                    client_info = ClientInformation.objects(id_user=user.id_client_information).first()
+                    # Prepare response data
+                    response_data = {
+                        'message': 'Authentication successful as client',
+                        'user': {
+                            'id': str(user.id),
+                            'username': user.username,
+                            'role': user.role,
+                            'client-info-id': str(client_info.id_user),
+                            'numberWorkers': client_info.number_workers,
+                            'ownedFacility': client_info.owned_facility,
+                            'serviceOrProduct': client_info.service_or_product
+                        },
+                        'token': token
+                    }
+                else:
+                    response_data = {
+                        'message': 'Authentication successful as employee',
+                        'user': {
+                            'id': str(user.id),
+                            'username': user.username,
+                            'role': user.role,
+                        },
+                        'token': token
+                    }
+
                 return JsonResponse(response_data, status=200)
             else:
                 return JsonResponse({'message': 'Invalid credentials'}, status=401)
