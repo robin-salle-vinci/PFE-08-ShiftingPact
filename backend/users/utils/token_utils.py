@@ -2,6 +2,10 @@ import jwt
 import environ
 from datetime import datetime, timedelta
 
+from django.http import JsonResponse, HttpResponse
+
+from users.models import Users
+
 env = environ.Env()
 environ.Env.read_env()
 
@@ -47,3 +51,24 @@ def decode_token(token):
     raise Exception("Token has expired")
   except jwt.InvalidTokenError:
     raise Exception("Invalid token")
+
+
+def check_authenticated_user(request):
+    header = request.headers.get('Authorization')
+    if not header or not header.startswith('Bearer '):
+      return HttpResponse("error: 'Invalid Authorization header", status=400)
+
+    token = header.split(' ')[1]
+    if token is None:
+      return HttpResponse("error: 'Token is missing", status=401)
+
+    try:
+      user_payload = decode_token(token)
+    except Exception as e:
+      return HttpResponse("error: str(e)", status=401)
+
+    user = Users.objects(id=user_payload['id']).first()
+
+    if user is None:
+      return HttpResponse('Not Found User', status=404)
+    return user

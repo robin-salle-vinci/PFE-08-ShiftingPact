@@ -9,9 +9,17 @@ class Users(DjangoCassandraModel):
     role = columns.Text(required=True)  # Role as 'employee' or 'client'
     id_client_information = columns.UUID(required=False)  # Optional field for 'client' role
 
+    @classmethod
+    def get_by_id(cls, id_user):
+        return cls.objects.get(pk=id_user)
+
 # Create this before creating User
 class ClientInformation(DjangoCassandraModel):
-    id = columns.UUID(primary_key=True, default=uuid4)
-    numberWorkers = columns.Integer(required=True)
-    ownedFacility = columns.Boolean(required=True)
-    serviceOrProduct = columns.Text(required=True)
+    id_user = columns.UUID(primary_key=True)
+    number_workers = columns.Integer(required=True)
+    owned_facility = columns.Boolean(required=True)
+    service_or_product = columns.Text(required=True)
+
+    @classmethod
+    def get_by_id(cls, id_client):
+        return cls.objects.get(pk=id_client)
