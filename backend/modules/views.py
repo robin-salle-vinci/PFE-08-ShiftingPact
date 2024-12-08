@@ -111,10 +111,11 @@ def change_state_esg(request, uuid_module_esg):
     # check consistency of the state
     current_state = module_esg.state
     user_role = authenticated_user.role
-    if current_state == 'open' and new_state != 'validated' or current_state == 'validated' and new_state != 'verified':
-        return HttpResponse("error: consistency must be open -> validated -> verified", status=400)
+    if current_state == new_state: return HttpResponse("New state must be different than current state", status=400)
+    if current_state == 'open' and new_state != 'validated' or current_state == 'validated' and new_state != 'verified' or current_state == 'verified':
+        return HttpResponse("consistency must be open -> validated -> verified", status=400)
     if user_role == 'employee' and new_state != 'verified' or user_role == 'client' and new_state != 'validated':
-        return HttpResponse("error: An employee can only verify and a client can only validate an ESG module", status=403)
+        return HttpResponse("An employee can only verify and a client can only validate an ESG module", status=403)
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification")
