@@ -57,7 +57,7 @@ def client_info_json(client_info):
     {
       'id_user': str(client_info.id_user),
       'number_workers': int(client_info.number_workers),
-      'owner_facility': str(client_info.owner_facility),
+      'owned_facility': str(client_info.owned_facility),
       'service_or_product': str(client_info.service_or_product)
     }
 
@@ -67,14 +67,14 @@ def choice_json(choice):
       'id': str(choice.id),
       'index_choice': int(choice.index_choice),
       'value': str(choice.value),
-      'score': float(choice.score),
+      'score': float(choice.score if choice.score else 0),
     }
 
 def question_json(question):
   return \
     {
       'id': str(question.id),
-      'index_choice': int(question.index_choice),
+      'index_question': int(question.index_question),
       'value': str(question.value),
       'type_response': str(question.type_response),
       'choices':
@@ -121,7 +121,7 @@ def answer_json(answer):
       'value': str(answer.value),
       'commentary': str(answer.commentary),
       'is_commitment': bool(answer.is_commitment),
-      'score_response': float(answer.score_response),
+      'score_response': float(answer.score_response if answer.score_response else 0),
     }
 
 def module_json(module):

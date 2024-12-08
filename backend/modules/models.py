@@ -8,7 +8,7 @@ class ModuleESG(DjangoCassandraModel):
     date_last_modification = columns.DateTime(required=True)  # Date of the last modification
     original_answers = columns.List(columns.UUID(required=True), required=True)
     modified_answers = columns.List(columns.UUID(required=True), required=False)
-    state = columns.Text(required=True)  # State of the module (e.g., 'open', 'validation', 'verified')
+    state = columns.Text(required=True)  # State of the module (e.g., 'open', 'validated', 'verified')
     calculated_score = columns.Double(required=False)  # Calculated score of the module in validation state
 
     @classmethod
