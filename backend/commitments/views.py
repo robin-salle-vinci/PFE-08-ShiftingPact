@@ -3,21 +3,20 @@ from django.views.decorators.http import require_GET
 
 from backend.utils.utils import commitment_json, check_authenticated_user
 from commitments.models import CommitmentPacts
-from users.models import Users
 
 
 # Create your views here.
 
 
 @require_GET
-def get_one(request, id):
+def get_one(request, id_commitment):
    try:
 
       user = check_authenticated_user(request)
       if isinstance(user, JsonResponse):
          return user
 
-      commitment = CommitmentPacts.get_by_id(id)
+      commitment = CommitmentPacts.get_by_id(id_commitment)
 
       if commitment is None:
          return JsonResponse({'error': 'Commitment not found'}, status=404)

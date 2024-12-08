@@ -2,12 +2,10 @@ import jwt
 import environ
 from datetime import datetime, timedelta
 
-from questions.models import Challenges, SubChallenges, Questions, Choices
 from modules.models import Answers
-from users.models import ClientInformation
 from django.http import JsonResponse
 
-from questions.models import Challenges, SubChallenges, Questions, Choices, Answers
+from questions.models import Challenges, SubChallenges, Questions, Choices
 from users.models import ClientInformation, Users
 
 env = environ.Env()
