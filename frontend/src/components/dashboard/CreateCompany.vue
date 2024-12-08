@@ -120,14 +120,14 @@
         const data = response.data
         username.value = data.user.username
         password.value = data.password
-        const token = data.token;
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(data.user))
-        console.log(data);
+        const token = data.token
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        console.log(data)
       })
       .catch(() => {})
 
-      submited.value = true // Show the credentials
+    submited.value = true // Show the credentials
   }
 
   const copyToClipboard = (text: string) => {
