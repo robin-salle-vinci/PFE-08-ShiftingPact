@@ -33,52 +33,25 @@ def read_modules(request):
             print(str(e))
             return JsonResponse({'error': str(e)}, status=500)
 
-# @require_GET
-# def read_modules(request):
-#     try:
-#         header = request.headers.get('Authorization')
-#         if not header or not header.startswith('Bearer '):
-#             return JsonResponse({'error': 'Invalid Authorization header'}, status=400)
+# Get one ESG module (for employees only)
+@require_GET
+def read_module(request, uuid_module_esg):
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
 
-#         token = header.split(' ')[1]
-#         if token is None:
-#             return JsonResponse({'error': 'Token is missing'}, status=401)
+        module = ModulesESG.objects(id=uuid_module_esg).first()
+        if not module:
+            return JsonResponse({'error': 'Module not found'}, status=404)
 
-#         try:
-#             user_payload = decode_token(token)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=401)
+        if authenticated_user.role != 'employee' :
+            return JsonResponse({'error': 'You are not allowed to access this module'}, status=403)
 
-#         user = Users.get_by_id(user_payload['id'])
-
-#         if user is None:
-#             return JsonResponse({'Not Found User'}, status=404)
-
-#         if user.role != 'employee':
-#             return JsonResponse({'Not Allowed'}, status=403)
-
-
-#         state_value = request.GET.get('state')
-
-        
-#         if state_value is None:
-#             modules = ModulesESG.get_all()
-#         if state_value not in ['open', 'validated', 'verified']:
-#             modules = ModulesESG.filter_by_state(state_value)
-#         else:
-#             return JsonResponse({'error': 'Invalid state value'}, status=400)
-
-
-#         modules_data = [
-#             module_json(module)
-#             for module in modules
-#         ]
-
-#         return JsonResponse(modules_data, safe=False ,status=200)
-
-#     except Exception as e:
-#         print(str(e))
-#         return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse(module_json(module), status=200)
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @require_POST
