@@ -10,6 +10,7 @@ class ModuleESG(DjangoCassandraModel):
     original_answers = columns.List(columns.UUID(required=True), required=True)
     modified_answers = columns.List(columns.UUID(required=True), required=False)
     state = columns.Text(required=True)  # State of the module (e.g., 'open', 'validation', 'verified')
+    calculated_score = columns.Double(required=False)  # Calculated score of the module in validation state
 
     @classmethod
     def get_all(cls):
