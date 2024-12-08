@@ -37,10 +37,14 @@ def read_modules(request):
 
         state_value = request.GET.get('state')
 
+        
         if state_value is None:
-            modules = ModulesESG.get_all()
+            modules = ModuleESG.get_all()
+        if state_value not in ['open', 'validated', 'verified']:
+            modules = ModuleESG.filter_by_state(state_value)
         else:
-            modules = ModulesESG.filter_by_state(state_value)
+            return JsonResponse({'error': 'Invalid state value'}, status=400)
+
 
         modules_data = [
             module_json(module)
