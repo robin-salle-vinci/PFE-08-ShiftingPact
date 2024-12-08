@@ -1,16 +1,9 @@
+
 from django_cassandra_engine.models import DjangoCassandraModel
 from cassandra.cqlengine import columns
 from uuid import uuid4
 
 # FORMULAIRE ET REPONSES
-class ModulesESG(DjangoCassandraModel):
-    id = columns.UUID(primary_key=True, default=uuid4)
-    id_client = columns.UUID(required=True)
-    date_last_modification = columns.DateTime(required=True)  # Date of the last modification
-    original_answers = columns.List(columns.UUID(required=True), required=True)
-    modified_answers = columns.List(columns.UUID(required=True), required=False)
-    state = columns.Text(required=True)  # State of the module (e.g., 'open', 'validation', 'verified')
-    calculated_score = columns.Double(required=False)  # Calculated score of the module in validation state
 
 class CommitmentPacts(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
@@ -30,6 +23,9 @@ class Answers(DjangoCassandraModel):
     is_commitment = columns.Boolean(required=True)  # Boolean pour savoir si engagement ou pas
     score_response = columns.Double(required=False)  # Score de la question
 
+    @classmethod
+    def get_by_id(cls, id_answer):
+        return cls.objects.get(pk=id_answer)
 
 class Challenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
@@ -38,11 +34,19 @@ class Challenges(DjangoCassandraModel):
     color = columns.Text(required=True)  # Hex color code
     sub_challenges = columns.List(columns.UUID(required=True), required=True)
 
+    @classmethod
+    def get_by_id(cls, id_challenge):
+        return cls.objects.get(pk=id_challenge)
+
 class SubChallenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     index_sub_challenge = columns.Integer(required=True)
     value = columns.Text(required=True)
     questions = columns.List(columns.UUID(required=True), required=True)
+
+    @classmethod
+    def get_by_id(cls, id_sub_challenge):
+        return cls.objects.get(pk=id_sub_challenge)
 
 class Questions(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
@@ -52,12 +56,16 @@ class Questions(DjangoCassandraModel):
     type_response = columns.Text(required=True) # qcm, question ouverte ou %
     choices = columns.List(columns.UUID(required=False), required=False)
 
+    @classmethod
+    def get_by_id(cls, id_question):
+        return cls.objects.get(pk=id_question)
+
 class Choices(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     index_choice = columns.Integer(required=True)
     value = columns.Text(required=True)
     score = columns.Double(required=True)
 
-
-
-
+    @classmethod
+    def get_by_id(cls, id_choice):
+        return cls.objects.get(pk=id_choice)
