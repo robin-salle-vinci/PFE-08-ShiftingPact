@@ -2,7 +2,8 @@ import jwt
 import environ
 from datetime import datetime, timedelta
 
-from questions.models import Challenges, SubChallenges, Questions, Choices, Answers
+from questions.models import Challenges, SubChallenges, Questions, Choices
+from modules.models import Answers
 from users.models import ClientInformation
 
 env = environ.Env()
