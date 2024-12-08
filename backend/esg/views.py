@@ -1,8 +1,13 @@
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_POST
+from users.models import  Users
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from esg.models import ModulesESG
+from datetime import datetime
+
 from users.utils.token_utils import check_authenticated_user
 
 
@@ -40,6 +45,3 @@ def change_state_esg(request, uuid_module_esg):
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification")
-
-
-
