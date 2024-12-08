@@ -40,13 +40,14 @@ def read_module(request, uuid_module_esg):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
+        
 
         module = ModulesESG.objects(id=uuid_module_esg).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
-
-        if authenticated_user.role != 'employee' :
-            return JsonResponse({'error': 'You are not allowed to access this module'}, status=403)
+        
+        if authenticated_user.role != 'employee' and module.id_client != authenticated_user.id:
+            return JsonResponse({'error': 'This module does not belong to the authenticated user'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
     
