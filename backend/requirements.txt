@@ -16,5 +16,3 @@ django-cors-middleware==1.5.0
 bcrypt==4.0.1
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
-djangorestframework==3.14.0
-djangorestframework-simplejwt==5.2.2
