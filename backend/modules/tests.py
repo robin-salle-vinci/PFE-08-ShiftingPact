@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from unittest.mock import patch
 from django.urls import reverse
 
-from questions.models import Answers
+from modules.models import Answers
 from users.models import Users
 
 
