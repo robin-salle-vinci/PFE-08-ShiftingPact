@@ -4,21 +4,6 @@ from cassandra.cqlengine import columns
 from uuid import uuid4
 
 # FORMULAIRE ET REPONSES
-class Answers(DjangoCassandraModel):
-    id = columns.UUID(primary_key=True, default=uuid4)
-    id_challenge = columns.UUID(required=True)
-    id_sub_challenge = columns.UUID(required=True)
-    id_question = columns.UUID(required=True)
-    id_choice = columns.UUID(required=False)  # Optional, only for QCM type questions
-    value = columns.Text(required=True)  # Optional, only for open type questions
-    commentary = columns.Text(required=False)  # Commentaire du client
-    is_commitment = columns.Boolean(required=True)  # Boolean pour savoir si engagement ou pas
-    score_response = columns.Double(required=False)  # Score de la question
-
-    @classmethod
-    def get_by_id(cls, id_answer):
-        return cls.objects.get(pk=id_answer)
-
 class Challenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     index_challenge = columns.Integer(required=True)
