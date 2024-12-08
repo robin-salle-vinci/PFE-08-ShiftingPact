@@ -19,6 +19,7 @@ class ModulesESG(DjangoCassandraModel):
     def filter_by_state(cls, state_value):
         return cls.objects.all().filter(state=state_value)
 
+
 class Answers(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_challenge = columns.UUID(required=True)
@@ -33,3 +34,9 @@ class Answers(DjangoCassandraModel):
     @classmethod
     def get_by_id(cls, id_answer):
         return cls.objects.get(pk=id_answer)
+
+class CommitmentPacts(DjangoCassandraModel):
+    id = columns.UUID(primary_key=True, default=uuid4)
+    id_client = columns.UUID(required=True)
+    creation_date = columns.DateTime(required=True)  # Date of the creation of the "Pacte d'engagement"
+    answers_commitments = columns.List(columns.UUID(required=True), required=True)  # List of answers with isEngagement = True
