@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 
-from backend.utils.token_utils import generate_token
+from backend.utils.utils import generate_token
 from .models import Users, ClientInformation
 
 @csrf_exempt

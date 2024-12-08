@@ -34,14 +34,15 @@ class ModulesViewTests(TestCase):
     def mock_decode_function(self, token):
         return {'id': str(self.user.id), 'role': self.user.role}
 
-
+    @patch('modules.views.module_json')
     @patch('modules.views.decode_token')
     @patch('users.models.Users.get_by_id')
     @patch('questions.models.Answers.get_by_id')
     @patch('modules.models.ModuleESG.get_all')
-    def test_successful_get_modules(self, mock_get_all, mock_answers_get, mock_users_get, mock_decode):
+    def test_successful_get_modules(self, mock_get_all, mock_answers_get, mock_users_get, mock_decode, mock_module_json):
         mock_users_get.return_value = self.user
         mock_decode.side_effect = self.mock_decode_function
+        mock_module_json.return_value = {}
         mock_answers_get.return_value = self.answers
         mock_get_all.return_value = []
 

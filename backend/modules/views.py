@@ -1,9 +1,8 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from backend.utils.token_utils import decode_token
+from backend.utils.utils import decode_token, module_json
 from modules.models import ModuleESG
-from questions.models import Answers
 from users.models import Users
 
 
@@ -39,37 +38,10 @@ def read_modules(request):
         else:
             modules = ModuleESG.filter_by_state(state_value)
 
-        modules_data = [{
-            'id': str(module.id),
-            'id_client': str(module.id_client),
-            'date_last_modification': module.date_last_modification.isoformat(),
-            'original_answers': [
-                {
-                    'id': str(answer.id),
-                    'id_challenge': str(answer.id_challenge),
-                    'id_sub_challenge': str(answer.id_sub_challenge),
-                    'id_question': str(answer.id_question),
-                    'value': answer.value,
-                    'commentary': answer.commentary,
-                    'is_commitment': answer.is_commitment,
-                    'score_response': answer.score_response,
-                } for answer in (Answers.get_by_id(idAnswer) for idAnswer in module.original_answers)
-            ],
-            'modified_answers': [
-                {
-                    'id': str(answer.id),
-                    'id_challenge': str(answer.id_challenge),
-                    'id_sub_challenge': str(answer.id_sub_challenge),
-                    'id_question': str(answer.id_question),
-                    'value': answer.value,
-                    'commentary': answer.commentary,
-                    'is_commitment': answer.is_commitment,
-                    'score_response': answer.score_response,
-                } for answer in (Answers.get_by_id(idAnswer) for idAnswer in module.modified_answers)
-            ],
-            'state': module.state,
-            'calculated_score': module.calculated_score
-        } for module in modules]
+        modules_data = [
+            module_json(module)
+            for module in modules
+        ]
 
         return JsonResponse(modules_data, safe=False ,status=200)
 
