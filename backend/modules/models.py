@@ -19,6 +19,7 @@ class ModuleESG(DjangoCassandraModel):
     @classmethod
     def filter_by_state(cls, state_value):
         return cls.objects.all().filter(state=state_value)
+
 class CommitmentPacts(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_client = columns.UUID(required=True)
