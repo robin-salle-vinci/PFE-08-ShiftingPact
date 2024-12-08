@@ -4,8 +4,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
+
+from backend.utils.utils import generate_token
 from .models import Users, ClientInformation
-from backend.utils.token_utils import generate_token
 
 @csrf_exempt
 @require_POST  # Only allow POST requests
@@ -39,7 +40,10 @@ def register_view(request):
         Users.objects(id=user.id).update(password=password)
 
         # Generate JWT tokens
-        token = generate_token(user.id, username)
+        try:
+            token = generate_token(user.id, username)
+        except:
+            return JsonResponse({'message': 'Impossible to generate a token'}, status=500)
 
         response_data = {
             'message': 'User created successfully',

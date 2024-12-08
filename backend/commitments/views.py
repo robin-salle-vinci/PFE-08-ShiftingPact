@@ -38,8 +38,8 @@ def get_one(request, id):
       if not (commitment.id_client == user.id_client_information or user.role == 'employee'):
          return JsonResponse({'error': 'Not Authorized'}, status=403)
 
-      commitment_data =
-      return JsonResponse(, safe=False, status=200)
+      commitment_data = {}
+      return JsonResponse(commitment_data, safe=False, status=200)
 
    except Exception as e:
       print(str(e))
