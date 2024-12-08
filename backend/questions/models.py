@@ -5,13 +5,27 @@ from uuid import uuid4
 
 # FORMULAIRE ET REPONSES
 
-
 class CommitmentPacts(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_client = columns.UUID(required=True)
     creation_date = columns.DateTime(required=True)  # Date of the creation of the "Pacte d'engagement"
     answers_commitments = columns.List(columns.UUID(required=True), required=True) # List of answers with isEngagement = True
     calculated_score = columns.Double(required=True)  # Calculated score of the module in validation state
+
+class Answers(DjangoCassandraModel):
+    id = columns.UUID(primary_key=True, default=uuid4)
+    id_challenge = columns.UUID(required=True)
+    id_sub_challenge = columns.UUID(required=True)
+    id_question = columns.UUID(required=True)
+    id_choice = columns.UUID(required=False)  # Optional, only for QCM type questions
+    value = columns.Text(required=True)  # Optional, only for open type questions
+    commentary = columns.Text(required=False)  # Commentaire du client
+    is_commitment = columns.Boolean(required=True)  # Boolean pour savoir si engagement ou pas
+    score_response = columns.Double(required=False)  # Score de la question
+
+    @classmethod
+    def get_by_id(cls, id_answer):
+        return cls.objects.get(pk=id_answer)
 
 class Challenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
