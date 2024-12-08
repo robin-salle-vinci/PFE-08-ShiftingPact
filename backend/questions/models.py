@@ -4,14 +4,6 @@ from cassandra.cqlengine import columns
 from uuid import uuid4
 
 # FORMULAIRE ET REPONSES
-
-class CommitmentPacts(DjangoCassandraModel):
-    id = columns.UUID(primary_key=True, default=uuid4)
-    id_client = columns.UUID(required=True)
-    creation_date = columns.DateTime(required=True)  # Date of the creation of the "Pacte d'engagement"
-    answers_commitments = columns.List(columns.UUID(required=True), required=True) # List of answers with isEngagement = True
-    calculated_score = columns.Double(required=True)  # Calculated score of the module in validation state
-
 class Answers(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_challenge = columns.UUID(required=True)
