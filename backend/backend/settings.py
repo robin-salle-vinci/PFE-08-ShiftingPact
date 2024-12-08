@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'users',
     'questions',
-    'esg',
+    'modules'
 ]
 
 REST_FRAMEWORK = {
