@@ -1,8 +1,8 @@
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
 from questions.models import Challenges, SubChallenges, Questions, Choices
+from users.utils.token_utils import check_authenticated_user
 
 
 # Create your views here.
@@ -10,6 +10,13 @@ from questions.models import Challenges, SubChallenges, Questions, Choices
 
 @require_GET
 def get_all_questions_views(request):
+    authenticated_user = check_authenticated_user(request)
+
+    # Si `check_authenticated_user` retourne une réponse JsonResponse (erreur), renvoyez-la directement
+    if isinstance(authenticated_user, JsonResponse):
+        return authenticated_user
+
+
     challenges = Challenges.objects.all()
     challenge_list = []
 
@@ -26,13 +33,13 @@ def get_all_questions_views(request):
                         choice = Choices.objects.get(id=choice_id)
                         choice_list.append({
                             'id': str(choice.id),
-                            'indexation_choice': choice.indexation_choice,
+                            'index_choice': choice.index_choice,
                             'value': choice.value,
                             'score': choice.score
                         })
                 question_list.append({
                     'id': str(question.id),
-                    'indexation_question': question.indexation_question,
+                    'index_question': question.index_question,
                     'template': question.template,
                     'value': question.value,
                     'type_response': question.type_response,
@@ -40,13 +47,13 @@ def get_all_questions_views(request):
                 })
             sub_challenge_list.append({
                 'id': str(sub_challenge.id),
-                'indexation_sub_challenge': sub_challenge.indexation_sub_challenge,
+                'index_sub_challenge': sub_challenge.index_sub_challenge,
                 'value': sub_challenge.value,
                 'questions': question_list
             })
         challenge_list.append({
             'id': str(challenge.id),
-            'indexation_challenge': challenge.indexation_challenge,
+            'index_challenge': challenge.index_challenge,
             'value': challenge.value,
             'color': challenge.color,
             'sub_challenges': sub_challenge_list

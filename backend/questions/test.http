@@ -1,0 +1,21 @@
+### login an user
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "test",
+  "password": "f198ffc1-dcb0-4060-97bf-a77c17747455"
+}
+> {% client.global.set("token", response.body.token); %}
+
+
+
+
+### get all questions with an authenticated user
+GET http://localhost:8000/questions/
+Authorization: Bearer {{token}}
+
+### get all questions with token not bearer
+GET http://localhost:8000/questions/
+Authorization: {{token}}
+
