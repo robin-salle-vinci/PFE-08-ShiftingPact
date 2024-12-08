@@ -1,0 +1,53 @@
+### login a client
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "test2",
+  "password": "fae0554e-c63a-465d-a174-54dce1f254ca"
+}
+> {% client.global.set("client1", response.body.token); %}
+
+### login a client2
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "test",
+  "password": "f198ffc1-dcb0-4060-97bf-a77c17747455"
+}
+> {% client.global.set("client2", response.body.token); %}
+
+### login an employee
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+> {% client.global.set("employee", response.body.token); %}
+
+### correct change open to validated by the client
+PATCH http://localhost:8000/esg/state/b0f6d519-b58b-4a43-bc3e-7a9b5445d46a?newState=validated
+Authorization: Bearer {{client}}
+
+### correct change validated to verified by an employee
+PATCH http://localhost:8000/esg/state/b0f6d519-b58b-4a43-bc3e-7a9b5445d46a?newState=verified
+Authorization: Bearer {{employee}}
+
+### not a correct new state
+PATCH http://localhost:8000/esg/state/f4e68f7b-8b65-4a2d-b702-02a830f37634?newState=coucou
+Authorization: Bearer {{client}}
+
+### a client try to verify its esg module
+PATCH http://localhost:8000/esg/state/f4e68f7b-8b65-4a2d-b702-02a830f37634?newState=verified
+Authorization: Bearer {{client2}}
+
+### a client try to verify an non-existent esg module
+PATCH http://localhost:8000/esg/state/d4e68f7b-8b65-4a2d-b702-02a830f37634?newState=validated
+Authorization: Bearer {{client2}}
+
+### a client try to verify an esg module of another client
+PATCH http://localhost:8000/esg/state/f4e68f7b-8b65-4a2d-b702-02a830f37634?newState=verified
+Authorization: Bearer {{client}}
