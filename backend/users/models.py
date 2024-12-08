@@ -9,6 +9,11 @@ class Users(DjangoCassandraModel):
     role = columns.Text(required=True)  # Role as 'employee' or 'client'
     id_client_information = columns.UUID(required=False)  # Optional field for 'client' role
 
+    @classmethod
+    def get_by_id(cls, id_user):
+        return cls.objects.get(id=id_user)
+
+
 # Create this before creating User
 class ClientInformation(DjangoCassandraModel):
     id_user = columns.UUID(primary_key=True)

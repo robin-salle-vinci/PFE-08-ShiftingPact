@@ -8,3 +8,7 @@ class CommitmentPacts(DjangoCassandraModel):
     creation_date = columns.DateTime(required=True)  # Date of the creation of the "Pacte d'engagement"
     answers_commitments = columns.List(columns.UUID(required=True), required=True) # List of answers with isEngagement = True
     calculated_score = columns.Double(required=True)  # Calculated score of the module in validation state
+
+    @classmethod
+    def get_by_id(cls, id_commitment_pact):
+        return CommitmentPacts.objects.get(id=id_commitment_pact)

@@ -3,10 +3,9 @@ import bcrypt
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from rest_framework_simplejwt.tokens import RefreshToken
 import json
 from .models import Users, ClientInformation
-from .utils.token_utils import generate_token
+from backend.utils.token_utils import generate_token
 
 @csrf_exempt
 @require_POST  # Only allow POST requests
