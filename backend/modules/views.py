@@ -33,21 +33,43 @@ def read_modules(request):
             print(str(e))
             return JsonResponse({'error': str(e)}, status=500)
 
-# Get one ESG module (for employees only)
+
+# Get one ESG module by esg id(for employees only)
 @require_GET
-def read_module(request, uuid_module_esg):
+def read_module_by_esg_id(request, uuid_module_esg):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
         
+        if authenticated_user.role != 'employee':
+            return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
 
         module = ModulesESG.objects(id=uuid_module_esg).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
         
-        if authenticated_user.role != 'employee' and module.id_client != authenticated_user.id:
-            return JsonResponse({'error': 'This module does not belong to the authenticated user'}, status=403)
+        return JsonResponse(module_json(module), status=200)
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# Get one ESG module by client id(for employees and clients)
+@require_GET
+def read_module_by_client_id(request, uuid_client):
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+
+        module = ModulesESG.objects(id_client=uuid_client).filter(state='open').first()
+
+        if not module:
+            return JsonResponse({'error': 'Module not found'}, status=404)
+        
+        if not (authenticated_user.role == 'employee' or str(authenticated_user.id) == str(uuid_client)):
+            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
     
@@ -55,13 +77,16 @@ def read_module(request, uuid_module_esg):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+
 @require_POST
 def create_esg_views(request):
     try:
-        # Check if auth && is an employee
-        # header = request.headers.get('Authorization')
-        # if not header or not header.startswith('Bearer '):
-        #     return JsonResponse({'error': 'Invalid Authorization header'}, status=400)
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+        
+        if authenticated_user.role != 'employee':
+            return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
 
         data = json.loads(request.body)
         id_client = data.get('idClient')
