@@ -2,12 +2,13 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
-from backend.utils.utils import decode_token, module_json
+
+from backend.utils.json_utils import module_json
+from backend.utils.token_utils import decode_token, check_authenticated_user
 from modules.models import ModulesESG
 from users.models import Users
 from datetime import datetime
 
-from users.utils.token_utils import check_authenticated_user
 
 
 @require_GET
@@ -39,9 +40,9 @@ def read_modules(request):
 
         
         if state_value is None:
-            modules = ModuleESG.get_all()
+            modules = ModulesESG.get_all()
         if state_value not in ['open', 'validated', 'verified']:
-            modules = ModuleESG.filter_by_state(state_value)
+            modules = ModulesESG.filter_by_state(state_value)
         else:
             return JsonResponse({'error': 'Invalid state value'}, status=400)
 
