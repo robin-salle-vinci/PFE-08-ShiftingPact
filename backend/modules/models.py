@@ -2,7 +2,7 @@ from uuid import uuid4
 from cassandra.cqlengine import columns
 from django_cassandra_engine.models import DjangoCassandraModel
 
-class ModuleESG(DjangoCassandraModel):
+class ModulesESG(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_client = columns.UUID(required=True)
     date_last_modification = columns.DateTime(required=True)  # Date of the last modification
