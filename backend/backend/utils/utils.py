@@ -59,7 +59,8 @@ def client_info_json(client_info):
       'id_user': str(client_info.id_user),
       'number_workers': int(client_info.number_workers),
       'owned_facility': str(client_info.owned_facility),
-      'service_or_product': str(client_info.service_or_product)
+      'service_or_product': str(client_info.service_or_product),
+      'company_name': str(client_info.company_name),
     }
 
 def choice_json(choice):
@@ -143,4 +144,22 @@ def module_json(module):
         ],
       'state': module.state,
       'calculated_score': module.calculated_score
+    }
+
+def module_single_json(module):
+  return \
+    {
+      'id': str(module.id),
+      'client_information': client_info_json(ClientInformation.get_by_id(module.id_client)),
+      'date_last_modification': module.date_last_modification.isoformat(),
+      'original_answers': [
+          str(idAnswer)
+          for idAnswer in module.original_answers
+        ],
+      'modified_answers': [
+        str(idAnswer)
+        for idAnswer in module.modified_answers
+      ],
+      'state': str(module.state),
+      'calculated_score': float(module.calculated_score)
     }

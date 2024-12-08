@@ -19,6 +19,7 @@ class ClientInformation(DjangoCassandraModel):
     number_workers = columns.Integer(required=True)
     owned_facility = columns.Boolean(required=True)
     service_or_product = columns.Text(required=True)
+    company_name = columns.Text(required=True)
 
     @classmethod
     def get_by_id(cls, id_client):

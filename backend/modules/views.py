@@ -2,59 +2,56 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
-from backend.utils.utils import decode_token, module_json
+from backend.utils.utils import decode_token, module_json, module_single_json
 from modules.models import ModulesESG
 from users.models import Users
 from datetime import datetime
 
 from users.utils.token_utils import check_authenticated_user
 
-
+# Get all ESG modules (for employees only)
 @require_GET
 def read_modules(request):
     try:
-        header = request.headers.get('Authorization')
-        if not header or not header.startswith('Bearer '):
-            return JsonResponse({'error': 'Invalid Authorization header'}, status=400)
-
-        token = header.split(' ')[1]
-        if token is None:
-            return JsonResponse({'error': 'Token is missing'}, status=401)
-
-        try:
-            user_payload = decode_token(token)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=401)
-
-        user = Users.get_by_id(user_payload['id'])
-
-        if user is None:
-            return JsonResponse({'Not Found User'}, status=404)
-
-        if user.role != 'employee':
-            return JsonResponse({'Not Allowed'}, status=403)
-
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+        
+        if authenticated_user.role != 'employee':
+            return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
 
         state_value = request.GET.get('state')
 
-        
-        if state_value is None:
-            modules = ModuleESG.get_all()
-        if state_value not in ['open', 'validated', 'verified']:
-            modules = ModuleESG.filter_by_state(state_value)
-        else:
+        if state_value not in ['validated', 'verified']:
             return JsonResponse({'error': 'Invalid state value'}, status=400)
+        else:
+            modules = ModulesESG.filter_by_state(state_value)
 
-
-        modules_data = [
-            module_json(module)
-            for module in modules
-        ]
-
-        return JsonResponse(modules_data, safe=False ,status=200)
-
+        modules_json = [module_single_json(module) for module in modules]
+        return JsonResponse(modules_json, safe=False, status=200)
     except Exception as e:
-        print(str(e))
+            print(str(e))
+            return JsonResponse({'error': str(e)}, status=500)
+
+# Get one ESG module (for employees only)
+@require_GET
+def read_module(request, uuid_module_esg):
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+        
+
+        module = ModulesESG.objects(id=uuid_module_esg).first()
+        if not module:
+            return JsonResponse({'error': 'Module not found'}, status=404)
+        
+        if authenticated_user.role != 'employee' and module.id_client != authenticated_user.id:
+            return JsonResponse({'error': 'This module does not belong to the authenticated user'}, status=403)
+
+        return JsonResponse(module_json(module), status=200)
+    
+    except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
