@@ -44,6 +44,11 @@
 </script>
 
 <style scoped>
+  * {
+    font-family: 'Arial', sans-serif;
+    box-sizing: border-box;
+  }
+
   body {
     padding: 0px;
     margin: 0px;
@@ -62,13 +67,15 @@
     border-radius: 4px;
     overflow-y: auto;
     overflow-x: hidden;
+    padding: 2%;
   }
 
   .separator {
     width: 100%;
     height: 2px;
     background-color: #ccc;
-    margin: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   .save-button-container {
