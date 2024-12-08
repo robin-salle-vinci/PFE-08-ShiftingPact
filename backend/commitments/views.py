@@ -7,7 +7,7 @@ from commitments.models import CommitmentPacts
 
 # Create your views here.
 
-
+# read one commitment
 @require_GET
 def get_one(request, id_commitment):
    try:
@@ -16,7 +16,7 @@ def get_one(request, id_commitment):
       if isinstance(user, JsonResponse):
          return user
 
-      commitment = CommitmentPacts.get_by_id(id_commitment)
+      commitment = CommitmentPacts.get_by_id(str(id_commitment))
 
       if commitment is None:
          return JsonResponse({'error': 'Commitment not found'}, status=404)

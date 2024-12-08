@@ -163,7 +163,7 @@ def module_json(module):
           for answer in (Answers.get_by_id(id_answer) for id_answer in module.modified_answers)
         ],
       'state': module.state,
-      'calculated_score': module.calculated_score
+      'calculated_score': float(module.calculated_score if module.calculated_score else 0),
     }
 
 def commitment_json(commitment):
@@ -171,11 +171,10 @@ def commitment_json(commitment):
     {
     'id': str(commitment.id),
     'client_information': client_info_json(ClientInformation.get_by_id(commitment.id_client)),
-    'created_date': commitment.created_date.isoformat(),
+    'creation_date': commitment.creation_date,
     'answers_commitments':
       [
         answer_json(answer)
         for answer in (Answers.get_by_id(id_answer) for id_answer in commitment.answers_commitments)
       ],
-    'calculated_score': float(commitment.calculated_score),
   }

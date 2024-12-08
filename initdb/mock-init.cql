@@ -1,15 +1,3 @@
-INSERT INTO app.users (id, username, password, role)
-VALUES (f198ffc1-dcb0-4060-97bf-a77c17747455, 'admin', '$2b$12$e/X6SFG7ckqjkGCrRr3CRec5AFQ6TDYLz2yS85Fl1zCjIFX9uTrgC',
-        'employee');
-
-INSERT INTO app.users (id, username, password, role, id_client_information)
-VALUES (91cef9b1-c61e-42de-acdc-e81019475fe9, 'client', '$2b$12$e/X6SFG7ckqjkGCrRr3CRec5AFQ6TDYLz2yS85Fl1zCjIFX9uTrgC',
-        'client', 91cef9b1-c61e-42de-acdc-e81019475fe9);
-
-INSERT INTO app.client_information (id_user, number_workers, owned_facility, service_or_product)
-VALUES (91cef9b1-c61e-42de-acdc-e81019475fe9, 10, False, 'service');
-
-
 -- Insert Challenges
 INSERT INTO app.challenges (id, index_challenge, value, color, sub_challenges) VALUES
                                                                                (550e8400-e29b-41d4-a716-446655440000, 1, 'Challenge 1', '#FF5733', [550e8400-e29b-41d4-a716-446655440002, 550e8400-e29b-41d4-a716-446655440003]);
@@ -90,26 +78,26 @@ INSERT INTO app.users (id, username, password, role, id_client_information)
 VALUES (550e8400-e29b-41d4-a716-446655440022, 'client_verified', '$2b$12$e/X6SFG7ckqjkGCrRr3CRec5AFQ6TDYLz2yS85Fl1zCjIFX9uTrgC','client', 550e8400-e29b-41d4-a716-446655440022);
 
 -- Insert Client Information
-INSERT INTO app.client_information (id_user, number_workers, owned_facility, service_or_product)
-VALUES (550e8400-e29b-41d4-a716-446655440020, 10, False, 'service');
+INSERT INTO app.client_information (id_user, number_workers, owned_facility, service_or_product, company_name)
+VALUES (550e8400-e29b-41d4-a716-446655440020, 10, False, 'service', 'Client Open CompanyName');
 
-INSERT INTO app.client_information (id_user, number_workers, owned_facility, service_or_product)
-VALUES (550e8400-e29b-41d4-a716-446655440021, 0, False, 'produit');
+INSERT INTO app.client_information (id_user, number_workers, owned_facility, service_or_product, company_name)
+VALUES (550e8400-e29b-41d4-a716-446655440021, 0, False, 'produit', 'Client Validation CompanyName');
 
-INSERT INTO app.client_information (id_user, number_workers, owned_facility, service_or_product)
-VALUES (550e8400-e29b-41d4-a716-446655440022, 1, True, 'service');
+INSERT INTO app.client_information (id_user, number_workers, owned_facility, service_or_product, company_name)
+VALUES (550e8400-e29b-41d4-a716-446655440022, 1, True, 'service', 'Client Verified CompanyName');
 
 -- Insert Modules ESG
-INSERT INTO app.module_esg (id, id_client, date_last_modification, original_answers, modified_answers ,state, calculated_score)
+INSERT INTO app.modules_esg (id, id_client, date_last_modification, original_answers, modified_answers ,state, calculated_score)
 VALUES (550e8400-e29b-41d4-a716-446655440023, 550e8400-e29b-41d4-a716-446655440020, '2022-07-12T00:00:00Z', [550e8400-e29b-41d4-a716-446655440027, 550e8400-e29b-41d4-a716-446655440028, 550e8400-e29b-41d4-a716-446655440029, 550e8400-e29b-41d4-a716-446655440030, 550e8400-e29b-41d4-a716-446655440031, 550e8400-e29b-41d4-a716-446655440032, 550e8400-e29b-41d4-a716-446655440033, 550e8400-e29b-41d4-a716-446655440034, 550e8400-e29b-41d4-a716-446655440035, 550e8400-e29b-41d4-a716-446655440036, 550e8400-e29b-41d4-a716-446655440037, 550e8400-e29b-41d4-a716-446655440038, 550e8400-e29b-41d4-a716-446655440039, 550e8400-e29b-41d4-a716-446655440040, 550e8400-e29b-41d4-a716-446655440041, 550e8400-e29b-41d4-a716-446655440042],[550e8400-e29b-41d4-a716-446655440043, 550e8400-e29b-41d4-a716-446655440044, 550e8400-e29b-41d4-a716-446655440045], 'verified', 6.8);
 
-INSERT INTO app.module_esg (id, id_client, date_last_modification, original_answers, state)
+INSERT INTO app.modules_esg (id, id_client, date_last_modification, original_answers, state)
 VALUES (550e8400-e29b-41d4-a716-446655440024, 550e8400-e29b-41d4-a716-446655440020, '2024-12-08T00:00:00Z', [550e8400-e29b-41d4-a716-446655440027, 550e8400-e29b-41d4-a716-446655440028, 550e8400-e29b-41d4-a716-446655440029, 550e8400-e29b-41d4-a716-446655440030, 550e8400-e29b-41d4-a716-446655440031, 550e8400-e29b-41d4-a716-446655440032, 550e8400-e29b-41d4-a716-446655440033, 550e8400-e29b-41d4-a716-446655440034, 550e8400-e29b-41d4-a716-446655440035, 550e8400-e29b-41d4-a716-446655440036, 550e8400-e29b-41d4-a716-446655440037, 550e8400-e29b-41d4-a716-446655440038], 'open');
 
-INSERT INTO app.module_esg (id, id_client, date_last_modification, original_answers, modified_answers ,state)
+INSERT INTO app.modules_esg (id, id_client, date_last_modification, original_answers, modified_answers ,state)
 VALUES (550e8400-e29b-41d4-a716-446655440025, 550e8400-e29b-41d4-a716-446655440021, '2024-12-08T00:00:00Z', [550e8400-e29b-41d4-a716-446655440027, 550e8400-e29b-41d4-a716-446655440028, 550e8400-e29b-41d4-a716-446655440029, 550e8400-e29b-41d4-a716-446655440030, 550e8400-e29b-41d4-a716-446655440031, 550e8400-e29b-41d4-a716-446655440032, 550e8400-e29b-41d4-a716-446655440033, 550e8400-e29b-41d4-a716-446655440034, 550e8400-e29b-41d4-a716-446655440035, 550e8400-e29b-41d4-a716-446655440036, 550e8400-e29b-41d4-a716-446655440037, 550e8400-e29b-41d4-a716-446655440038, 550e8400-e29b-41d4-a716-446655440039, 550e8400-e29b-41d4-a716-446655440040, 550e8400-e29b-41d4-a716-446655440041, 550e8400-e29b-41d4-a716-446655440042], [550e8400-e29b-41d4-a716-446655440043, 550e8400-e29b-41d4-a716-446655440044, 550e8400-e29b-41d4-a716-446655440045], 'validated');
 
-INSERT INTO app.module_esg (id, id_client, date_last_modification, original_answers, modified_answers ,state, calculated_score)
+INSERT INTO app.modules_esg (id, id_client, date_last_modification, original_answers, modified_answers ,state, calculated_score)
 VALUES (550e8400-e29b-41d4-a716-446655440026, 550e8400-e29b-41d4-a716-446655440022, '2024-12-08T00:00:00Z', [550e8400-e29b-41d4-a716-446655440027, 550e8400-e29b-41d4-a716-446655440028, 550e8400-e29b-41d4-a716-446655440029, 550e8400-e29b-41d4-a716-446655440030, 550e8400-e29b-41d4-a716-446655440031, 550e8400-e29b-41d4-a716-446655440032, 550e8400-e29b-41d4-a716-446655440033, 550e8400-e29b-41d4-a716-446655440034, 550e8400-e29b-41d4-a716-446655440035, 550e8400-e29b-41d4-a716-446655440036, 550e8400-e29b-41d4-a716-446655440037, 550e8400-e29b-41d4-a716-446655440038, 550e8400-e29b-41d4-a716-446655440039, 550e8400-e29b-41d4-a716-446655440040, 550e8400-e29b-41d4-a716-446655440041, 550e8400-e29b-41d4-a716-446655440042],[550e8400-e29b-41d4-a716-446655440043, 550e8400-e29b-41d4-a716-446655440044, 550e8400-e29b-41d4-a716-446655440045], 'verified', 6.8);
 
 -- Insert Original Answers
