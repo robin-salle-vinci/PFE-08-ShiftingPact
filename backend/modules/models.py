@@ -2,6 +2,7 @@ from uuid import uuid4
 from cassandra.cqlengine import columns
 from django_cassandra_engine.models import DjangoCassandraModel
 
+
 class ModuleESG(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_client = columns.UUID(required=True)
@@ -18,3 +19,9 @@ class ModuleESG(DjangoCassandraModel):
     @classmethod
     def filter_by_state(cls, state_value):
         return cls.objects.all().filter(state=state_value)
+
+class CommitmentPacts(DjangoCassandraModel):
+    id = columns.UUID(primary_key=True, default=uuid4)
+    id_client = columns.UUID(required=True)
+    creation_date = columns.DateTime(required=True)  # Date of the creation of the "Pacte d'engagement"
+    answers_commitments = columns.List(columns.UUID(required=True), required=True)  # List of answers with isEngagement = True
