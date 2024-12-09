@@ -4,7 +4,7 @@ DROP KEYSPACE IF EXISTS app;
 CREATE KEYSPACE app WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
 
 -- choices
-CREATE TABLE app.Choices
+CREATE TABLE app.choices
 (
     id           uuid PRIMARY KEY,
     index_choice int,
@@ -13,7 +13,7 @@ CREATE TABLE app.Choices
 );
 
 -- questions
-CREATE TABLE app.Questions
+CREATE TABLE app.questions
 (
     id             uuid PRIMARY KEY,
     index_question int,
@@ -24,7 +24,7 @@ CREATE TABLE app.Questions
 );
 
 -- sub challenges
-CREATE TABLE app.SubChallenges
+CREATE TABLE app.sub_challenges
 (
     id                  uuid PRIMARY KEY,
     index_sub_challenge int,
@@ -33,7 +33,7 @@ CREATE TABLE app.SubChallenges
 );
 
 -- challenges
-CREATE TABLE app.Challenges
+CREATE TABLE app.challenges
 (
     id              uuid PRIMARY KEY,
     index_challenge int,
@@ -43,7 +43,7 @@ CREATE TABLE app.Challenges
 );
 
 -- answers
-CREATE TABLE app.Answers
+CREATE TABLE app.answers
 (
     id               uuid PRIMARY KEY,
     id_challenge     uuid,
@@ -57,7 +57,7 @@ CREATE TABLE app.Answers
 );
 
 -- commitments pacts
-CREATE TABLE app.CommitmentPacts
+CREATE TABLE app.commitment_pacts
 (
     id                  uuid PRIMARY KEY,
     id_client           uuid,
@@ -66,7 +66,7 @@ CREATE TABLE app.CommitmentPacts
 );
 
 -- modules esg
-CREATE TABLE app.ModulesESG
+CREATE TABLE app.modules_esg
 (
     id                     uuid PRIMARY KEY,
     id_client              uuid,
@@ -78,7 +78,7 @@ CREATE TABLE app.ModulesESG
 );
 
 -- users
-CREATE TABLE app.Users
+CREATE TABLE app.users
 (
     id                    uuid PRIMARY KEY,
     username              text,
@@ -88,9 +88,10 @@ CREATE TABLE app.Users
 );
 
 -- client information
-CREATE TABLE app.ClientInformation
+CREATE TABLE app.client_information
 (
     id                 uuid PRIMARY KEY,
+    id_user            uuid,
     number_workers     int,
     owned_facility     boolean,
     service_or_product text,
