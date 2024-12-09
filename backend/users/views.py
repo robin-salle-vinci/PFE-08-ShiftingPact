@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
+import re
 
 from backend.utils.token_utils import generate_token
 from .models import Users, ClientInformation
@@ -20,6 +21,11 @@ def register_view(request):
 
         # Change the companyName to username
         username = company_name.replace(' ', '').lower()
+        username = re.sub(r'[^a-z0-9-_]', '', username)
+
+        # Check if username already exists
+        if Users.objects(username=username).first():
+            return JsonResponse({'message': 'Username already exists'}, status=409)
 
         # Check if any field is empty
         if username is None or number_workers is None or owned_facility is None or service_or_product is None:
