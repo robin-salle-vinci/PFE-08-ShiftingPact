@@ -1,14 +1,12 @@
-from uuid import UUID
 import uuid
-from ast import Not
-import re
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
-from modules.models import ModulesESG, Answers, CommitmentPacts
+
+from commitments.models import CommitmentPacts
+from modules.models import Answers
 from backend.utils.json_utils import module_json, module_single_json
-from backend.utils.token_utils import  check_authenticated_user
+from backend.utils.token_utils import check_authenticated_user
 from modules.models import ModulesESG
 from users.models import Users
 from questions.models import Choices
@@ -22,7 +20,7 @@ def read_modules(request):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-        
+
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
 
@@ -36,8 +34,8 @@ def read_modules(request):
         modules_json = [module_single_json(module) for module in modules]
         return JsonResponse(modules_json, safe=False, status=200)
     except Exception as e:
-            print(str(e))
-            return JsonResponse({'error': str(e)}, status=500)
+        print(str(e))
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 # Get one ESG module by esg id(for employees only)
@@ -47,16 +45,16 @@ def read_module_by_esg_id(request, uuid_module_esg):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-        
+
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
 
         module = ModulesESG.objects(id=uuid_module_esg).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
-        
+
         return JsonResponse(module_json(module), status=200)
-    
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -73,15 +71,14 @@ def read_module_by_client_id(request, uuid_client):
 
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
-        
+
         if not (authenticated_user.role == 'employee' or str(authenticated_user.id) == str(uuid_client)):
             return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
-    
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
 
 
 @require_POST
@@ -90,7 +87,7 @@ def create_esg_views(request):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-        
+
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
 
@@ -102,7 +99,7 @@ def create_esg_views(request):
             return JsonResponse({'message': 'Client id is required'}, status=400)
         if Users.objects.filter(id=id_client).count() == 0:
             return JsonResponse({'message': 'Client does not exist'}, status=400)
-            
+
         ModulesESG.objects.create(
             id_client=id_client,
             date_last_modification=datetime.today().date(),
@@ -111,9 +108,9 @@ def create_esg_views(request):
             state="open",
         )
         return JsonResponse({'message': 'Module ESG created successfully'}, status=201)
-        
+
     except Exception as e:
-            return JsonResponse({'message': str(e)}, status=500)
+        return JsonResponse({'message': str(e)}, status=500)
 
 
 # Create your views here.
@@ -145,7 +142,8 @@ def change_state_esg(request, uuid_module_esg):
     if current_state == 'open' and new_state != 'verification' or current_state == 'verification' and new_state != 'validated' or current_state == 'validated':
         return HttpResponse("consistency must be open -> verification -> validated", status=400)
     if user_role == 'employee' and new_state != 'validated' or user_role == 'client' and new_state != 'verification':
-        return HttpResponse("An employee can only validate and a client can only set to verification an ESG module", status=403)
+        return HttpResponse("An employee can only validate and a client can only set to verification an ESG module",
+                            status=403)
 
     if new_state == 'validated':
         print(module_esg.original_answers)
@@ -174,14 +172,13 @@ def change_state_esg(request, uuid_module_esg):
     return HttpResponse("Successful modification")
 
 
-
 @require_http_methods(["PATCH"])
 def answer_question(request):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-        
+
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
 
@@ -197,34 +194,30 @@ def answer_question(request):
 
         module = ModulesESG.objects.get(pk=id_esg)
 
-       
-
         # if old_answere.value == value and old_answere.is_commitment == is_commitment and old_answere.id_choice == id_choice:
         #     return JsonResponse({'message': 'No modification'}, status=400)
 
-
-
         ## Already modify
         if id_answere in module.modified_answers:
-            Answers.objects(id=id_answere).update(value=value, is_commitment=is_commitment,  id_choice=id_choice, score_response=new_choice.score if new_choice else 0)
+            Answers.objects(id=id_answere).update(value=value, is_commitment=is_commitment, id_choice=id_choice,
+                                                  score_response=new_choice.score if new_choice else 0)
 
         ## Not modify
         else:
 
-            old_answere =  Answers.objects.get(pk=id_answere)
+            old_answere = Answers.objects.get(pk=id_answere)
 
             if not old_answere:
                 return JsonResponse({'error': 'Answer not found'}, status=404)
-            
+
             if id_choice is not None:
                 new_choice = Choices.objects.get(pk=id_choice)
                 if old_answere.id_choice == id_choice:
                     return JsonResponse({'message': 'Answer already has this choice'}, status=400)
 
-
             # convertor is_commitment to boolean
             is_commitment = True if is_commitment == 'true' else False
-            
+
             modified_answer = Answers.objects.create(
                 id_challenge=old_answere.id_challenge,
                 id_sub_challenge=old_answere.id_sub_challenge,
@@ -237,13 +230,12 @@ def answer_question(request):
             )
             list_modified_answers = module.modified_answers
             list_modified_answers.append(modified_answer.id)
-            module.update(modified_answers=list_modified_answers)   
+            module.update(modified_answers=list_modified_answers)
 
-        
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    
+
 
 # Update de module ESG by adding answer in original answers
 @require_http_methods(["PATCH"])
@@ -252,7 +244,7 @@ def add_in_original_answers(request, uuid_module_esg):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-        
+
         if authenticated_user.role != 'client':
             return JsonResponse({'message': 'Not Authorized'}, status=403)
 
