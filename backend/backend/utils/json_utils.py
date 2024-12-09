@@ -114,3 +114,15 @@ def module_single_json(module):
       'state': str(module.state),
       'calculated_score': float(module.calculated_score)
     }
+
+def commitment_json(commitment):
+  return {
+    'id': str(commitment.id),
+    'id_client': str(commitment.id_client),
+    'creation_date': commitment.creation_date.isoformat(),
+    'answers_commitment':
+      [
+        answer_json(answer)
+        for answer in (Answers.get_by_id(idAnswer) for idAnswer in commitment.answers_commitments)
+      ],
+  }

@@ -46,7 +46,7 @@ def register_view(request):
 
         # Generate JWT tokens
         try:
-            token = generate_token(user.id, username).decode('utf-8')
+            token = generate_token(user.id, username)
         except:
             return JsonResponse({'message': 'Impossible to generate a token'}, status=500)
 
@@ -94,7 +94,7 @@ def login_view(request):
         if user:
             # Check if password matches
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                token = generate_token(user.id, username).decode('utf-8')
+                token = generate_token(user.id, username)
 
                 # Prepare response data
                 if user.role != 'employee':
