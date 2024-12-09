@@ -159,7 +159,8 @@ def change_state_esg(request, uuid_module_esg):
     if current_state == 'open' and new_state != 'verification' or current_state == 'verification' and new_state != 'validated' or current_state == 'validated':
         return HttpResponse("consistency must be open -> verification -> validated", status=400)
     if user_role == 'employee' and new_state != 'validated' or user_role == 'client' and new_state != 'verification':
-        return HttpResponse("An employee can only validate and a client can only set to verification an ESG module", status=403)
+        return HttpResponse("An employee can only validate and a client can only set to verification an ESG module",
+                            status=403)
 
     if new_state == 'validated':
         print(module_esg.original_answers)
@@ -188,9 +189,9 @@ def change_state_esg(request, uuid_module_esg):
     return HttpResponse("Successful modification of state", status=201)
 
 
-# employee change the answer of a client 
+# Add or modify an answer in a module ESG - Employee only
 @require_http_methods(["PATCH"])
-def answer_question(request):
+def add_modified_answers(request):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
@@ -218,21 +219,16 @@ def answer_question(request):
             return JsonResponse({'error': 'Module ESG not found'}, status=404)
 
         new_choice = Choices.objects.get(pk=id_choice)
-
         score = 0 if not new_choice else new_choice.score
 
-        answers_dict = {answer.id_question: answer for answer in module_esg.modified_answers}
-
-        answer = answers_dict.get(id_question)
+        answer = Answers.objects(id_question=id_question, id__in=module_esg.original_answers).first()
 
         if answer:
             Answers.objects(id=answer.id).update(value=value, is_commitment=is_commitment, id_choice=id_choice,
                                                  score_response=score)
-        ## Or Create
         else:
-
             new_answer = Answers.objects.create(
-                id_challenge= id_challenge,
+                id_challenge=id_challenge,
                 id_sub_challenge=id_sub_challenge,
                 id_question=id_question,
                 id_choice=id_choice,
@@ -242,8 +238,7 @@ def answer_question(request):
                 score_response=score,
             )
 
-            list_modified_answers = module_esg.modified_answers
-            list_modified_answers.append(new_answer.id)
+            list_modified_answers = module_esg.modified_answers.append(new_answer.id)
             module_esg.update(modified_answers=list_modified_answers)
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
@@ -251,9 +246,9 @@ def answer_question(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-# Update de module ESG by adding answer in original answers
+# Add or modify an answer in a module ESG - Client only
 @require_http_methods(["PATCH"])
-def add_in_original_answers(request, uuid_module_esg):
+def add_original_answers(request, uuid_module_esg):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
@@ -263,27 +258,51 @@ def add_in_original_answers(request, uuid_module_esg):
             return JsonResponse({'message': 'Not Authorized'}, status=403)
 
         data = json.loads(request.body)
-        new_id_answer = uuid.UUID(data.get('idAnswer'))
+        id_challenge = data.get('id_challenge')
+        id_sub_challenge = data.get('id_sub_challenge')
+        commentary = data.get('commentary')
+        id_question = data.get('id_question')
+        id_choice = data.get('id_choice')
+        value = data.get('value')
+        is_commitment = data.get('is_commitment')
 
-        if new_id_answer is None:
-            return JsonResponse({'message': 'Missing or Invalid attribute'}, status=400)
+        if not (uuid_module_esg or id_question or value or is_commitment or id_choice) is None:
+            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
-        module_esg = ModulesESG.get_by_id(uuid_module_esg)
+        module_esg = ModulesESG.objects.get(pk=uuid_module_esg)
 
         if not module_esg:
-            return JsonResponse({'message': 'Module ESG not found'}, status=404)
+            return JsonResponse({'error': 'Module ESG not found'}, status=404)
+
+        if module_esg.id_client != authenticated_user.id:
+            return JsonResponse({'message': 'Not Authorized'}, status=403)
 
         if module_esg.state != 'open':
             return JsonResponse({'message': 'Not Authorized'}, status=403)
 
-        original_answers = module_esg.original_answers
+        new_choice = Choices.objects.get(pk=id_choice)
+        score = 0 if not new_choice else new_choice.score
 
-        if new_id_answer in original_answers:
-            return JsonResponse({'message': 'Conflict: already contains the answer'}, status=409)
+        answer = Answers.objects(id_question=id_question, id__in=module_esg.original_answers).first()
 
-        original_answers.append(new_id_answer)
-        module_esg.update(original_answers=original_answers)
+        if answer:
+            Answers.objects(id=answer.id).update(value=value, is_commitment=is_commitment, id_choice=id_choice,
+                                                 score_response=score)
+        else:
+            new_answer = Answers.objects.create(
+                id_challenge=id_challenge,
+                id_sub_challenge=id_sub_challenge,
+                id_question=id_question,
+                id_choice=id_choice,
+                value=value,
+                commentary=commentary,
+                is_commitment=is_commitment,
+                score_response=score,
+            )
 
-        return JsonResponse({'message': 'The answer has been added to original answers'}, status=200)
+            list_original_answers = module_esg.original_answers.append(new_answer.id)
+            module_esg.update(original_answers=list_original_answers)
+
+        return JsonResponse({'message': 'Answer modify successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
