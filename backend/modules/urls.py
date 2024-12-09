@@ -8,6 +8,8 @@ urlpatterns = [
 
     # Get one ESG module for 
     path('esg/<str:uuid_module_esg>', views.read_module_by_esg_id, name='read_module_by_esg_id'),
+
+    # Get one ESG module by client id most recent
     path('client/<str:uuid_client>', views.read_module_by_client_id, name='read_module_by_client_id'),
 
     # Create ESG module
@@ -18,4 +20,5 @@ urlpatterns = [
 
     # Answer to a question
     path('answer', views.answer_question, name='answer_question'),
+
 ]

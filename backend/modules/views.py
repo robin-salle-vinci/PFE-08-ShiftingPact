@@ -1,3 +1,5 @@
+import uuid
+
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
@@ -55,8 +57,7 @@ def read_module_by_esg_id(request, uuid_module_esg):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-# Get one ESG module by client id(for employees and clients)
+# Get one ESG module by client id(for employees and client)
 @require_GET
 def read_module_by_client_id(request, uuid_client):
     try:
@@ -64,13 +65,13 @@ def read_module_by_client_id(request, uuid_client):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        module = ModulesESG.objects(id_client=uuid_client).filter(state='open').first()
+        if not (authenticated_user.role == 'employee' or str(authenticated_user.id) == str(uuid_client)):
+            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
+
+        module = ModulesESG.objects(id_client=uuid_client).filter(state='open').first() # est ce que un client a voir son module dans n'importe quelle etat
 
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
-        
-        if not (authenticated_user.role == 'employee' or str(authenticated_user.id) == str(uuid_client)):
-            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
     
