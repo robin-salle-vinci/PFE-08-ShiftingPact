@@ -14,7 +14,11 @@ class ModulesESG(DjangoCassandraModel):
     @classmethod
     def get_by_id(cls,id_module_esg):
         return cls.objects.get(pk=id_module_esg)
-    
+
+    @classmethod
+    def get_most_recent_by_client_id(cls, id_client):
+        return cls.objects.filter(id_client=id_client).order_by('-date_last_modification').first()
+
     @classmethod
     def get_all(cls):
         return cls.objects.all()

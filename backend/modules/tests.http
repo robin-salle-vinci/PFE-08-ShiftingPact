@@ -1,3 +1,4 @@
+
 @baseUrl=http://localhost:8000
 
 ### login a client
@@ -5,20 +6,20 @@ POST http://localhost:8000/users/login/
 Content-Type: application/json
 
 {
-  "username": "test2",
-  "password": "fae0554e-c63a-465d-a174-54dce1f254ca"
+  "username": "client_open",
+  "password": "admin"
 }
-> {% client.global.set("client1", response.body.token); %}
+> {% client.global.set("clientOpen", response.body.token); %}
 
-### login a client2
+### login a client verification
 POST http://localhost:8000/users/login/
 Content-Type: application/json
 
 {
-  "username": "test",
-  "password": "f198ffc1-dcb0-4060-97bf-a77c17747455"
+  "username": "client_verification",
+  "password": "admin"
 }
-> {% client.global.set("client2", response.body.token); %}
+> {% client.global.set("clientVerification", response.body.token); %}
 
 
 ### login a client_open
@@ -42,29 +43,29 @@ Content-Type: application/json
 }
 > {% client.global.set("employee", response.body.token); %}
 
-### correct change open to validated by the client
-PATCH http://localhost:8000/modules/state/b0f6d519-b58b-4a43-bc3e-7a9b5445d46a?newState=validated
-Authorization: Bearer {{client}}
+### correct change open to verification by the client
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440024?newState=verification
+Authorization: Bearer {{clientOpen}}
 
-### correct change validated to verified by an employee
-PATCH http://localhost:8000/modules/state/b0f6d519-b58b-4a43-bc3e-7a9b5445d46a?newState=verified
+### a client try to validated its esg module
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440024?newState=validated
+Authorization: Bearer {{clientOpen}}
+
+### correct change verification to validated by an employee
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440024?newState=validated
 Authorization: Bearer {{employee}}
 
 ### not a correct new state
-PATCH http://localhost:8000/modules/state/f4e68f7b-8b65-4a2d-b702-02a830f37634?newState=coucou
-Authorization: Bearer {{client}}
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440025?newState=coucou
+Authorization: Bearer {{employee}}
 
-### a client try to verify its esg module
-PATCH http://localhost:8000/modules/state/f4e68f7b-8b65-4a2d-b702-02a830f37634?newState=verified
-Authorization: Bearer {{client2}}
+### a client try to set to verification an non-existent esg module
+PATCH http://localhost:8000/modules/state/d4e68f7b-8b65-4a2d-b702-02a830f37634?newState=verification
+Authorization: Bearer {{clientVerification}}
 
-### a client try to verify an non-existent esg module
-PATCH http://localhost:8000/modules/state/d4e68f7b-8b65-4a2d-b702-02a830f37634?newState=validated
-Authorization: Bearer {{client2}}
-
-### a client try to verify an esg module of another client
-PATCH http://localhost:8000/modules/state/f4e68f7b-8b65-4a2d-b702-02a830f37634?newState=verified
-Authorization: Bearer {{client}}
+### a client try to set to verification an esg module of another client
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440025?newState=verification
+Authorization: Bearer {{clientOpen}}
 
 ### a user(client) is adding a answer in original answers
 PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
@@ -92,3 +93,24 @@ Content-Type: application/json
 {
    "idAnswer":"550e8400-e29b-41d4-a716-446655440027"
 }
+
+### get a module id by module esg
+GET {{baseUrl}}/modules/esg/550e8400-e29b-41d4-a716-446655440023
+
+### get a module id by client id
+GET {{baseUrl}}/modules/client/550e8400-e29b-41d4-a716-446655440020
+### create a module esg without token
+POST http://localhost:8000/modules/create/550e8400-e29b-41d4-a716-446655440020
+Authorization:
+
+### a client try to create a module esg
+POST http://localhost:8000/modules/create/550e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{clientOpen}}
+
+### create a module esg with non-existent client
+POST http://localhost:8000/modules/create/950e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{employee}}
+
+### create a correct module esg
+POST http://localhost:8000/modules/create/550e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{employee}}

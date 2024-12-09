@@ -5,7 +5,6 @@ from backend.utils.json_utils import commitment_json
 from backend.utils.token_utils import check_authenticated_user
 from commitments.models import CommitmentPacts
 
-
 # Create your views here.
 
 # read one commitment
