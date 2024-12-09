@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from backend.utils.utils import commitment_json, check_authenticated_user
+from backend.utils.json_utils import commitment_json
+from backend.utils.token_utils import check_authenticated_user
 from commitments.models import CommitmentPacts
 
 
