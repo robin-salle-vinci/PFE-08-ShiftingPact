@@ -32,10 +32,10 @@ def register_view(request):
             return JsonResponse({'message': 'All fields are required'}, status=400)
 
         # Create User object
-        user = Users.create(username=username, password='', role='client')
+        user = Users.create(username=username, password='password', role='client')
 
         # Create a password with BCrypt with the identifier
-        password = bcrypt.hashpw(str(user.id).encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        password = bcrypt.hashpw((str(user.id)).encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         Users.objects(id=user.id).update(password=password)
 
         # Create ClientInformation object
@@ -46,7 +46,7 @@ def register_view(request):
 
         # Generate JWT tokens
         try:
-            token = generate_token(user.id, username)
+            token = generate_token(user.id, username).decode('utf-8')
         except:
             return JsonResponse({'message': 'Impossible to generate a token'}, status=500)
 
@@ -62,7 +62,7 @@ def register_view(request):
                 'serviceOrProduct': client_info.service_or_product
             },
             'token': token,
-            'password': identifier
+            'password': str(user.id)
         }
 
         # add password to the response
