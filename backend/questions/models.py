@@ -3,7 +3,6 @@ from django_cassandra_engine.models import DjangoCassandraModel
 from cassandra.cqlengine import columns
 from uuid import uuid4
 
-# FORMULAIRE ET REPONSES
 class Challenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     index_challenge = columns.Integer(required=True)
@@ -15,6 +14,7 @@ class Challenges(DjangoCassandraModel):
     def get_by_id(cls, id_challenge):
         return cls.objects.get(pk=id_challenge)
 
+
 class SubChallenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     index_sub_challenge = columns.Integer(required=True)
@@ -24,6 +24,7 @@ class SubChallenges(DjangoCassandraModel):
     @classmethod
     def get_by_id(cls, id_sub_challenge):
         return cls.objects.get(pk=id_sub_challenge)
+
 
 class Questions(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
@@ -36,6 +37,7 @@ class Questions(DjangoCassandraModel):
     @classmethod
     def get_by_id(cls, id_question):
         return cls.objects.get(pk=id_question)
+
 
 class Choices(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)

@@ -1,4 +1,7 @@
-### login a client open
+
+@baseUrl=http://localhost:8000
+
+### login a client
 POST http://localhost:8000/users/login/
 Content-Type: application/json
 
@@ -17,6 +20,18 @@ Content-Type: application/json
   "password": "admin"
 }
 > {% client.global.set("clientVerification", response.body.token); %}
+
+
+### login a client_open
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "client_open",
+  "password": "admin"
+}
+> {% client.global.set("client_open", response.body.token); %}
+
 
 ### login an employee
 POST http://localhost:8000/users/login/
@@ -51,3 +66,30 @@ Authorization: Bearer {{clientVerification}}
 ### a client try to set to verification an esg module of another client
 PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440025?newState=verification
 Authorization: Bearer {{clientOpen}}
+
+### a user(client) is adding a answer in original answers
+PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
+Authorization: Bearer {{client_open}}
+Content-Type: application/json
+
+{
+   "idAnswer":"550e8400-e29b-41d4-a716-446655440045"
+}
+
+### a client is adding a answer in original answers
+PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
+Authorization: Bearer {{employee}}
+Content-Type: application/json
+
+{
+   "idAnswer":"550e8400-e29b-41d4-a716-446655440045"
+}
+
+### a user(client) is adding a answer in original answers
+PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
+Authorization: Bearer {{client_open}}
+Content-Type: application/json
+
+{
+   "idAnswer":"550e8400-e29b-41d4-a716-446655440027"
+}
