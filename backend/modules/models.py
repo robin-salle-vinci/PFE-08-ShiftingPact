@@ -12,6 +12,10 @@ class ModulesESG(DjangoCassandraModel):
     calculated_score = columns.Double(required=False)  # Calculated score of the module in validation state
 
     @classmethod
+    def get_by_id(cls,id_module_esg):
+        return cls.objects.get(pk=id_module_esg)
+    
+    @classmethod
     def get_all(cls):
         return cls.objects.all()
 
