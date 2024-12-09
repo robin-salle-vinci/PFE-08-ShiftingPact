@@ -4,21 +4,27 @@
 
   <div v-if="loading"></div>
   <div v-else class="container">
-    <!-- <h1>Questionaires ESG de l'entreprise: {{ questionDb.client_information.company_name }}</h1> -->
+    <h1>Questionaires ESG de l'entreprise: {{ clientName }}</h1>
     <div
+      class="form challenge"
       v-if="questionDb && questionDb.challenges"
       v-for="challenge in questionDb.challenges"
       v-bind:key="challenge.id"
+      c
     >
-      <p>{{ challenge.value }}</p>
-      <div v-for="subChallenge in challenge.sub_challenges" v-bind:key="subChallenge.id">
-        <p>{{ subChallenge.value }}</p>
-        <div
-          class="questions-container"
-          v-for="question in subChallenge.questions"
-          v-bind:key="question.id"
-        >
-          <QuestionElement :question="question" :reponse="reponse[question.id]" />
+      <h2>{{ challenge.value }}</h2>
+      <div
+        v-for="subChallenge in challenge.sub_challenges"
+        v-bind:key="subChallenge.id"
+        class="sub-challenge"
+      >
+        <h3>{{ subChallenge.value }}</h3>
+        <div v-for="question in subChallenge.questions" v-bind:key="question.id" class="question">
+          <QuestionElement
+            :question="question"
+            :clientResponse="clientResponse[question.id]"
+            :employeeResponse="employeeResponse ? employeeResponse[question.id] : undefined"
+          />
         </div>
       </div>
     </div>
@@ -37,38 +43,41 @@
   const route = useRoute()
   const id = route.params.id
   const apiUrl = import.meta.env.VITE_API_URL
-  // interface QuestionDb {
-  //   id: number
-  //   client_information: {
-  //     company_name: string
-  //   }
-  // }
 
   const questionDb = ref(null)
+  const clientResponse = ref<Record<string, any>>({})
+  const employeeResponse = ref<Record<string, any>>({})
+  const clientName = ref('')
+
   const fetchData = async () => {
-    const response = await axios.get(`${apiUrl}/questions/`, {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-    questionDb.value = response.data
-    loading.value = false
+    try {
+      const [questionsResponse, reponseResponse] = await Promise.all([
+        // Get All questions from ESG module
+        axios.get(`${apiUrl}/questions/`, {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+        }),
+        // Get All answers from ESG module
+        axios.get(`${apiUrl}/modules/esg/${id}`, {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+        }),
+      ])
+
+      questionDb.value = questionsResponse.data
+      clientResponse.value = reponseResponse.data.original_answers
+      employeeResponse.value = reponseResponse.data.employee_answers
+      clientName.value = reponseResponse.data.client_information.company_name
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      loading.value = false
+    }
   }
 
   fetchData()
-
-  const reponse = ref({})
-  const fetchReponse = async () => {
-    const response = await axios.get(`${apiUrl}/modules/esg/${id}`, {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-    })
-    reponse.value = response.data.original_answers
-    console.log(reponse.value)
-  }
-
-  fetchReponse()
 
   const handleBack = () => {
     router.push('/dashboard')
@@ -76,18 +85,8 @@
 </script>
 
 <style scoped>
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-    position: relative;
-  }
-
-  .questions-container {
-    display: flex;
-    flex-direction: column;
-    width: 80%;
+  .container h1 {
+    text-align: center;
   }
 
   .back-button {
@@ -111,5 +110,23 @@
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
     border-right: 10px solid white;
+  }
+
+  .challenge {
+    margin-left: 20%;
+    margin-right: 20%;
+    background-color: rgb(182, 126, 41);
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 5%;
+  }
+
+  .sub-challenge {
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-bottom: 2%;
+    background-color: blanchedalmond;
+    border-radius: 10px;
+    padding: 30px;
   }
 </style>
