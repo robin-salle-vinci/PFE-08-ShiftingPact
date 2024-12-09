@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 
-from backend.utils.utils import generate_token
+from backend.utils.token_utils import generate_token
 from .models import Users, ClientInformation
 
 @csrf_exempt
@@ -30,7 +30,7 @@ def register_view(request):
 
         # Create ClientInformation object
         client_info = ClientInformation.create(id_user=user.id, number_workers=number_workers, owned_facility=owned_facility,
-                                               service_or_product=service_or_product)
+                                               service_or_product=service_or_product, company_name=company_name)
 
         Users.objects(id=user.id).update(id_client_information=client_info.id_user)
 
