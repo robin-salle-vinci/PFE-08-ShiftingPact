@@ -21,10 +21,27 @@
 
 <script setup lang="ts">
   import { ref, computed } from 'vue'
+  import axios from 'axios'
+  import { getToken } from '../utils/localstorage'
   import ESGFormList from '@/components/esg/ESGFormList.vue'
   import ESGFormQuestions from '@/components/esg/ESGFormQuestions.vue'
 
+  const apiUrl = import.meta.env.VITE_API_URL
+
   const selectedSubChallenge = ref<object | null>(null)
+
+  axios
+    .get(`${apiUrl}/questions/`, {
+      headers: {
+        Authorization: 'Bearer ' + getToken(),
+      },
+    })
+    .then((response) => {
+      console.log('Réponse des challenges:', response.data)
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la requête:', error)
+    })
 
   const responses = ref([
     {
