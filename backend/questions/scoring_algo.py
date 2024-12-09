@@ -1,131 +1,132 @@
-def calculate_esg_score(questions, choices, responses):
-  # Initialiser les scores par thème
-  theme_scores_today = {"Environnement": 0, "Social": 0, "Gouvernance": 0}
-  theme_scores_in_two_years = {"Environnement": 0, "Social": 0,
-                               "Gouvernance": 0}
-  max_scores_by_theme = {"Environnement": 0, "Social": 0, "Gouvernance": 0}
-
-  # Calcul des scores pour chaque enjeu
-  for question in questions:
-    question_id = question["id"]
-
-    # Récupérer les choix et le score max pour cette question
-    question_choices = [c for c in choices if c["id_question"] == question_id]
-    max_score_question = sum(c["score_choice"] for c in question_choices) / 2
-
-    if max_score_question == 0:
-      continue
-
-    # Réponses associées à la question
-    question_responses = [r for r in responses if
-                          r["id_question"] == question_id]
-
-    # Calculer les scores des engagements aujourd'hui et dans deux ans
-    score_today = sum(
-        c["score_choice"] for r in question_responses if
-        r["type_engagement"] == "aujourd'hui"
-        for c in question_choices if c["value"] == r["value"]
-    )
-    score_in_two_years = sum(
-        c["score_choice"] * 0.25 for r in question_responses if
-        r["type_engagement"] == "dans deux ans"
-        for c in question_choices if c["value"] == r["value"]
-    )
-
-    # Normaliser les scores sur le score max
-    score_today = min(score_today, max_score_question)
-    score_in_two_years = min(score_in_two_years, max_score_question)
-
-    # Debug prints
-    print(f"Question ID: {question_id}")
-    print(f"Score Today: {score_today}/{max_score_question}")
-    print(f"Score In Two Years: {score_in_two_years}/{max_score_question}")
-
-    # Ajouter les scores au thème correspondant
-    theme = question["challenge"]
-    theme_scores_today[theme] += score_today / max_score_question
-    theme_scores_in_two_years[theme] += score_in_two_years / max_score_question
-
-    # Ajouter le score max au total pour le thème
-    max_scores_by_theme[theme] += 1
-
-  # Calcul des scores totaux par thème
-  total_scores_today = sum(
-      theme_scores_today[theme] for theme in theme_scores_today)
-  total_scores_in_two_years = sum(
-      theme_scores_in_two_years[theme] for theme in theme_scores_in_two_years)
-  max_scores_total = sum(
-      max_scores_by_theme[theme] for theme in max_scores_by_theme)
-
-  # Calcul du score ESG total en pourcentage
-  esg_score_percentage = ((total_scores_today + total_scores_in_two_years) / max_scores_total) * 100
-
-  return theme_scores_today, theme_scores_in_two_years, esg_score_percentage
+from modules.models import Answers, ModulesESG
+from questions.models import Choices, Challenges, SubChallenges, Questions
 
 
-# Simuler les questions
-questions = [
-  {"id": "q1", "challenge": "Environnement",
-   "sub_challenge": "Gestion de l'énergie", "type_response": "QCM"},
-  {"id": "q2", "challenge": "Environnement",
-   "sub_challenge": "Empreinte carbone", "type_response": "QCM"},
-  {"id": "q3", "challenge": "Environnement", "sub_challenge": "Eau",
-   "type_response": "QCM"},
-  {"id": "q4", "challenge": "Environnement",
-   "sub_challenge": "Matières premières et fournitures",
-   "type_response": "QCM"},
-  {"id": "q5", "challenge": "Environnement", "sub_challenge": "Déchets",
-   "type_response": "QCM"},
-  {"id": "q6", "challenge": "Environnement",
-   "sub_challenge": "Écosystèmes et biodiversité", "type_response": "QCM"}
-]
+def calculate_esg_scores(module_esg):
+  try:
+    # Initialize data structures
+    theme_scores_today = {
+      "Environnement": 0.0,
+      "Social": 0.0,
+      "Gouvernance": 0.0
+    }
+    theme_scores_in_two_years = {
+      "Environnement": 0.0,
+      "Social": 0.0,
+      "Gouvernance": 0.0
+    }
+    sub_challenge_scores_today = {
+      "Environnement": {},
+      "Social": {},
+      "Gouvernance": {}
+    }
+    sub_challenge_scores_in_two_years = {
+      "Environnement": {},
+      "Social": {},
+      "Gouvernance": {}
+    }
 
-# Simuler les choix
-choices = [
-  {"id_question": "q1", "value": "Énergie renouvelable", "score_choice": 2.0},
-  {"id_question": "q1", "value": "Énergie fossile", "score_choice": 0.0},
-  {"id_question": "q2", "value": "Réduction des émissions",
-   "score_choice": 3.0},
-  {"id_question": "q2", "value": "Augmentation des émissions",
-   "score_choice": 1.0},
-  {"id_question": "q3", "value": "Réduction de la consommation d'eau",
-   "score_choice": 4.0},
-  {"id_question": "q3", "value": "Augmentation de la consommation",
-   "score_choice": 0.0},
-  {"id_question": "q4", "value": "Utilisation de matériaux recyclés",
-   "score_choice": 3.0},
-  {"id_question": "q4", "value": "Utilisation de nouveaux matériaux",
-   "score_choice": 1.0},
-  {"id_question": "q5", "value": "Gestion efficace des déchets",
-   "score_choice": 2.5},
-  {"id_question": "q5", "value": "Aucune gestion", "score_choice": 0.0},
-  {"id_question": "q6", "value": "Protection des habitats",
-   "score_choice": 3.5},
-  {"id_question": "q6", "value": "Destruction des habitats",
-   "score_choice": 0.0}
-]
+    # Process all original answers
+    for answer_id in module_esg.original_answers:
+      try:
+        # Fetch associated question, sub-challenge, and challenge, theme and answer
+        answer = Answers.get_by_id(answer_id)
+        question = Questions.get_by_id(answer.id_question)
+        sub_challenge = SubChallenges.get_by_id(answer.id_sub_challenge)
+        challenge = Challenges.get_by_id(answer.id_challenge)
+        theme = Challenges.get_theme_from_color(challenge.color)
 
-# Simuler les réponses
-responses = [
-  {"id_question": "q1", "value": "Énergie renouvelable",
-   "type_engagement": "aujourd'hui"},
-  {"id_question": "q2", "value": "Réduction des émissions",
-   "type_engagement": "dans deux ans"},
-  {"id_question": "q3", "value": "Réduction de la consommation d'eau",
-   "type_engagement": "aujourd'hui"},
-  {"id_question": "q4", "value": "Utilisation de matériaux recyclés",
-   "type_engagement": "dans deux ans"},
-  {"id_question": "q5", "value": "Gestion efficace des déchets",
-   "type_engagement": "aujourd'hui"},
-  {"id_question": "q6", "value": "Protection des habitats",
-   "type_engagement": "dans deux ans"}
-]
+        # Fetch associated choices
+        choices = [Choices.get_by_id(choice_id) for choice_id in question.choices]
 
-# Calculer les scores
-results = calculate_esg_score(questions, choices, responses)
+        # Calculate max score for the question
+        max_score_today = sum(choice.score for choice in choices) / 2 if choices else 0.0
 
-# Afficher les résultats
-print("\n=== Résultats ===")
-print("Scores par thème aujourd'hui:", results[0])
-print("Scores par thème dans deux ans:", results[1])
-print("Score ESG total en pourcentage:", results[2])
+        # Calculate actual score for the question
+        actual_score_today = 0.0
+        actual_score_in_two_years = 0.0
+
+        if answer.is_commitment:
+          selected_choice = next(
+              (choice for choice in choices if choice.id == answer.id_choice), None)
+          if selected_choice:
+            actual_score_in_two_years = selected_choice.score * 0.25
+        else:
+          # Engagement for today
+          selected_choice = next(
+              (choice for choice in choices if choice.id == answer.id_choice),
+              None)
+          if selected_choice:
+            actual_score_today = selected_choice.score
+
+        # Update sub_challenge scores for both timeframes
+        # Sub-challenges: Today's scores
+        if sub_challenge.id not in sub_challenge_scores_today[theme]:
+          sub_challenge_scores_today[theme][sub_challenge.id] = {
+            "name": sub_challenge.value,
+            "actual_score": 0.0,
+            "max_score": 0.0
+          }
+        sub_challenge_scores_today[theme][sub_challenge.id]["actual_score"] += actual_score_today
+        sub_challenge_scores_today[theme][sub_challenge.id]["max_score"] += max_score_today
+
+        # Sub-challenges: Two-year scores
+        if sub_challenge.id not in sub_challenge_scores_in_two_years[theme]:
+          sub_challenge_scores_in_two_years[theme][sub_challenge.id] = {
+            "name": sub_challenge.value,
+            "actual_score": 0.0,
+            "max_score": 0.0
+          }
+        sub_challenge_scores_in_two_years[theme][sub_challenge.id]["actual_score"] += actual_score_in_two_years
+        sub_challenge_scores_in_two_years[theme][sub_challenge.id]["max_score"] += max_score_today
+      except Exception as e:
+        print(f"Error processing answer {answer_id}: {e}")
+
+    # Aggregate scores for each theme
+    for theme in sub_challenge_scores_today:
+      # Calculate today's score
+      theme_actual_today = sum(
+          sc["actual_score"] for sc in
+          sub_challenge_scores_today[theme].values())
+      theme_max_today = sum(
+          sc["max_score"] for sc in
+          sub_challenge_scores_today[theme].values())
+      theme_scores_today[theme] = (
+            theme_actual_today / theme_max_today * 100) if theme_max_today > 0 else 0.0
+
+      # Calculate two-year engagement score
+      theme_actual_2yrs = sum(
+          sc["actual_score"] for sc in
+          sub_challenge_scores_in_two_years[theme].values())
+      theme_max_2yrs = sum(
+          sc["max_score"] for sc in
+          sub_challenge_scores_in_two_years[theme].values())
+      theme_scores_in_two_years[theme] = (
+            theme_actual_2yrs / theme_max_2yrs * 100) if theme_max_2yrs > 0 else 0.0
+
+    # Combine scores
+    total_esg_score = sum(theme_scores_today.values()) / len(
+        theme_scores_today) if theme_scores_today else 0.0
+
+    # Prepare response
+    result = {
+      "themes": [],
+      "total_esg_score": total_esg_score,
+      "theme_scores_in_two_years": theme_scores_in_two_years
+    }
+
+    for theme, score in theme_scores_today.items():
+      result["themes"].append({
+        "name": theme,
+        "score_today": score,
+        "score_in_two_years": theme_scores_in_two_years[theme]
+      })
+
+    return result
+
+  except Exception as e:
+    return {"error": f"Error calculating ESG score: {e}"}
+
+
+
+

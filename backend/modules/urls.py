@@ -18,4 +18,7 @@ urlpatterns = [
 
     # Answer to a question
     path('answer', views.answer_question, name='answer_question'),
+
+    # Add score to module
+    path('addScore/<str:uuid_module_esg>', views.add_score, name='add_score'),
 ]

@@ -6,6 +6,7 @@ from modules.models import ModulesESG, Answers
 from backend.utils.json_utils import module_json, module_single_json
 from backend.utils.token_utils import  check_authenticated_user
 from modules.models import ModulesESG
+from questions.scoring_algo import calculate_esg_scores
 from users.models import Users
 from questions.models import Choices
 from datetime import datetime
@@ -216,4 +217,43 @@ def answer_question(request):
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    
+
+@require_http_methods(["PATCH"])
+def add_score (request, uuid_module_esg) :
+    # check authentication
+    authenticated_user = check_authenticated_user(request)
+    if isinstance(authenticated_user, HttpResponse):
+        return authenticated_user
+
+    # check if the user is an employee
+    if authenticated_user.role != 'employee':
+        return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
+
+    try:
+        module_esg = ModulesESG.objects.get(id=uuid_module_esg)
+    except ModulesESG.DoesNotExist:
+        return JsonResponse({'error': 'Module ESG not found'}, status=404)
+
+    # Check module state
+    if module_esg.state == 'open':
+        return JsonResponse(
+            {'error': 'Module ESG must be in verified or validated state'},
+            status=400)
+
+    # Calculate ESG scores
+    try:
+        data = calculate_esg_scores(module_esg)
+        if "error" in data:
+            return JsonResponse(data, status=500)
+    except Exception as e:
+        return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
+                            status=500)
+
+    try:
+        module_esg.update(calculated_score=data["total_esg_score"])
+        module_esg.save()
+    except Exception as e:
+        return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
+                            status=500)
+
+    return JsonResponse(data, status=200)
