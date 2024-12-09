@@ -6,10 +6,12 @@ from uuid import uuid4
 
 class Users(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)  # Use UUID for unique ID
-    username = columns.Text(required=True, unique=True)
+    username = columns.Text(required=True)
     password = columns.Text(required=True)
     role = columns.Text(required=True)  # Role as 'employee' or 'client'
     id_client_information = columns.UUID(required=False)  # Optional field for 'client' role
+
+
 
     @classmethod
     def get_by_id(cls, id_user):
