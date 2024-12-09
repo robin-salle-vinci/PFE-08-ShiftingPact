@@ -18,7 +18,10 @@ urlpatterns = [
     # Update ESG module
     path('state/<str:uuid_module_esg>', views.change_state_esg, name='change_state_esg_view'),
 
-    # Answer to a question
-    path('answer', views.answer_question, name='answer_question'),
+    # Add answer to the modified list of answers
+    path('add/answer', views.add_modified_answers, name='add_modified_answer'),
+
+    # Add answer  to the original list of answers
+    path('add/answer/<str:uuid_module_esg>', views.add_original_answers, name='add_original_answer'),
 
 ]
