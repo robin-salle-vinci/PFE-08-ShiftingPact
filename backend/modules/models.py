@@ -35,6 +35,7 @@ class Answers(DjangoCassandraModel):
     def get_by_id(cls, id_answer):
         return cls.objects.get(pk=id_answer)
 
+
 class CommitmentPacts(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
     id_client = columns.UUID(required=True)
