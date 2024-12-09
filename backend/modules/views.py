@@ -1,3 +1,6 @@
+import uuid
+from ast import Not
+import re
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
@@ -217,3 +220,41 @@ def answer_question(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     
+
+# Update de module ESG by adding answer in original answers
+@require_http_methods(["PATCH"])
+def add_in_original_answers(request, uuid_module_esg):
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+        
+        if authenticated_user.role != 'client':
+            return JsonResponse({'message': 'Not Authorized'}, status=403)
+
+        data = json.loads(request.body)
+        new_id_answer = uuid.UUID(data.get('idAnswer'))
+
+        if new_id_answer is None:
+            return JsonResponse({'message': 'Missing or Invalid attribute'}, status=400)
+
+        module_esg = ModulesESG.get_by_id(uuid_module_esg)
+
+        if module_esg.state != 'open':
+            return JsonResponse({'message': 'Not Authorized'}, status=403)
+
+        original_answers = module_esg.original_answers
+
+        print(type(uuid_module_esg))
+        print(type(original_answers[0]))
+        print(type(new_id_answer))
+
+        if new_id_answer in original_answers:
+            return JsonResponse({'message': 'Conflict: already contains the answer'}, status=409)
+
+        original_answers.append(new_id_answer)  # Utilisez add() si c'est un ensemble
+        module_esg.update(original_answers=original_answers)
+
+        return JsonResponse({'message': 'The answer has been added to original answers'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
