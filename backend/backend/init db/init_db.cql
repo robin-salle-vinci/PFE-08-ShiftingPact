@@ -90,8 +90,7 @@ CREATE TABLE app.users
 -- client information
 CREATE TABLE app.client_information
 (
-    id                 uuid PRIMARY KEY,
-    id_user            uuid,
+    id_user            uuid PRIMARY KEY,
     number_workers     int,
     owned_facility     boolean,
     service_or_product text,
