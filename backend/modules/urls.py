@@ -16,9 +16,6 @@ urlpatterns = [
     # Update ESG module
     path('state/<str:uuid_module_esg>', views.change_state_esg, name='change_state_esg_view'),
 
-    # Update ESG module by adding answer in original answer
-    path('answer/<str:uuid_module_esg>', views.add_in_original_answers, name='views.add_in_original_answers'),
-
     # Answer to a question
     path('answer', views.answer_question, name='answer_question'),
 ]
