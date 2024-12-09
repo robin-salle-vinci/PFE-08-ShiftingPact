@@ -11,7 +11,7 @@ urlpatterns = [
     path('client/<str:uuid_client>', views.read_module_by_client_id, name='read_module_by_client_id'),
 
     # Create ESG module
-    path('', views.create_esg_views, name='create_esg_views'),
+    path('create/<str:uuid_client>', views.create_esg_views, name='create_esg_views'),
 
     # Update ESG module
     path('state/<str:uuid_module_esg>', views.change_state_esg, name='change_state_esg_view'),
