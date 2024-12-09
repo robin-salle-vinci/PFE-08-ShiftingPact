@@ -1,8 +1,10 @@
+from uuid import UUID
+
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
-from modules.models import ModulesESG, Answers
+from modules.models import ModulesESG, Answers, CommitmentPacts
 from backend.utils.json_utils import module_json, module_single_json
 from backend.utils.token_utils import  check_authenticated_user
 from modules.models import ModulesESG
@@ -124,8 +126,8 @@ def change_state_esg(request, uuid_module_esg):
     new_state = request.GET.get('newState', None)
     if new_state is None:
         return HttpResponse("No new state provided", status=400)
-    if new_state not in ['validated', 'verified']:
-        return HttpResponse("Invalid new state, must be validated or verified", status=400)
+    if new_state not in ['verification', 'validated']:
+        return HttpResponse("Invalid new state, must be verification or validated", status=400)
 
     # check module esg
     module_esg = ModulesESG.objects(id=uuid_module_esg).first()
@@ -138,10 +140,33 @@ def change_state_esg(request, uuid_module_esg):
     current_state = module_esg.state
     user_role = authenticated_user.role
     if current_state == new_state: return HttpResponse("New state must be different than current state", status=400)
-    if current_state == 'open' and new_state != 'validated' or current_state == 'validated' and new_state != 'verified' or current_state == 'verified':
-        return HttpResponse("consistency must be open -> validated -> verified", status=400)
-    if user_role == 'employee' and new_state != 'verified' or user_role == 'client' and new_state != 'validated':
-        return HttpResponse("An employee can only verify and a client can only validate an ESG module", status=403)
+    if current_state == 'open' and new_state != 'verification' or current_state == 'verification' and new_state != 'validated' or current_state == 'validated':
+        return HttpResponse("consistency must be open -> verification -> validated", status=400)
+    if user_role == 'employee' and new_state != 'validated' or user_role == 'client' and new_state != 'verification':
+        return HttpResponse("An employee can only validate and a client can only set to verification an ESG module", status=403)
+
+    if new_state == 'validated':
+        print(module_esg.original_answers)
+        # Récupérer toutes les réponses originales et modifiées pour le pacte d'engagement
+        original_answers = Answers.objects.filter(id__in=module_esg.original_answers, is_commitment=True)
+        modified_answers = Answers.objects.filter(id__in=module_esg.modified_answers, is_commitment=True)
+
+        # Créer un dictionnaire basé sur id_question pour permettre un écrasement des réponses originales
+        answers_dict = {answer.id_question: answer for answer in original_answers}
+
+        # Remplacer ou ajouter les réponses modifiées
+        for answer in modified_answers:
+            answers_dict[answer.id_question] = answer
+
+        # Obtenir la liste des réponses finales
+        answers_to_commitment = [answer.id for answer in answers_dict.values()]
+
+        # Créer le pacte d'engagement
+        CommitmentPacts.objects.create(
+            id_client=module_esg.id_client,
+            creation_date=datetime.today().date(),
+            answers_commitments=answers_to_commitment
+        )
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification")
