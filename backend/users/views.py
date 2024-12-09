@@ -94,7 +94,7 @@ def login_view(request):
         if user:
             # Check if password matches
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                token = generate_token(user.id, username)
+                token = generate_token(user.id, username).decode('utf-8')
 
                 # Prepare response data
                 if user.role != 'employee':
