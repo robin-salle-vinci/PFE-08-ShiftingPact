@@ -30,7 +30,7 @@ def register_view(request):
 
         # Create ClientInformation object
         client_info = ClientInformation.create(id_user=user.id, number_workers=number_workers, owned_facility=owned_facility,
-                                               service_or_product=service_or_product)
+                                               service_or_product=service_or_product, company_name=company_name)
 
         Users.objects(id=user.id).update(id_client_information=client_info.id_user)
 
