@@ -2,13 +2,14 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
-from backend.utils.utils import decode_token, module_json, module_single_json
 from modules.models import ModulesESG, Answers
+from backend.utils.json_utils import module_json, module_single_json
+from backend.utils.token_utils import  check_authenticated_user
+from modules.models import ModulesESG
 from users.models import Users
 from questions.models import Choices
 from datetime import datetime
 
-from users.utils.token_utils import check_authenticated_user
 
 # Get all ESG modules (for employees only)
 @require_GET
