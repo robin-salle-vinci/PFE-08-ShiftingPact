@@ -1,9 +1,11 @@
 import uuid
-
+from ast import Not
+import re
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
-from modules.models import Answers
+from modules.models import ModulesESG, Answers
 from backend.utils.json_utils import module_json, module_single_json
 from backend.utils.token_utils import  check_authenticated_user
 from modules.models import ModulesESG
@@ -57,7 +59,8 @@ def read_module_by_esg_id(request, uuid_module_esg):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-# Get one ESG module by client id(for employees and client)
+
+# Get one ESG module by client id(for employees and clients)
 @require_GET
 def read_module_by_client_id(request, uuid_client):
     try:
@@ -65,13 +68,13 @@ def read_module_by_client_id(request, uuid_client):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        if not (authenticated_user.role == 'employee' or str(authenticated_user.id) == str(uuid_client)):
-            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
-
-        module = ModulesESG.objects(id_client=uuid_client).filter(state='open').first() # est ce que un client a voir son module dans n'importe quelle etat
+        module = ModulesESG.objects(id_client=uuid_client).filter(state='open').first()
 
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
+        
+        if not (authenticated_user.role == 'employee' or str(authenticated_user.id) == str(uuid_client)):
+            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
     
@@ -217,3 +220,37 @@ def answer_question(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     
+
+# Update de module ESG by adding answer in original answers
+@require_http_methods(["PATCH"])
+def add_in_original_answers(request, uuid_module_esg):
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+        
+        if authenticated_user.role != 'client':
+            return JsonResponse({'message': 'Not Authorized'}, status=403)
+
+        data = json.loads(request.body)
+        new_id_answer = uuid.UUID(data.get('idAnswer'))
+
+        if new_id_answer is None:
+            return JsonResponse({'message': 'Missing or Invalid attribute'}, status=400)
+
+        module_esg = ModulesESG.get_by_id(uuid_module_esg)
+
+        if module_esg.state != 'open':
+            return JsonResponse({'message': 'Not Authorized'}, status=403)
+
+        original_answers = module_esg.original_answers
+
+        if new_id_answer in original_answers:
+            return JsonResponse({'message': 'Conflict: already contains the answer'}, status=409)
+
+        original_answers.append(new_id_answer)
+        module_esg.update(original_answers=original_answers)
+
+        return JsonResponse({'message': 'The answer has been added to original answers'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
