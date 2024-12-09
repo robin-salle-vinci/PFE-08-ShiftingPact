@@ -3,7 +3,7 @@
 
   interface Choice {
     id: string
-    indexation_choice: string
+    index_choice: string
     value: string
     score: number
   }
@@ -17,87 +17,91 @@
     choices: Choice[]
   }
 
-  const props = defineProps<{ question: Question }>()
-  console.log(props.question)
+  interface Reponse {
+    id: string
+    challenge: string
+    sub_challenge: string
+    id_choice: string
+    value: string
+    commentary: string
+    score: number
+    is_commitment: boolean
+    score_response: number
+  }
+
+  const props = defineProps<{ question: Question; reponse: Reponse }>()
 
   const questionModel = ref(props.question)
+  const reponseModel = ref(props.reponse)
 
-  // const handleSave = () => {
-  //   console.log('save')
-  // }
+  const newResponse = ref(reponseModel.value) // Create a copy of the current response
+  const newChoice = ref(reponseModel.value.id_choice)
+  const newIsEngagement = ref(reponseModel.value.is_commitment)
+
+  const handleSave = () => {
+    console.log('QuestionId:', questionModel.value.id)
+    console.log('Response', newResponse.value)
+    console.log('Choice', newChoice.value)
+    console.log('Is Engagement', newIsEngagement.value)
+    console.log('save', newResponse.value)
+  }
 </script>
 
 <template>
-  <div>
-    <!-- {{ questionModel }} -->
-
-    <div>{{ questionModel.value }}</div>
+  <div style="border: 2px solid black; margin: 20px; width: 1000px">
+    <!-- Question -->
     <div>
-      <div>reponse du client TODO</div>
-      <div v-if="questionModel.choices.length > 0">
-        <select v-model="questionModel.value">
-          <option v-for="choix in questionModel.choices" :key="choix.id" :value="choix">
-            {{ choix.value }}
-          </option>
-        </select>
-      </div>
-      <div v-else>
-        <input v-model="questionModel.value" type="text" />
+      <span>{{ questionModel.value }}</span>
+    </div>
+    <br />
+    <br />
+
+    <!-- Answeres -->
+    <div>
+      <!-- Display old answere of the client -->
+      <div>
+        <label for="reponse">Reponse client: </label>
+
+        <div>
+          <input type="text" :value="reponseModel.value" disabled />
+          <label for="comment">Commentaire: </label>
+          <input type="text" :value="reponseModel.commentary" id="comment" disabled />
+          <label for="commitment">Engagement: </label>
+          <input type="checkbox" :checked="reponseModel.is_commitment" id="commitment" disabled />
+        </div>
       </div>
 
-      <div>todo commentaire</div>
+      <!-- New potentiel reponse -->
+      <div>
+        <label for="new-reponse">Reponse potentiel: </label>
+
+        <!-- Type of question -->
+        <div v-if="questionModel.choices.length > 0">
+          <select v-model="newChoice">
+            <option v-for="choix in questionModel.choices" :key="choix.id" :value="choix.id">
+              {{ choix.value }}
+            </option>
+          </select>
+        </div>
+        <div v-else>
+          <input type="text" id="new-reponse" />
+        </div>
+
+        <div>
+          <label for="commitment">Engagement: </label>
+          <input
+            type="checkbox"
+            :checked="reponseModel.is_commitment"
+            v-model="newIsEngagement"
+            id="commitment"
+          />
+        </div>
+
+        <br />
+        <button @click="handleSave">Modifier</button>
+      </div>
     </div>
   </div>
-  <!-- <div class="card">
-
-     <span>{{ questionModel.question }}</span>
-    <form class="inputs">
-      <div v-if="!questionModel.choix.length">
-        <input v-model="questionModel.reponse" type="text" />
-      </div>
-      <textarea v-model="questionModel.commentaire" readonly disabled></textarea>
-      <div>
-        <label>
-          <input type="radio" v-model="questionModel.isEngagement" :value="false" />
-          Déjà en application
-        </label>
-        <label>
-          <input type="radio" v-model="questionModel.isEngagement" :value="true" />
-          Engagement
-        </label>
-      </div>
-      <span>{{ questionModel.value }}</span>
-      <div v-if="questionModel.choix.length">
-        <select v-model="questionModel.value">
-          <option v-for="choix in questionModel.choix" :key="choix" :value="choix">
-            {{ choix }}
-          </option>
-        </select>
-      </div>
-      <button @click="handleSave">sauvgarder</button>
-    </form> 
-  </div> -->
 </template>
 
-<style>
-  .card {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: #f5f5f5;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  .inputs {
-    margin-top: 2%;
-    display: flex;
-    justify-content: space-around;
-    gap: 10px;
-  }
-  textarea {
-    resize: none;
-  }
-</style>
+<style></style>

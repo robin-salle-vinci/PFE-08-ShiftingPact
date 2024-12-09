@@ -1,13 +1,13 @@
 <template>
   <div class="container">
     <h1>Questionaires ESG en attente de validation</h1>
-    <div class="list" v-for="item in fakeESG" :key="item.idClient">
+    <div class="list" v-for="item in allEsg" :key="item.id">
       <div class="item">
-        <span>{{ item.companyName }}</span>
-        <span>{{ item.date }}</span>
+        <span>{{ item.client_information.company_name }}</span>
+        <span>{{ new Date(item.date_last_modification).toLocaleDateString('fr-FR') }}</span>
         <div>
-          <button @click="handleSeeForm(item.esgId)">Voir/Editer</button>
-          <button @click="handleValidate(item.esgId)">Valider</button>
+          <button @click="handleSeeForm(item.id)">Voir/Editer</button>
+          <button @click="handleValidate(item.id)">Valider</button>
         </div>
       </div>
     </div>
@@ -16,38 +16,35 @@
 
 <script setup lang="ts">
   import router from '@/router'
+  import axios from 'axios'
   import { ref } from 'vue'
+  const apiUrl = import.meta.env.VITE_API_URL
+  interface ESGItem {
+    id: number
+    client_information: {
+      company_name: string
+    }
+    date_last_modification: string
+  }
 
-  const fakeESG = ref([
-    {
-      idClient: 1,
-      companyName: 'Company Name',
-      esgScore: 80,
-      date: '2021-10-10',
-      esgId: 1,
-    },
-    {
-      idClient: 2,
-      companyName: 'Company Name',
-      esgScore: 80,
-      date: '2021-10-10',
-      esgId: 2,
-    },
-    {
-      idClient: 3,
-      companyName: 'Company Name',
-      esgScore: 80,
-      date: '2021-10-10',
-      esgId: 3,
-    },
-  ])
-  // TODO request to get ESG list
+  const allEsg = ref<ESGItem[]>([])
+
+  const fetchESGList = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/modules?state=validated`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      })
+      allEsg.value = response.data
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  fetchESGList()
 
   const handleSeeForm = (_esgId: number) => {
-    // TODO request to see ESG form
-    console.log(_esgId)
-    console.log('see form')
-    // go to page form with _esgId
     router.push(`/esg/${_esgId}`)
   }
 
