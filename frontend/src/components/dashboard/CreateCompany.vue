@@ -77,13 +77,13 @@
           <p>
             Identifiant: <strong>{{ username }}</strong>
           </p>
-          <button @click="copyToClipboard(username)">copy</button>
+          <button @click="copyToClipboard(username, 'username')">{{ usernameButtonText }}</button>
         </div>
         <div class="cred-element">
           <p>
             Mot de passe: <strong>{{ password }}</strong>
           </p>
-          <button @click="copyToClipboard(password)">copy</button>
+          <button @click="copyToClipboard(password, 'password')">{{ passwordButtonText }}</button>
         </div>
       </div>
     </div>
@@ -96,6 +96,8 @@
 
   const apiUrl = import.meta.env.VITE_API_URL
   const submited = ref<boolean>(false)
+  const usernameButtonText = ref<string>('copy')
+  const passwordButtonText = ref<string>('copy')
 
   const companyName = ref<string>('')
   const numberWorkers = ref<number>(0)
@@ -130,8 +132,21 @@
     submited.value = true // Show the credentials
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      if (type === 'username') {
+        usernameButtonText.value = 'copied !'
+      } else if (type === 'password') {
+        passwordButtonText.value = 'copied !'
+      }
+      setTimeout(() => {
+        if (type === 'username') {
+          usernameButtonText.value = 'copy'
+        } else if (type === 'password') {
+          passwordButtonText.value = 'copy'
+        }
+      }, 2000)
+    })
   }
 </script>
 
@@ -257,5 +272,13 @@
     border-radius: 4px;
     cursor: pointer;
     width: 70px;
+  }
+
+  button {
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #013238a9;
   }
 </style>

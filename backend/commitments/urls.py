@@ -3,5 +3,5 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.get_all_questions_views, name='questions_view')
+    path('<str:id_commitment>', views.get_one, name='questions_view')
 ]

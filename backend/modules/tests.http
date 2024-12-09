@@ -1,0 +1,95 @@
+
+@baseUrl=http://localhost:8000
+
+### login a client
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "client_open",
+  "password": "admin"
+}
+> {% client.global.set("clientOpen", response.body.token); %}
+
+### login a client verification
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "client_verification",
+  "password": "admin"
+}
+> {% client.global.set("clientVerification", response.body.token); %}
+
+
+### login a client_open
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "client_open",
+  "password": "admin"
+}
+> {% client.global.set("client_open", response.body.token); %}
+
+
+### login an employee
+POST http://localhost:8000/users/login/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+> {% client.global.set("employee", response.body.token); %}
+
+### correct change open to verification by the client
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440024?newState=verification
+Authorization: Bearer {{clientOpen}}
+
+### a client try to validated its esg module
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440024?newState=validated
+Authorization: Bearer {{clientOpen}}
+
+### correct change verification to validated by an employee
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440024?newState=validated
+Authorization: Bearer {{employee}}
+
+### not a correct new state
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440025?newState=coucou
+Authorization: Bearer {{employee}}
+
+### a client try to set to verification an non-existent esg module
+PATCH http://localhost:8000/modules/state/d4e68f7b-8b65-4a2d-b702-02a830f37634?newState=verification
+Authorization: Bearer {{clientVerification}}
+
+### a client try to set to verification an esg module of another client
+PATCH http://localhost:8000/modules/state/550e8400-e29b-41d4-a716-446655440025?newState=verification
+Authorization: Bearer {{clientOpen}}
+
+### a user(client) is adding a answer in original answers
+PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
+Authorization: Bearer {{client_open}}
+Content-Type: application/json
+
+{
+   "idAnswer":"550e8400-e29b-41d4-a716-446655440045"
+}
+
+### a client is adding a answer in original answers
+PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
+Authorization: Bearer {{employee}}
+Content-Type: application/json
+
+{
+   "idAnswer":"550e8400-e29b-41d4-a716-446655440045"
+}
+
+### a user(client) is adding a answer in original answers
+PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
+Authorization: Bearer {{client_open}}
+Content-Type: application/json
+
+{
+   "idAnswer":"550e8400-e29b-41d4-a716-446655440027"
+}
