@@ -42,6 +42,7 @@ Content-Type: application/json
 }
 > {% client.global.set("employee", response.body.token); %}
 
+
 ### correct change open to validated by the client
 PATCH http://localhost:8000/modules/state/b0f6d519-b58b-4a43-bc3e-7a9b5445d46a?newState=validated
 Authorization: Bearer {{client}}
@@ -75,7 +76,7 @@ Content-Type: application/json
    "idAnswer":"550e8400-e29b-41d4-a716-446655440045"
 }
 
-### a client is adding a answer in original answers
+### a employee is adding a answer in original answers
 PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
 Authorization: Bearer {{employee}}
 Content-Type: application/json
@@ -84,7 +85,7 @@ Content-Type: application/json
    "idAnswer":"550e8400-e29b-41d4-a716-446655440045"
 }
 
-### a user(client) is adding a answer in original answers
+### a user(client) is adding an existing answer in original answers
 PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
 Authorization: Bearer {{client_open}}
 Content-Type: application/json
@@ -92,3 +93,9 @@ Content-Type: application/json
 {
    "idAnswer":"550e8400-e29b-41d4-a716-446655440027"
 }
+
+### get a module id by module esg
+GET {{baseUrl}}/modules/esg/550e8400-e29b-41d4-a716-446655440023
+
+### get a module id by client id
+GET {{baseUrl}}/modules/client/550e8400-e29b-41d4-a716-446655440020

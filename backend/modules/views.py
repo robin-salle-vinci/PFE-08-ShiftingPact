@@ -82,7 +82,6 @@ def read_module_by_client_id(request, uuid_client):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-
 @require_POST
 def create_esg_views(request):
     try:
