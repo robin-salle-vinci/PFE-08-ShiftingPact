@@ -8,7 +8,7 @@
       <img src="@/assets/profils.png" alt="profil" />
       <div class="profils-info">
         <span>{{ username }}</span>
-        <button @click="handleLogout">se deconnecter</button>
+        <a @click="handleLogout">se deconnecter</a>
       </div>
     </div>
   </header>

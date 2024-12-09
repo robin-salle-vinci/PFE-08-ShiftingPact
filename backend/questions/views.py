@@ -12,7 +12,7 @@ def get_all_questions_views(request):
     challenges = Challenges.objects.all()
     challenge_list = []
 
-    for challenge in challenges:
+    for challenge in sorted(challenges, key=lambda c: c.index_challenge):
         sub_challenge_list = []
         for sub_challenge_id in challenge.sub_challenges:
             sub_challenge = SubChallenges.objects.get(id=sub_challenge_id)
@@ -25,13 +25,13 @@ def get_all_questions_views(request):
                         choice = Choices.objects.get(id=choice_id)
                         choice_list.append({
                             'id': str(choice.id),
-                            'indexation_choice': choice.indexation_choice,
+                            'index_choice': choice.index_choice,
                             'value': choice.value,
                             'score': choice.score
                         })
                 question_list.append({
                     'id': str(question.id),
-                    'indexation_question': question.indexation_question,
+                    'index_question': question.index_question,
                     'template': question.template,
                     'value': question.value,
                     'type_response': question.type_response,
@@ -39,13 +39,13 @@ def get_all_questions_views(request):
                 })
             sub_challenge_list.append({
                 'id': str(sub_challenge.id),
-                'indexation_sub_challenge': sub_challenge.indexation_sub_challenge,
+                'index_sub_challenge': sub_challenge.index_sub_challenge,
                 'value': sub_challenge.value,
                 'questions': question_list
             })
         challenge_list.append({
             'id': str(challenge.id),
-            'indexation_challenge': challenge.indexation_challenge,
+            'index_challenge': challenge.index_challenge,
             'value': challenge.value,
             'color': challenge.color,
             'sub_challenges': sub_challenge_list
@@ -53,3 +53,4 @@ def get_all_questions_views(request):
 
     # Retourner les données au format JSON
     return JsonResponse({'challenges': challenge_list}, safe=False)
+
