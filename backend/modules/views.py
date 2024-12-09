@@ -245,10 +245,6 @@ def add_in_original_answers(request, uuid_module_esg):
 
         original_answers = module_esg.original_answers
 
-        print(type(uuid_module_esg))
-        print(type(original_answers[0]))
-        print(type(new_id_answer))
-
         if new_id_answer in original_answers:
             return JsonResponse({'message': 'Conflict: already contains the answer'}, status=409)
 
