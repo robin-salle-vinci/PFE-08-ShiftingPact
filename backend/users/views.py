@@ -32,18 +32,17 @@ def register_view(request):
             return JsonResponse({'message': 'All fields are required'}, status=400)
 
         # Create User object
-        user = Users.create(username=username, password='password', role='client')
+        user = Users.create(username=username, password='', role='client')
+
+        # Create a password with BCrypt with the identifier
+        password = bcrypt.hashpw(str(user.id).encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        Users.objects(id=user.id).update(password=password)
 
         # Create ClientInformation object
         client_info = ClientInformation.create(id_user=user.id, number_workers=number_workers, owned_facility=owned_facility,
                                                service_or_product=service_or_product, company_name=company_name)
 
         Users.objects(id=user.id).update(id_client_information=client_info.id_user)
-
-        # Create a random password with BCrypt with the identifier
-        identifier = str(user.id)
-        password = bcrypt.hashpw(identifier.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        Users.objects(id=user.id).update(password=password)
 
         # Generate JWT tokens
         try:
