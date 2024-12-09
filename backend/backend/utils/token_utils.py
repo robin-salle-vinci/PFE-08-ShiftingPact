@@ -55,11 +55,11 @@ def decode_token(token):
 def check_authenticated_user(request):
   header = request.headers.get('Authorization')
   if not header or not header.startswith('Bearer '):
-      return HttpResponse("error: 'Invalid Authorization header", status=400)
+      return HttpResponse("error: Invalid Authorization header", status=400)
 
   token = header.split(' ')[1]
   if token is None:
-      return HttpResponse("error: 'Token is missing", status=401)
+      return HttpResponse("error: Token is missing", status=401)
 
   try:
       user_payload = decode_token(token)
