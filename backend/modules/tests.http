@@ -93,3 +93,19 @@ Content-Type: application/json
 {
    "idAnswer":"550e8400-e29b-41d4-a716-446655440027"
 }
+
+### create a module esg without token
+POST http://localhost:8000/modules/create/550e8400-e29b-41d4-a716-446655440020
+Authorization:
+
+### a client try to create a module esg
+POST http://localhost:8000/modules/create/550e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{clientOpen}}
+
+### create a module esg with non-existent client
+POST http://localhost:8000/modules/create/950e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{employee}}
+
+### create a correct module esg
+POST http://localhost:8000/modules/create/550e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{employee}}

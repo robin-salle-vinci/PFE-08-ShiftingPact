@@ -82,7 +82,7 @@ def read_module_by_client_id(request, uuid_client):
 
 
 @require_POST
-def create_esg_views(request):
+def create_esg_views(request, uuid_client):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
@@ -91,17 +91,12 @@ def create_esg_views(request):
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
 
-        data = json.loads(request.body)
-        id_client = data.get('idClient')
-
         # check if client exist
-        if not id_client:
-            return JsonResponse({'message': 'Client id is required'}, status=400)
-        if Users.objects.filter(id=id_client).count() == 0:
-            return JsonResponse({'message': 'Client does not exist'}, status=400)
+        if Users.objects.filter(id=uuid_client).count() == 0:
+            return JsonResponse({'message': 'Client does not exist'}, status=404)
 
         ModulesESG.objects.create(
-            id_client=id_client,
+            id_client=uuid_client,
             date_last_modification=datetime.today().date(),
             original_answers=[],
             modified_answers=[],
@@ -142,8 +137,7 @@ def change_state_esg(request, uuid_module_esg):
     if current_state == 'open' and new_state != 'verification' or current_state == 'verification' and new_state != 'validated' or current_state == 'validated':
         return HttpResponse("consistency must be open -> verification -> validated", status=400)
     if user_role == 'employee' and new_state != 'validated' or user_role == 'client' and new_state != 'verification':
-        return HttpResponse("An employee can only validate and a client can only set to verification an ESG module",
-                            status=403)
+        return HttpResponse("An employee can only validate and a client can only set to verification an ESG module", status=403)
 
     if new_state == 'validated':
         print(module_esg.original_answers)
@@ -169,7 +163,7 @@ def change_state_esg(request, uuid_module_esg):
         )
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
-    return HttpResponse("Successful modification")
+    return HttpResponse("Successful modification of state", status=201)
 
 
 @require_http_methods(["PATCH"])
