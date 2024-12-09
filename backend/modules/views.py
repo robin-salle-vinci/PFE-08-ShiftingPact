@@ -248,7 +248,7 @@ def add_in_original_answers(request, uuid_module_esg):
         if new_id_answer in original_answers:
             return JsonResponse({'message': 'Conflict: already contains the answer'}, status=409)
 
-        original_answers.append(new_id_answer)  # Utilisez add() si c'est un ensemble
+        original_answers.append(new_id_answer)
         module_esg.update(original_answers=original_answers)
 
         return JsonResponse({'message': 'The answer has been added to original answers'}, status=200)
