@@ -3,8 +3,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 import json
 from backend.utils.utils import decode_token, module_json, module_single_json
-from modules.models import ModulesESG
+from modules.models import ModulesESG, Answers
 from users.models import Users
+from questions.models import Choices
 from datetime import datetime
 
 from users.utils.token_utils import check_authenticated_user
@@ -111,8 +112,6 @@ def create_esg_views(request):
 
 
 # Create your views here.
-
-@csrf_exempt
 @require_http_methods(["PATCH"])
 def change_state_esg(request, uuid_module_esg):
     # authentication part
@@ -145,3 +144,75 @@ def change_state_esg(request, uuid_module_esg):
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification")
+
+
+
+@require_http_methods(["PATCH"])
+def answer_question(request):
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+        
+        if authenticated_user.role != 'employee':
+            return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
+
+        data = json.loads(request.body)
+        id_esg = data.get('id_esg')
+        id_answere = data.get('id_answere')
+        id_choice = data.get('id_choice')
+        value = data.get('value')
+        is_commitment = data.get('is_commitment')
+
+        if not id_esg or not id_answere or not value or is_commitment is None:
+            return JsonResponse({'error': 'id_esg, id_answere, value, is_commitment fields are required'}, status=400)
+
+        module = ModulesESG.objects.get(pk=id_esg)
+
+       
+
+        # if old_answere.value == value and old_answere.is_commitment == is_commitment and old_answere.id_choice == id_choice:
+        #     return JsonResponse({'message': 'No modification'}, status=400)
+
+
+
+        ## Already modify
+        if id_answere in module.modified_answers:
+            Answers.objects(id=id_answere).update(value=value, is_commitment=is_commitment,  id_choice=id_choice, score_response=new_choice.score if new_choice else 0)
+
+        ## Not modify
+        else:
+
+            old_answere =  Answers.objects.get(pk=id_answere)
+
+            if not old_answere:
+                return JsonResponse({'error': 'Answer not found'}, status=404)
+            
+            if id_choice is not None:
+                new_choice = Choices.objects.get(pk=id_choice)
+                if old_answere.id_choice == id_choice:
+                    return JsonResponse({'message': 'Answer already has this choice'}, status=400)
+
+
+            # convertor is_commitment to boolean
+            is_commitment = True if is_commitment == 'true' else False
+            
+            modified_answer = Answers.objects.create(
+                id_challenge=old_answere.id_challenge,
+                id_sub_challenge=old_answere.id_sub_challenge,
+                id_question=old_answere.id_question,
+                id_choice=id_choice,
+                value=value,
+                commentary=old_answere.commentary,
+                is_commitment=is_commitment,
+                score_response=new_choice.score if new_choice else 0
+            )
+            list_modified_answers = module.modified_answers
+            list_modified_answers.append(modified_answer.id)
+            module.update(modified_answers=list_modified_answers)   
+
+        
+        return JsonResponse({'message': 'Answer modify successfully'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
