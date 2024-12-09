@@ -83,8 +83,8 @@
         default: () => ({}),
       },
       selectedSubChallenge: {
-        type: Object,
-        default: () => '',
+        type: Boolean,
+        default: () => false,
       },
       onSubChallengeSelected: {
         type: Function,
@@ -141,7 +141,7 @@
     margin-bottom: 0px;
     background-color: #e7e7e9;
     text-align: center;
-    border-radius: 4px 4px 0 0;
+    border-radius: 5px 5px 0 0;
     border-bottom: 2px solid #cccccc;
   }
 
@@ -155,7 +155,7 @@
 
   .form-container {
     background-color: #e7e7e9;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 5px 5px;
     padding: 30px;
     height: 100%;
     overflow-y: auto;
@@ -168,7 +168,7 @@
 
   .progress-bar {
     background: #e7e7e9;
-    border-radius: 4px;
+    border-radius: 5px;
     position: relative;
     height: 30px;
     width: 100%;
@@ -178,7 +178,7 @@
   .bar {
     background: #b5cdbf;
     height: 100%;
-    border-radius: 4px;
+    border-radius: 5px;
     transition: width 0.5s ease-in-out;
   }
 
@@ -197,7 +197,7 @@
   /* Categories and subcategories */
   .category {
     margin-bottom: 15px;
-    border-radius: 4px;
+    border-radius: 5px;
   }
 
   .category-header {
@@ -210,7 +210,7 @@
     background-color: #013238;
     color: #ffffff;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 5px;
     box-sizing: border-box;
     user-select: none;
   }
@@ -252,7 +252,7 @@
     align-items: center;
     background-color: #ffffff;
     padding: 0% 2% 0% 2%;
-    border-radius: 4px;
+    border-radius: 5px;
     user-select: none;
   }
 
@@ -268,8 +268,8 @@
 
     margin: 0 10px 0 10px;
 
-    border-end-start-radius: 4px;
-    border-end-end-radius: 4px;
+    border-end-start-radius: 5px;
+    border-end-end-radius: 5px;
     background-color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }

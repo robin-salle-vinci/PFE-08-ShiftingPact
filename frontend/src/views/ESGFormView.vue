@@ -7,15 +7,13 @@
       v-if="selectedSubChallenge"
       :responses="responses"
       :choices="choices"
-      :questions="questions"
-      :groupedQuestions="groupedQuestions"
       :selectedSubChallenge="selectedSubChallenge"
     />
     <ESGFormList
       :responses="responses"
       :questions="questions"
       :groupedQuestions="groupedQuestions"
-      :selectedSubChallenge="selectedSubChallenge"
+      :selectedSubChallenge="selectedSubChallenge ? true : false"
       :onSubChallengeSelected="handleSubChallengeSelected"
     />
   </div>
@@ -32,10 +30,10 @@
     {
       id: 'c03ba929-1427-4612-9ec2-c5efa943e616',
       id_client: 1,
-      id_question: '6116bd17-7885-4444-b275-be7b79f8730f',
+      id_question: '0aaf3234-516e-4dd6-8994-e28df9fa6858',
       comment: "Commentaire de l'utilisateur",
-      isEngagement: false,
-      value: '123456',
+      isEngagement: true,
+      value: 'b',
       score_response: 1.0,
       date_modification: '2021-09-01T00:00:00.000Z',
     },

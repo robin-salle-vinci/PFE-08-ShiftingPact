@@ -1,14 +1,46 @@
 <template>
   <div class="main-container-esg-from-questions">
     <div class="form-container-questions">
-      <!-- Boucle à travers les questions sélectionnées -->
-      <div v-for="(question, questionKey) in selectedSubChallenge" :key="questionKey">
+      <div v-for="(question, questionIndex) in selectedSubChallenge" :key="questionIndex">
         <h4>{{ question.value }}</h4>
-        <ESGChoices :question="question" :choices="choices" />
-        <div class="separator"></div>
+        <ESGChoices
+          :question="question"
+          :choices="choices"
+          :responseValue="questionResponses[questionIndex].value"
+        />
+
+        <h4></h4>
+        <div class="radio-group">
+          <ESGRadioChoice
+            :choice="{ id: questionIndex + '-' + 1, value: 'Maintenant' }"
+            :questionId="question.id + '-when'"
+            :responseValue="
+              questionResponses[questionIndex].isEngagement ? 'Dans 2 ans' : 'Maintenant'
+            "
+          />
+          <ESGRadioChoice
+            :choice="{ id: questionIndex + '-' + 2, value: 'Dans 2 ans' }"
+            :questionId="question.id + '-when'"
+            :responseValue="
+              questionResponses[questionIndex].isEngagement ? 'Dans 2 ans' : 'Maintenant'
+            "
+          />
+        </div>
+
+        <h4>Commentaire ?</h4>
+        <div class="textarea-container">
+          <textarea
+            placeholder="Entrez votre commentaire ici"
+            :value="questionResponses[questionIndex].comment"
+          ></textarea>
+        </div>
+
+        <div
+          v-if="parseInt(questionIndex) < selectedSubChallenge.length - 1"
+          class="separator"
+        ></div>
       </div>
 
-      <!-- Bouton de sauvegarde -->
       <div class="save-button-container">
         <button class="save-button">Sauvegarder</button>
       </div>
@@ -18,8 +50,9 @@
 
 <script setup lang="ts">
   import ESGChoices from './ESGChoices.vue'
+  import ESGRadioChoice from './ESGRadioChoice.vue'
 
-  const { responses, choices, questions, groupedQuestions, selectedSubChallenge } = defineProps({
+  const { responses, choices, selectedSubChallenge } = defineProps({
     responses: {
       type: Object,
       default: () => ({}),
@@ -28,18 +61,26 @@
       type: Object,
       default: () => ({}),
     },
-    questions: {
-      type: Object,
-      default: () => ({}),
-    },
-    groupedQuestions: {
-      type: Object,
-      default: () => ({}),
-    },
     selectedSubChallenge: {
       type: Object,
       default: null,
     },
+  })
+
+  interface Response {
+    id: string
+    id_client: number
+    id_question: string
+    comment: string
+    isEngagement: boolean
+    value: string
+    score_response: number
+    date_modification: string
+  }
+
+  const questionResponses = selectedSubChallenge.map((question: any) => {
+    const mainResponse = responses.find((r: Response) => r.id_question === question.id) || null
+    return mainResponse
   })
 </script>
 
@@ -59,15 +100,40 @@
     width: 100%;
     box-sizing: border-box;
     padding: 2% 0% 2% 2%;
+    overflow: hidden;
   }
 
   .form-container-questions {
     height: 100%;
     background-color: #e7e7e9;
-    border-radius: 4px;
+    border-radius: 5px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 2%;
+    padding: 0% 2% 2% 2%;
+  }
+
+  .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .textarea-container textarea {
+    width: 100%;
+    max-width: 500px;
+    height: 100px;
+    font-size: 16px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .textarea-container textarea:focus {
+    border-color: #013238;
+    box-shadow: 0 0 5px #b5cdbf;
   }
 
   .separator {
@@ -79,21 +145,28 @@
   }
 
   .save-button-container {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;
+    right: 0;
     text-align: right;
-    margin-top: 20px;
+    margin-top: 0;
+    z-index: 1000;
   }
 
   .save-button {
-    background-color: #007bff;
+    background-color: #013238;
     color: white;
     border: none;
     padding: 10px 20px;
     font-size: 16px;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
   }
 
   .save-button:hover {
-    background-color: #0056b3;
+    background-color: #00252a;
+    transform: scale(1.03);
+    transition: transform 0.3s ease;
   }
 </style>
