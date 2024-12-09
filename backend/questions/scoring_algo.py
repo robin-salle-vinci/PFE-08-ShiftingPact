@@ -30,7 +30,18 @@ def calculate_esg_scores(module_esg):
         choices = [Choices.get_by_id(choice_id) for choice_id in question.choices]
 
         # Calculate max score for the question
-        max_score_today = sum(choice.score for choice in choices) / 2 if choices else 0.0
+        max_score_today = 0.0
+        if question.type_response == "%":
+          # Handle percentage logic: use the choice with the highest percentage value
+          if choices:
+            max_percentage_value = max(
+                choice.value for choice in choices if choice.value is not None
+            )
+            max_score_today = max_percentage_value / 2.0  # Divide by 2 as per the instruction
+        else:
+          # Default calculation for other question types
+          max_score_today = sum(
+              choice.score for choice in choices) / 2 if choices else 0.0
 
         # Calculate actual score for the question
         actual_score_today = 0.0
