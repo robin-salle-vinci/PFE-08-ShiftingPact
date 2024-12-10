@@ -80,7 +80,7 @@ def read_last_module_for_client(request):
 
 
 @require_POST
-def create_one(request, uuid_client):
+def create_one(request):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
@@ -90,11 +90,11 @@ def create_one(request, uuid_client):
             return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
 
         # check if client exist
-        if Users.objects.filter(id=uuid_client).count() == 0:
+        if Users.objects.filter(id=authenticated_user.id).count() == 0:
             return JsonResponse({'message': 'Client does not exist'}, status=404)
 
         ModulesESG.objects.create(
-            id_client=uuid_client,
+            id_client=authenticated_user.id,
             date_last_modification=datetime.today().date(),
             original_answers=[],
             modified_answers=[],

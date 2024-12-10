@@ -13,7 +13,7 @@ urlpatterns = [
     path('esg/', views.read_last_module_for_client, name='read_last_module_for_client'),
 
     # Create ESG module
-    path('create/<str:uuid_client>', views.create_one, name='create_one_module'),
+    path('create/', views.create_one, name='create_one_module'),
 
     # Update ESG module
     path('state/<str:uuid_module_esg>', views.change_state, name='change_state'),
