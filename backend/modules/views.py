@@ -202,7 +202,7 @@ def add_original_answers(request, uuid_module_esg):
             return JsonResponse({'message': 'Not Authorized'}, status=403)
 
         new_choice = Choices.objects.get(pk=id_choice)
-        score = 0 if not new_choice else new_choice.score
+        score = 0.0 if not new_choice else new_choice.score
 
         answer = Answers.objects(id_question=id_question, id__in=module_esg.original_answers).first()
 
@@ -224,23 +224,11 @@ def add_original_answers(request, uuid_module_esg):
             list_original_answers = module_esg.original_answers
             list_original_answers.append(new_answer.id)
             module_esg.update(original_answers=list_original_answers)
-
             module_esg.update(date_last_modification=datetime.today().date())
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-
-def stringify_keys(data):
-    """
-    Recursively convert all dictionary keys to strings.
-    """
-    if isinstance(data, dict):
-        return {str(key): stringify_keys(value) for key, value in data.items()}
-    elif isinstance(data, list):
-        return [stringify_keys(item) for item in data]
-    return data
 
 
 # Add or modify an answer in a module ESG - Employee only
@@ -263,14 +251,7 @@ def add_modified_answers(request):
         id_choice = data.get('id_choice')
         value = data.get('value')
         is_commitment = data.get('is_commitment')
-        print("id_esg:", id_esg)
-        print("id_challenge:", id_challenge)
-        print("id_sub_challenge:", id_sub_challenge)
-        print("commentary:", commentary)
-        print("id_question:", id_question)
-        print("id_choice:", id_choice)
-        print("value:", value)
-        print("is_commitment:", is_commitment)
+
         if id_esg is None or id_question is None or value is None or is_commitment is None:
             return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
@@ -310,6 +291,16 @@ def add_modified_answers(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
+def stringify_keys(data):
+    """
+    Recursively convert all dictionary keys to strings.
+    """
+    if isinstance(data, dict):
+        return {str(key): stringify_keys(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [stringify_keys(item) for item in data]
+    return data
 
 # Calculate ESG Module score
 @require_http_methods(["PATCH"])
@@ -351,7 +342,7 @@ def add_score(request, uuid_module_esg):
         return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
                             status=500)
 
-    # Combine results into a single object with stringed keys
+    # Combine results into a single object with stringified keys
     combined_scores = stringify_keys({
         "sub_challenge_scores": sub_challenge_scores,
         "challenge_scores": challenge_scores,

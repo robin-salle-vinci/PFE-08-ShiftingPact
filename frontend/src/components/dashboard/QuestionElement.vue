@@ -1,24 +1,27 @@
 <template>
   <div class="question">
     <!-- Question -->
-
     <h4>{{ questionModel.value }}</h4>
 
     <!-- Answers -->
-
-    <!-- If employee dont have already modify this question -->
+    <!-- If employee don't have already modified this question -->
     <div v-if="!alreadyModified" class="answers">
       <div class="each-answer">
         <div>
           <h5>Réponse client:</h5>
           <div>
             <label>Réponse:</label>
-            <input v-if="!answerToModify.id_choice" type="text" :value="answerToModify.value" />
+            <input
+              v-if="!answerToModify.id_choice"
+              type="text"
+              :value="answerToModify.value"
+              :disabled="props.state === 'validated' || !isModifying"
+            />
             <select
               v-else
               v-model="answerToModify.id_choice"
               @change="updateAnswerValue"
-              :disabled="!isModifying"
+              :disabled="props.state === 'validated' || !isModifying"
             >
               <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
                 {{ choice.value }}
@@ -27,28 +30,31 @@
           </div>
           <div>
             <label>Commentaire:</label>
-            <textarea v-model="answerToModify.commentary" :disabled="!isModifying"></textarea>
+            <textarea
+              v-model="answerToModify.commentary"
+              :disabled="props.state === 'validated' || !isModifying"
+            ></textarea>
           </div>
           <div>
             <label>Engagement:</label>
             <input
               type="checkbox"
               v-model="answerToModify.is_commitment"
-              :disabled="!isModifying"
+              :disabled="props.state === 'validated' || !isModifying"
             />
           </div>
         </div>
         <button
           @click="isModifying == true ? (isModifying = false) : (isModifying = true)"
-          v-if="!isModifying"
+          v-if="!isModifying && props.state !== 'validated'"
         >
           modifier
         </button>
-        <button v-else @click="handleSave">sauvagrder</button>
+        <button v-else @click="handleSave" v-if="props.state !== 'validated'">sauvagarder</button>
       </div>
     </div>
 
-    <!-- if the epmloyee have already modify the answer -->
+    <!-- If the employee has already modified the answer -->
     <div v-else class="answers">
       <div class="each-answer">
         <h5>Réponse client:</h5>
@@ -70,8 +76,18 @@
         <h5>Réponse employé:</h5>
         <div>
           <label>Réponse:</label>
-          <input v-if="!answerToModify.id_choice" type="text" :value="answerToModify.value" />
-          <select v-else v-model="answerToModify.id_choice" @change="updateAnswerValue">
+          <input
+            v-if="!answerToModify.id_choice"
+            type="text"
+            :value="answerToModify.value"
+            :disabled="props.state === 'validated'"
+          />
+          <select
+            v-else
+            v-model="answerToModify.id_choice"
+            @change="updateAnswerValue"
+            :disabled="props.state === 'validated'"
+          >
             <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
               {{ choice.value }}
             </option>
@@ -79,75 +95,52 @@
         </div>
         <div>
           <label>Commentaire:</label>
-          <textarea v-model="answerToModify.commentary"></textarea>
+          <textarea
+            v-model="answerToModify.commentary"
+            :disabled="props.state === 'validated'"
+          ></textarea>
         </div>
         <div>
           <label>Engagement:</label>
-          <input type="checkbox" v-model="answerToModify.is_commitment" />
+          <input
+            type="checkbox"
+            v-model="answerToModify.is_commitment"
+            :disabled="props.state === 'validated'"
+          />
         </div>
-        <button @click="handleSave">sauvagrder</button>
+        <button @click="handleSave" v-if="props.state !== 'validated'">sauvagarder</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  import type { Question } from '@/types/Question'
+  import type { Answer } from '@/types/Reponse'
   import axios from 'axios'
   import { defineProps, ref, type Ref } from 'vue'
 
-  interface Choice {
-    id: string
-    index_choice: string
-    value: string
-    score: number
-  }
-
-  interface Question {
-    id: string
-    indexation_question: string
-    template: string
-    value: string
-    type_response: string
-    choices: Choice[]
-  }
-
-  interface Reponse {
-    id: string
-    challenge: string
-    sub_challenge: string
-    id_choice: string
-    value: string
-    commentary: string
-    score: number
-    is_commitment: boolean
-    score_response: number
-  }
-
   const props = defineProps<{
     question: Question
-    clientResponse: Reponse
-    employeeResponse?: Reponse
+    clientAnswer: Answer
+    employeeAnswer?: Answer
     idEsg: string
+    state: string
   }>()
 
-  const questionModel: Ref<Question> = ref(props.question)
-  const originalAnswer = ref(props.clientResponse)
-  const alreadyModified = ref(props.employeeResponse ? true : false)
-  let answerToModify: Ref<Reponse>
-
-  console.log(props.employeeResponse)
-
-  if (props.employeeResponse) {
-    answerToModify = ref({ ...props.employeeResponse })
-  } else {
-    answerToModify = ref({ ...props.clientResponse })
-  }
-
-  // const newResponseModel = ref({ ...props.clientResponse })
-
+  // Toggle the modification mode
   const isModifying = ref(false)
+  const questionModel: Ref<Question> = ref(props.question)
+  const originalAnswer = ref(props.clientAnswer)
+  const alreadyModified = ref(props.employeeAnswer ? true : false)
 
-  const apiUrl = import.meta.env.VITE_API_URL
+  // If no employee answer, we use the client answer for the modification
+  let answerToModify: Ref<Answer>
+  if (props.employeeAnswer) {
+    answerToModify = ref({ ...props.employeeAnswer })
+  } else {
+    answerToModify = ref({ ...props.clientAnswer })
+  }
 
   const updateAnswerValue = () => {
     const choice = questionModel.value.choices.find((c) => c.id === answerToModify.value.id_choice)
@@ -161,7 +154,7 @@
     answerToModify = ref({ ...answerToModify.value })
 
     axios.patch(
-      `${apiUrl}/modules/add/answer`,
+      `${import.meta.env.VITE_API_URL}/modules/add/answer`,
       {
         id_esg: props.idEsg,
         id_challenge: answerToModify.value.challenge,
