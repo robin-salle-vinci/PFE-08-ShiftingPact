@@ -40,7 +40,8 @@
   import { onMounted, ref } from 'vue'
   import { useRoute } from 'vue-router'
 
-  const id = useRoute().params.id
+  const id = useRoute().params.id as string
+  // props
 
   const esgForm = ref<{ challenges: Array<Challenge> }>()
   const clientResponse = ref<Record<string, Answer>>({})
@@ -68,7 +69,6 @@
       // Get esg information
       idEsg.value = clientEsg.data.id
       client.value = clientEsg.data.client_information
-      console.log(clientEsg.data.client_information)
       stateEsg.value = clientEsg.data.state
 
       // Get the questions

@@ -50,7 +50,7 @@
         >
           modifier
         </button>
-        <button v-else @click="handleSave" v-if="props.state !== 'validated'">sauvagarder</button>
+        <button v-else-if="props.state !== 'validated'" @click="handleSave">sauvagarder</button>
       </div>
     </div>
 
