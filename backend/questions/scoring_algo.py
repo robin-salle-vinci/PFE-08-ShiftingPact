@@ -1,3 +1,4 @@
+import json
 from typing import Dict, Any
 from modules.models import Answers
 from questions.models import Choices, Challenges, SubChallenges, Questions
@@ -90,9 +91,8 @@ def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
     return sub_challenge_scores
 
 
-def calculate_challenge_scores(module_esg) -> Dict[str, Dict[str, float]]:
+def calculate_challenge_scores(sub_challenge_scores) -> Dict[str, Dict[str, float]]:
   challenge_scores = {"today": {}, "in_two_years": {}}
-  sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
 
   for sub_challenge_id, scores in sub_challenge_scores["today"].items():
     try:
@@ -132,9 +132,8 @@ def calculate_challenge_scores(module_esg) -> Dict[str, Dict[str, float]]:
   return challenge_scores
 
 
-def calculate_theme_scores(module_esg) -> Dict[str, Dict[str, float]]:
+def calculate_theme_scores(challenge_scores) -> Dict[str, Dict[str, float]]:
   theme_scores = {"today": {}, "in_two_years": {}}
-  challenge_scores = calculate_challenge_scores(module_esg)
 
   for challenge_id, scores in challenge_scores["today"].items():
     try:
@@ -149,10 +148,8 @@ def calculate_theme_scores(module_esg) -> Dict[str, Dict[str, float]]:
       # Add challenge scores to the theme
       theme_scores["today"][theme]["score"] += scores["score"]
       theme_scores["today"][theme]["score_max"] += scores["score_max"]
-      theme_scores["in_two_years"][theme]["score"] += \
-      challenge_scores["in_two_years"][challenge_id]["score"]
-      theme_scores["in_two_years"][theme]["score_max"] += \
-      challenge_scores["in_two_years"][challenge_id]["score_max"]
+      theme_scores["in_two_years"][theme]["score"] += challenge_scores["in_two_years"][challenge_id]["score"]
+      theme_scores["in_two_years"][theme]["score_max"] += challenge_scores["in_two_years"][challenge_id]["score_max"]
 
     except Exception as e:
       print(f"Error processing challenge {challenge_id}: {e}")
@@ -161,7 +158,7 @@ def calculate_theme_scores(module_esg) -> Dict[str, Dict[str, float]]:
   for theme, scores in theme_scores["today"].items():
     today_max = scores["score_max"]
     theme_scores["today"][theme]["percentage"] = (
-          scores["score"] / today_max * 100) if today_max > 0 else 0.0
+        scores["score"] / today_max * 100) if today_max > 0 else 0.0
 
   for theme, scores in theme_scores["in_two_years"].items():
     in_two_years_max = scores["score_max"]
@@ -172,8 +169,7 @@ def calculate_theme_scores(module_esg) -> Dict[str, Dict[str, float]]:
 
 
 # Step 4: Calculate global ESG scores
-def calculate_global_esg_scores(module_esg) -> Dict[str, float]:
-  theme_scores = calculate_theme_scores(module_esg)
+def calculate_global_esg_scores(theme_scores) -> Dict[str, float]:
   try:
     # Calculate the total ESG score for today
     total_score_today = sum(theme["percentage"] for theme in theme_scores["today"].values()) if theme_scores["today"] else 0.0
