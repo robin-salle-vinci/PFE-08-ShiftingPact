@@ -45,14 +45,17 @@ def read_modules_by_client_id(request, uuid_client):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        modules = ModulesESG.objects.all().filter(client_id=uuid_client)
+        if str(authenticated_user.id) != uuid_client:
+            return JsonResponse({'error': 'Invalid client'}, status=403)
 
-        if authenticated_user.role != 'employee':
-            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
+        if authenticated_user.role != 'client':
+            return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
+
+        modules = ModulesESG.filter_by_client_id(uuid_client)
 
         data_json = [module_single_json(module) for module in modules]
 
-        return JsonResponse(data_json, status=200)
+        return JsonResponse(data_json, safe=False, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -66,17 +69,14 @@ def read_module_by_esg_id(request, uuid_module_esg):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        module_esg = ModulesESG.objects.get(esg_id=uuid_module_esg)
-
-        if not (authenticated_user.role == 'employee' or authenticated_user.id == module_esg.id_client):
-            return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
-
         module = ModulesESG.objects(id=uuid_module_esg).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
-        return JsonResponse(module_json(module), status=200)
+        if not (authenticated_user.role == 'employee' or authenticated_user.id == module.id_client):
+            return JsonResponse({'error': 'Only employees can access this endpoint or the correct client'}, status=403)
 
+        return JsonResponse(module_json(module), status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 

@@ -27,6 +27,10 @@ class ModulesESG(DjangoCassandraModel):
     def filter_by_state(cls, state_value):
         return cls.objects.all().filter(state=state_value)
 
+    @classmethod
+    def filter_by_client_id(cls, id_client):
+        return cls.objects.all().filter(id_client=id_client)
+
 
 class Answers(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)

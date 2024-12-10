@@ -112,7 +112,7 @@ def module_single_json(module):
         for idAnswer in module.modified_answers
       ],
       'state': str(module.state),
-      'calculated_score': float(module.calculated_score)
+      'calculated_score': float(module.calculated_score if module.calculated_score else 0.0)
     }
 
 def commitment_json(commitment):
