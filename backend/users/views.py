@@ -18,7 +18,7 @@ def register_view(request):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        if authenticated_user.role != 'admin':
+        if authenticated_user.role != 'employee':
             return JsonResponse({'message': 'You are not authorized to create a new user'}, status=403)
 
         data = json.loads(request.body)
