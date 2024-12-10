@@ -61,7 +61,7 @@
           },
         }),
         // Get All answers from ESG module
-        axios.get(`${apiUrl}/modules/esg/${id}`, {
+        axios.get(`${apiUrl}/modules/${id}`, {
           headers: {
             Authorization: 'Bearer ' + localStorage.getItem('token'),
           },
