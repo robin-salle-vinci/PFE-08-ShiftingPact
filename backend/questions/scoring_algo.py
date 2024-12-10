@@ -1,163 +1,181 @@
-from modules.models import Answers, ModulesESG
+from typing import Dict, Any
+from modules.models import Answers
 from questions.models import Choices, Challenges, SubChallenges, Questions
 
 
-def calculate_esg_scores(module_esg):
-  try:
-    # Initialize data structures
-    sub_challenge_scores_today = {
-      "Environnement": {},
-      "Social": {},
-      "Gouvernance": {}
-    }
-    sub_challenge_scores_in_two_years = {
-      "Environnement": {},
-      "Social": {},
-      "Gouvernance": {}
-    }
+# Step 1: Calculate scores for a single question
+def calculate_question_score(answer, question, choices) -> Dict[str, float]:
+    try:
+        # Initialize scores
+        score_today = 0.0
+        score_in_two_years = 0.0
+        score_max = 0.0
 
-    # Process all original answers
-    for answer_id in module_esg.original_answers:
-      try:
-        # Fetch associated question, sub-challenge, and challenge, theme and answer
-        answer = Answers.get_by_id(answer_id)
-        question = Questions.get_by_id(answer.id_question)
-        sub_challenge = SubChallenges.get_by_id(answer.id_sub_challenge)
-        challenge = Challenges.get_by_id(answer.id_challenge)
-        theme = Challenges.get_theme_from_color(challenge.color)
-
-        # Fetch associated choices
-        choices = [Choices.get_by_id(choice_id) for choice_id in question.choices]
-
-        # Calculate max score for the question
-        max_score_today = 0.0
         if question.type_response == "%":
-          # Handle percentage logic: use the choice with the highest percentage value
-          if choices:
-            max_percentage_value = max(
-                choice.value for choice in choices if choice.value is not None
-            )
-            max_score_today = max_percentage_value / 2.0  # Divide by 2 as per the instruction
+            # Use the highest percentage value as the max score
+            max_percentage_value = max(choice.value for choice in choices if choice.value is not None)
+            score_max = max_percentage_value / 2.0  # Divide by 2 as per instruction
         else:
-          # Default calculation for other question types
-          max_score_today = sum(
-              choice.score for choice in choices) / 2 if choices else 0.0
+            # Default max score logic
+            score_max = sum(choice.score for choice in choices) / 2 if choices else 0.0
 
-        # Calculate actual score for the question
-        actual_score_today = 0.0
-        actual_score_in_two_years = 0.0
+        # Calculate the actual score
+        selected_choice = next((choice for choice in choices if choice.id == answer.id_choice), None)
+        if selected_choice:
+            if answer.is_commitment:
+                score_in_two_years = selected_choice.score * 0.25
+            else:
+                score_today = selected_choice.score
 
-        if answer.is_commitment:
-          selected_choice = next(
-              (choice for choice in choices if choice.id == answer.id_choice), None)
-          if selected_choice:
-            actual_score_in_two_years = selected_choice.score * 0.25
-        else:
-          # Engagement for today
-          selected_choice = next(
-              (choice for choice in choices if choice.id == answer.id_choice),
-              None)
-          if selected_choice:
-            actual_score_today = selected_choice.score
+        return {
+            "score_today": score_today,
+            "score_in_two_years": score_in_two_years,
+            "score_max": score_max,
+        }
+    except Exception as e:
+        raise ValueError(f"Error calculating question score: {e}")
 
-        # Update sub_challenge scores for both timeframes
-        # Sub-challenges: Today's scores
-        if sub_challenge.id not in sub_challenge_scores_today[theme]:
-          sub_challenge_scores_today[theme][sub_challenge.id] = {
-            "name": sub_challenge.value,
-            "score_today": 0.0,
-            "max_score_today": 0.0
-          }
-        sub_challenge_scores_today[theme][sub_challenge.id]["score_today"] += actual_score_today
-        sub_challenge_scores_today[theme][sub_challenge.id]["max_score_today"] += max_score_today
 
-        # Sub-challenges: Two-year scores
-        if sub_challenge.id not in sub_challenge_scores_in_two_years[theme]:
-          sub_challenge_scores_in_two_years[theme][sub_challenge.id] = {
-            "name": sub_challenge.value,
-            "score_in_two_years": 0.0,
-            "max_score_in_two_years": 0.0
-          }
-        sub_challenge_scores_in_two_years[theme][sub_challenge.id]["score_in_two_years"] += actual_score_in_two_years
-        sub_challenge_scores_in_two_years[theme][sub_challenge.id]["max_score_in_two_years"] += max_score_today
-      except Exception as e:
-        print(f"Error processing answer {answer_id}: {e}")
+# Step 2: Aggregate scores for sub-challenges
+def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
+    sub_challenge_scores = {
+        "today": {},
+        "in_two_years": {},
+    }
 
-    # Calculate scores per theme
-    theme_scores_today = {}
-    theme_scores_in_two_years = {}
+    for answer_id in module_esg.original_answers:
+        try:
+            # Retrieve associated data
+            answer = Answers.get_by_id(answer_id)
+            question = Questions.get_by_id(answer.id_question)
+            sub_challenge = SubChallenges.get_by_id(answer.id_sub_challenge)
+            choices = [Choices.get_by_id(choice_id) for choice_id in question.choices]
 
-    # Aggregate scores for each theme
-    for theme in sub_challenge_scores_today:
-      print(theme)
-      # Calculate today's score
-      total_score_today = sum(
-          sc["score_today"] for sc in sub_challenge_scores_today[theme].values())
-      total_max_score_today = sum(
-          sc["max_score_today"] for sc in sub_challenge_scores_today[theme].values())
-      theme_scores_today[theme] = (
-        (
-              total_score_today / total_max_score_today * 100) if total_max_score_today > 0 else 0.0
-      )
+            # Calculate scores for the question
+            question_scores = calculate_question_score(answer, question, choices)
 
-      total_score_in_two_years = sum(
-          sc["score_in_two_years"] for sc in
-          sub_challenge_scores_in_two_years[theme].values())
-      total_max_score_in_two_years = sum(
-          sc["max_score_in_two_years"] for sc in
-          sub_challenge_scores_in_two_years[theme].values())
-      theme_scores_in_two_years[theme] = (
-        (
-              total_score_in_two_years / total_max_score_in_two_years * 100) if total_max_score_in_two_years > 0 else 0.0
-      )
+            # Aggregate scores for the sub-challenge
+            if sub_challenge.id not in sub_challenge_scores["today"]:
+                sub_challenge_scores["today"][sub_challenge.id] = {
+                    "name": sub_challenge.value,
+                    "score": 0.0,
+                    "score_max": 0.0,
+                }
+                sub_challenge_scores["in_two_years"][sub_challenge.id] = {
+                    "name": sub_challenge.value,
+                    "score": 0.0,
+                    "score_max": 0.0,
+                }
 
-      # Calculate final global scores
-      total_esg_score_today = sum(theme_scores_today.values()) / len(
-          theme_scores_today) if theme_scores_today else 0.0
-      total_esg_score_in_two_years = sum(
-        theme_scores_in_two_years.values()) / len(
-          theme_scores_in_two_years) if theme_scores_in_two_years else 0.0
+            sub_challenge_scores["today"][sub_challenge.id]["score"] += question_scores["score_today"]
+            sub_challenge_scores["today"][sub_challenge.id]["score_max"] += question_scores["score_max"]
+            sub_challenge_scores["in_two_years"][sub_challenge.id]["score"] += question_scores["score_in_two_years"]
+            sub_challenge_scores["in_two_years"][sub_challenge.id]["score_max"] += question_scores["score_max"]
+        except Exception as e:
+            print(f"Error processing answer {answer_id}: {e}")
 
-      # Calculate the total_esg as the sum of today and two years
-      total_esg = total_esg_score_today + total_esg_score_in_two_years
+    return sub_challenge_scores
 
-      # Final response structure
-      result = {
-        "themes": [],
-        "total_esg_score_today": total_esg_score_today,
-        "total_esg_score_in_two_years": total_esg_score_in_two_years,
-        "total_esg_score": total_esg
-      }
 
-    # Map results back into themes with detailed sub-challenges
-    for theme in sub_challenge_scores_today:
-      result["themes"].append({
-        "name": theme,
-        "score_today": theme_scores_today[theme],
-        "score_in_two_years": theme_scores_in_two_years[theme],
-        "sub_challenges_today": [
-          {
-            "name": sc["name"],
-            "score_today": sc["score_today"],
-            "max_score_today": sc["max_score_today"]
-          }
-          for sc_id, sc in sub_challenge_scores_today[theme].items()
-        ],
-        "sub_challenges_in_two_years": [
-          {
-            "name": sc["name"],
-            "score_in_two_years": sc["score_in_two_years"],
-            "max_score_in_two_years": sc["max_score_in_two_years"]
-          }
-          for sc_id, sc in sub_challenge_scores_in_two_years[theme].items()
-        ]
-      })
+def calculate_challenge_scores(sub_challenge_scores) -> Dict[
+  str, Dict[str, float]]:
+  challenge_scores = {"today": {}, "in_two_years": {}}
 
-    return result
+  for sub_challenge_id, scores in sub_challenge_scores["today"].items():
+    try:
+      # Retrieve the parent challenge for the sub-challenge
+      parent_challenge = Challenges.objects.filter(
+        sub_challenges__contains=sub_challenge_id).first()
+      if not parent_challenge:
+        print(
+          f"No parent challenge found for sub-challenge ID: {sub_challenge_id}")
+        continue
 
+      challenge_id = parent_challenge.id
+      if challenge_id not in challenge_scores["today"]:
+        challenge_scores["today"][challenge_id] = {
+          "name": parent_challenge.value,
+          "score": 0.0,
+          "score_max": 0.0,
+        }
+        challenge_scores["in_two_years"][challenge_id] = {
+          "name": parent_challenge.value,
+          "score": 0.0,
+          "score_max": 0.0,
+        }
+
+      # Add sub-challenge scores to the corresponding challenge
+      challenge_scores["today"][challenge_id]["score"] += scores["score"]
+      challenge_scores["today"][challenge_id]["score_max"] += scores[
+        "score_max"]
+      challenge_scores["in_two_years"][challenge_id]["score"] += \
+      sub_challenge_scores["in_two_years"][sub_challenge_id]["score"]
+      challenge_scores["in_two_years"][challenge_id]["score_max"] += \
+      sub_challenge_scores["in_two_years"][sub_challenge_id]["score_max"]
+
+    except Exception as e:
+      print(f"Error processing sub-challenge {sub_challenge_id}: {e}")
+
+  return challenge_scores
+
+
+def calculate_theme_scores(challenge_scores) -> Dict[str, Dict[str, float]]:
+  theme_scores = {"today": {}, "in_two_years": {}}
+
+  for challenge_id, scores in challenge_scores["today"].items():
+    try:
+      # Retrieve the theme for the challenge based on its color
+      challenge = Challenges.get_by_id(challenge_id)
+      theme = Challenges.get_theme_from_color(challenge.color)
+
+      if theme not in theme_scores["today"]:
+        theme_scores["today"][theme] = {"score": 0.0, "score_max": 0.0}
+        theme_scores["in_two_years"][theme] = {"score": 0.0, "score_max": 0.0}
+
+      # Add challenge scores to the theme
+      theme_scores["today"][theme]["score"] += scores["score"]
+      theme_scores["today"][theme]["score_max"] += scores["score_max"]
+      theme_scores["in_two_years"][theme]["score"] += \
+      challenge_scores["in_two_years"][challenge_id]["score"]
+      theme_scores["in_two_years"][theme]["score_max"] += \
+      challenge_scores["in_two_years"][challenge_id]["score_max"]
+
+    except Exception as e:
+      print(f"Error processing challenge {challenge_id}: {e}")
+
+  # Calculate percentage scores for each theme
+  for theme, scores in theme_scores["today"].items():
+    today_max = scores["score_max"]
+    theme_scores["today"][theme]["percentage"] = (
+          scores["score"] / today_max * 100) if today_max > 0 else 0.0
+
+  for theme, scores in theme_scores["in_two_years"].items():
+    in_two_years_max = scores["score_max"]
+    theme_scores["in_two_years"][theme]["percentage"] = (scores[
+                                                           "score"] / in_two_years_max * 100) if in_two_years_max > 0 else 0.0
+
+  return theme_scores
+
+
+# Step 4: Calculate global ESG scores
+def calculate_global_esg_scores(theme_scores) -> Dict[str, float]:
+  try:
+    # Calculate the total ESG score for today
+    total_score_today = sum(theme["percentage"] for theme in theme_scores["today"].values()) if theme_scores["today"] else 0.0
+    # Calculate the total ESG score for in two years
+    total_score_in_two_years = sum(theme["percentage"] for theme in theme_scores["in_two_years"].values()) if theme_scores["in_two_years"] else 0.0
+
+    # Average scores for global ESG calculation
+    total_esg_score_today = total_score_today / len(theme_scores["today"]) if theme_scores["today"] else 0.0
+    total_esg_score_in_two_years = total_score_in_two_years / len(theme_scores["in_two_years"]) if theme_scores["in_two_years"] else 0.0
+
+    # Sum of global scores
+    total_esg_score = total_esg_score_today + total_esg_score_in_two_years
+
+    return {
+      "total_esg_score_today": total_esg_score_today,
+      "total_esg_score_in_two_years": total_esg_score_in_two_years,
+      "total_esg_score": total_esg_score,
+    }
   except Exception as e:
-    return {"error": f"Error calculating ESG score: {e}"}
-
-
-
-
+    raise ValueError(f"Error calculating global ESG scores: {e}")
