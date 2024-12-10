@@ -4,28 +4,25 @@ from modules import views
 
 urlpatterns = [
     # Get all ESG modules
-    path('',views.read_modules, name='read_modules'),
+    path('',views.read_all, name='read_all_esg_modules'),
 
-    # Get one ESG module for 
-    path('module/<str:uuid_module_esg>', views.read_module_by_esg_id, name='read_module_by_esg_id'),
+    # Get one ESG module by id
+    path('<str:uuid_esg_module>', views.read_one_by_id, name='read_one_module_by_id'),
 
-    # Get all ESG modules by client id
-    path('client/<str:uuid_client>', views.read_modules_by_client_id, name='read_modules_by_client_id'),
-
-    # Get one ESG module by client id
-    path('module/client/<str:uuid_client>', views.read_module_by_client_id, name='read_module_by_client_id'),
+    # Get one ESG module (last client module)
+    path('module/', views.read_last_module_for_client, name='read_last_module_for_client'),
 
     # Create ESG module
-    path('create/<str:uuid_client>', views.create_esg_views, name='create_esg_views'),
+    path('create/<str:uuid_client>', views.create_one, name='create_one_module'),
 
     # Update ESG module
-    path('state/<str:uuid_module_esg>', views.change_state_esg, name='change_state_esg_view'),
+    path('state/<str:uuid_module_esg>', views.change_state, name='change_state'),
 
     # Add answer to the modified list of answers
-    path('add/answer', views.add_modified_answers, name='add_modified_answer'),
+    path('add/answer/', views.add_modified_answers, name='add_modified_answers'),
 
     # Add answer  to the original list of answers
-    path('add/answer/<str:uuid_module_esg>', views.add_original_answers, name='add_original_answer'),
+    path('add/answer/<str:uuid_module_esg>', views.add_original_answers, name='add_original_answers'),
 
     # Add score to module
     path('addScore/<str:uuid_module_esg>', views.add_score, name='add_score')
