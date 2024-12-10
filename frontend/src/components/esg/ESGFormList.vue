@@ -2,7 +2,7 @@
   <div
     class="main-container"
     :class="
-      selectedSubChallenge
+      isSubChallengeSelected
         ? 'main-container-esg-list-small-padding'
         : 'main-container-esg-list-big-padding'
     "
@@ -20,42 +20,44 @@
 
     <div class="form-container">
       <div
-        v-for="(challenge, challengeName) in groupedQuestions"
-        :key="challengeName"
+        v-for="(challenge, challengeIndex) in questions.challenges"
+        :key="challengeIndex"
         class="category"
       >
-        <div class="category-header" @click="toggleCategory(challengeName)">
-          <h3>{{ challengeName }}</h3>
+        <div class="category-header" @click="toggleCategory(challengeIndex)">
+          <h3>{{ challenge.value }}</h3>
           <div class="category-right-content">
             <div class="category-progress">
               <ChallengeProgress
                 type="challenge"
-                :challengeName="challengeName.toString()"
                 :responses="responses"
-                :questions="questions"
+                :questions="
+                  challenge.sub_challenges.flatMap(
+                    (subChallenge: SubChallenge) => subChallenge.questions,
+                  )
+                "
               />
             </div>
             <div class="separator"></div>
             <i
               class="fas fa-chevron-down toggle-arrow"
-              :class="{ open: categoryState[challengeName] }"
+              :class="{ open: categoryState[challengeIndex] }"
             ></i>
           </div>
         </div>
 
-        <div v-show="categoryState[challengeName]" class="subcategories">
+        <div v-show="categoryState[challengeIndex]" class="subcategories">
           <div
-            v-for="(subChallenge, subChallengeName) in challenge"
-            :key="subChallengeName"
+            v-for="(subChallenge, subChallengeIndex) in challenge.sub_challenges"
+            :key="subChallengeIndex"
             class="subcategory"
-            @click="onSubChallengeSelected(groupedQuestions[challengeName][subChallengeName])"
+            @click="onSubChallengeSelected(subChallenge.questions)"
           >
-            <h4>{{ subChallengeName }}</h4>
+            <h4>{{ subChallenge.value }}</h4>
             <ChallengeProgress
               type="subchallenge"
-              :challengeName="subChallengeName.toString()"
               :responses="responses"
-              :questions="questions"
+              :questions="subChallenge.questions"
             />
           </div>
         </div>
@@ -68,38 +70,58 @@
   import { ref, computed } from 'vue'
   import ChallengeProgress from './ChallengeProgress.vue'
 
-  const { responses, questions, groupedQuestions, selectedSubChallenge, onSubChallengeSelected } =
-    defineProps({
-      responses: {
-        type: Object,
-        default: () => ({}),
-      },
-      questions: {
-        type: Object,
-        default: () => ({}),
-      },
-      groupedQuestions: {
-        type: Object,
-        default: () => ({}),
-      },
-      selectedSubChallenge: {
-        type: Boolean,
-        default: () => false,
-      },
-      onSubChallengeSelected: {
-        type: Function,
-        default: () => {},
-      },
-    })
+  const { questions, responses, isSubChallengeSelected, onSubChallengeSelected } = defineProps({
+    questions: {
+      type: Object,
+      default: () => ({}),
+    },
+    responses: {
+      type: Object,
+      default: () => ({}),
+    },
+    isSubChallengeSelected: {
+      type: Boolean,
+      default: () => false,
+    },
+    onSubChallengeSelected: {
+      type: Function,
+      default: () => {},
+    },
+  })
+
+  interface Question {
+    id: string
+    index_question: number
+    value: string
+    type_response: string
+    choices: { id: string; index_choice: number; value: string; score: number }[]
+  }
+
+  interface SubChallenge {
+    id: string
+    index_sub_challenge: number
+    value: string
+    questions: Question[]
+  }
 
   const progress = computed(() => {
+    if (!questions.challenges) return 0
     if (progress.value === 100) return 100
-    return (responses.length / questions.length) * 100
+
+    let totalQuestions = 0
+
+    for (const challenge of questions.challenges) {
+      for (const subChallenge of challenge.sub_challenges) {
+        totalQuestions += subChallenge.questions.length
+      }
+    }
+
+    return (responses.length / totalQuestions) * 100
   })
 
   const categoryState = ref<Record<string, boolean>>({})
 
-  const toggleCategory = (challenge: string) => {
+  const toggleCategory = (challenge: number) => {
     categoryState.value[challenge] = !categoryState.value[challenge]
   }
 </script>
@@ -118,6 +140,7 @@
 
   .main-container {
     height: 100vh;
+    width: 45%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

@@ -3,27 +3,18 @@
     <div class="form-container-questions">
       <div v-for="(question, questionIndex) in selectedSubChallenge" :key="questionIndex">
         <h4>{{ question.value }}</h4>
-        <ESGChoices
-          :question="question"
-          :choices="choices"
-          :responseValue="questionResponses[questionIndex].value"
-        />
+        <ESGChoices :question="question" :responseValue="questionResponses[question.id]?.value" />
 
-        <h4></h4>
         <div class="radio-group">
           <ESGRadioChoice
             :choice="{ id: questionIndex + '-' + 1, value: 'Maintenant' }"
             :questionId="question.id + '-when'"
-            :responseValue="
-              questionResponses[questionIndex].isEngagement ? 'Dans 2 ans' : 'Maintenant'
-            "
+            :responseValue="questionResponses[question.id]?.isEngagement"
           />
           <ESGRadioChoice
             :choice="{ id: questionIndex + '-' + 2, value: 'Dans 2 ans' }"
             :questionId="question.id + '-when'"
-            :responseValue="
-              questionResponses[questionIndex].isEngagement ? 'Dans 2 ans' : 'Maintenant'
-            "
+            :responseValue="questionResponses[question.id]?.isEngagement"
           />
         </div>
 
@@ -31,7 +22,7 @@
         <div class="textarea-container">
           <textarea
             placeholder="Entrez votre commentaire ici"
-            :value="questionResponses[questionIndex].comment"
+            :value="questionResponses[question.id]?.comment"
           ></textarea>
         </div>
 
@@ -52,12 +43,8 @@
   import ESGChoices from './ESGChoices.vue'
   import ESGRadioChoice from './ESGRadioChoice.vue'
 
-  const { responses, choices, selectedSubChallenge } = defineProps({
+  const { responses, selectedSubChallenge } = defineProps({
     responses: {
-      type: Object,
-      default: () => ({}),
-    },
-    choices: {
       type: Object,
       default: () => ({}),
     },
@@ -78,9 +65,11 @@
     date_modification: string
   }
 
-  const questionResponses = selectedSubChallenge.map((question: any) => {
-    const mainResponse = responses.find((r: Response) => r.id_question === question.id) || null
-    return mainResponse
+  const questionResponses: any = {}
+
+  selectedSubChallenge.forEach((question) => {
+    questionResponses[question.id] =
+      responses.find((r: Response) => r.id_question === question.id) || null
   })
 </script>
 
