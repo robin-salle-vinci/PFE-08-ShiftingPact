@@ -15,6 +15,7 @@ from users.models import Users
 from questions.models import Choices, Questions
 from datetime import datetime
 
+
 # Get all ESG modules
 @require_GET
 def read_all(request):
@@ -160,7 +161,7 @@ def change_state(request, uuid_module_esg):
         )
 
     # if(new_state == 'verification'):
-        # TODO calculate_global_esg_scores() + add score to module_esg
+    # TODO calculate_global_esg_scores() + add score to module_esg
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification of state", status=201)
@@ -308,6 +309,7 @@ def add_modified_answers(request):
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 # Calculate ESG Module score
 @require_http_methods(["PATCH"])

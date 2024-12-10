@@ -10,7 +10,7 @@ urlpatterns = [
     path('<str:uuid_esg_module>', views.read_one_by_id, name='read_one_module_by_id'),
 
     # Get one ESG module (last client module)
-    path('module/', views.read_last_module_for_client, name='read_last_module_for_client'),
+    path('esg/', views.read_last_module_for_client, name='read_last_module_for_client'),
 
     # Create ESG module
     path('create/<str:uuid_client>', views.create_one, name='create_one_module'),
