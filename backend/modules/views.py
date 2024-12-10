@@ -138,7 +138,6 @@ def change_state(request, uuid_module_esg):
                             status=403)
 
     if new_state == 'validated':
-        print(module_esg.original_answers)
         # Récupérer toutes les réponses originales et modifiées pour le pacte d'engagement
         original_answers = Answers.objects.filter(id__in=module_esg.original_answers, is_commitment=True)
         modified_answers = Answers.objects.filter(id__in=module_esg.modified_answers, is_commitment=True)
@@ -159,6 +158,9 @@ def change_state(request, uuid_module_esg):
             creation_date=datetime.today().date(),
             answers_commitments=answers_to_commitment
         )
+
+    # if(new_state == 'verification'):
+        # TODO calculate_global_esg_scores() + add score to module_esg
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification of state", status=201)
