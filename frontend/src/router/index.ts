@@ -4,6 +4,7 @@ import EsgView from '@/views/EsgView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import ScoresView from '../views/ScoresView.vue'
 
 function isEmployee() {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -34,6 +35,12 @@ const router = createRouter({
       component: EsgView,
       props: true,
     },
+    {
+      path: '/scores',
+      name: 'scores',
+      component: ScoresView,
+    },
+
   ],
 })
 router.beforeEach((to, from, next) => {
