@@ -33,7 +33,6 @@
               name="company-name"
               placeholder="Nom de la PME"
               v-model="companyName"
-              required
             />
           </div>
 

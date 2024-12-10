@@ -22,6 +22,7 @@
 
   username.value = getUser().username
   const handleLogout = () => {
+    // rerednder the page
     clearStorage()
     router.push('/')
   }

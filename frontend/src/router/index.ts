@@ -4,6 +4,7 @@ import EsgView from '@/views/EsgView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import ESGFormView from '../views/ESGFormView.vue'
 
 function isEmployee() {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -22,6 +23,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/form/esg',
+      name: 'formesg',
+      component: ESGFormView,
     },
     {
       path: '/dashboard',
