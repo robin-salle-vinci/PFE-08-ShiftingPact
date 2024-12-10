@@ -154,7 +154,7 @@
     answerToModify = ref({ ...answerToModify.value })
 
     axios.patch(
-      `${import.meta.env.VITE_API_URL}/modules/add/answer`,
+      `${import.meta.env.VITE_API_URL}/modules/add/answer/`,
       {
         id_esg: props.idEsg,
         id_challenge: answerToModify.value.challenge,
