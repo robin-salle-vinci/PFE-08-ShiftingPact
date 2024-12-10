@@ -1,18 +1,26 @@
 # views.py
 import bcrypt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 import re
 
-from backend.utils.token_utils import generate_token
+from backend.utils.token_utils import generate_token, check_authenticated_user
 from .models import Users, ClientInformation
 
 @csrf_exempt
 @require_POST  # Only allow POST requests
 def register_view(request):
     try:
+        # authentication part
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
+
+        if authenticated_user.role != 'employee':
+            return JsonResponse({'message': 'You are not authorized to create a new user'}, status=403)
+
         data = json.loads(request.body)
         company_name = data.get('companyName')
         number_workers = data.get('numberWorkers')
