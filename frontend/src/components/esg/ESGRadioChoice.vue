@@ -3,18 +3,17 @@
     type="radio"
     :name="questionId"
     :value="choice.value"
-    :id="`choice-${choice.id}`"
-    :checked="isChecked"
+    :id="`choice-${choice.id}-${questionId}`"
+    :checked="isActive"
   />
-  <label :for="`choice-${choice.id}`">
+  <label :for="`choice-${choice.id}-${questionId}`">
     {{ choice.value }}
   </label>
+  <h4>{{ isActive }}</h4>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-
-  const { questionId, choice, responseValue } = defineProps({
+  const { questionId, choice, isActive } = defineProps({
     questionId: {
       type: String,
       default: '',
@@ -23,14 +22,10 @@
       type: Object,
       default: () => ({}),
     },
-    responseValue: {
-      type: String,
-      default: '',
+    isActive: {
+      type: Boolean,
+      default: false,
     },
-  })
-
-  const isChecked = computed(() => {
-    return responseValue === choice.value
   })
 </script>
 
@@ -40,9 +35,9 @@
     box-sizing: border-box;
   }
 
-  input[type='radio'] {
+  /*input[type='radio'] {
     display: none;
-  }
+  }*/
 
   label {
     display: flex;

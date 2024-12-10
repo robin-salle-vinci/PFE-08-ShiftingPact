@@ -1,43 +1,36 @@
 <template>
-  <div v-if="question.type_response === 'radio'" class="radio-group">
-    <div
-      v-for="choice in choices.filter((c: Choice) => c.id_question === question.id)"
-      :key="choice.id"
-      class="radio-choice"
-    >
-      <ESGRadioChoice :choice="choice" :questionId="question.id" :responseValue="responseValue" />
+  <div v-if="question.type_response === 'qcm'" class="radio-group">
+    <div v-for="choice in question.choices" :key="choice.id" class="radio-choice">
+      <ESGRadioChoice
+        :choice="choice"
+        :questionId="question.id"
+        :isActive="responseId == choice.id"
+      />
     </div>
   </div>
 
-  <div v-if="question.type_response === 'free'" class="textarea-container">
-    <textarea placeholder="Entrez votre réponse ici"></textarea>
+  <div v-if="question.type_response === 'open'" class="textarea-container">
+    <textarea placeholder="Entrez votre réponse ici" :value="responseValue"></textarea>
   </div>
 </template>
 
 <script setup lang="ts">
   import ESGRadioChoice from './ESGRadioChoice.vue'
 
-  const { question, choices, responseValue } = defineProps({
+  const { question, responseId, responseValue } = defineProps({
     question: {
       type: Object,
       default: () => ({}),
     },
-    choices: {
-      type: Object,
-      default: () => ({}),
+    responseId: {
+      type: String,
+      default: '() => ({})',
     },
     responseValue: {
       type: String,
       default: '',
     },
   })
-
-  interface Choice {
-    id: string
-    id_question: string
-    score_choice: number
-    value: string
-  }
 </script>
 
 <style scoped>

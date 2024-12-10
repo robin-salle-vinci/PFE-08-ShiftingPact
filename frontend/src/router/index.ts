@@ -26,7 +26,7 @@ const router = createRouter({
     },
     {
       path: '/form/esg',
-      name: 'esg',
+      name: 'formesg',
       component: ESGFormView,
     },
     {

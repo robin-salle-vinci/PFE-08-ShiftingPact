@@ -140,7 +140,6 @@
 
   .main-container {
     height: 100vh;
-    width: 45%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -152,6 +151,7 @@
   .main-container-esg-list-small-padding {
     padding-left: 2%;
     padding-right: 2%;
+    width: 45%;
   }
 
   .main-container-esg-list-big-padding {

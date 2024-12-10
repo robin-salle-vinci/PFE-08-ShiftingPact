@@ -3,19 +3,29 @@
     <div class="form-container-questions">
       <div v-for="(question, questionIndex) in selectedSubChallenge" :key="questionIndex">
         <h4>{{ question.value }}</h4>
-        <ESGChoices :question="question" :responseValue="questionResponses[question.id]?.value" />
+        <ESGChoices
+          :question="question"
+          :responseId="questionResponses[question.id]?.id_choice"
+          :responseValue="questionResponses[question.id]?.value"
+        />
 
+        <h4>Mise en place de la pratique :</h4>
         <div class="radio-group">
           <ESGRadioChoice
-            :choice="{ id: questionIndex + '-' + 1, value: 'Maintenant' }"
+            :choice="{ id: question.id + '-' + 1, value: 'Maintenant' }"
             :questionId="question.id + '-when'"
-            :responseValue="questionResponses[question.id]?.isEngagement"
+            :isActive="
+              !questionResponses[question.id] ? false : !questionResponses[question.id].isEngagement
+            "
           />
           <ESGRadioChoice
-            :choice="{ id: questionIndex + '-' + 2, value: 'Dans 2 ans' }"
+            :choice="{ id: question.id + '-' + 2, value: 'Dans les 2 ans' }"
             :questionId="question.id + '-when'"
-            :responseValue="questionResponses[question.id]?.isEngagement"
+            :isActive="
+              !questionResponses[question.id] ? false : questionResponses[question.id].isEngagement
+            "
           />
+          
         </div>
 
         <h4>Commentaire ?</h4>
@@ -40,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+  import { computed } from 'vue'
   import ESGChoices from './ESGChoices.vue'
   import ESGRadioChoice from './ESGRadioChoice.vue'
 
@@ -65,11 +76,15 @@
     date_modification: string
   }
 
-  const questionResponses: any = {}
+  const questionResponses = computed(() => {
+    const questionResponsesTemp: any = {}
 
-  selectedSubChallenge.forEach((question) => {
-    questionResponses[question.id] =
-      responses.find((r: Response) => r.id_question === question.id) || null
+    selectedSubChallenge.forEach((question) => {
+      questionResponsesTemp[question.id] =
+        responses.find((r: Response) => r.id_question === question.id) || null
+    })
+
+    return questionResponsesTemp
   })
 </script>
 
