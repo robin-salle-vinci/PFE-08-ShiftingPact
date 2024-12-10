@@ -345,10 +345,7 @@ def add_score (request, uuid_module_esg) :
 
     # Calculate ESG scores
     try:
-        sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
-        challenge_scores = calculate_challenge_scores(sub_challenge_scores)
-        theme_scores = calculate_theme_scores(challenge_scores)
-        global_esg_scores = calculate_global_esg_scores(theme_scores)
+        global_esg_scores = calculate_global_esg_scores(module_esg)
     except Exception as e:
         return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
                             status=500)
@@ -360,13 +357,4 @@ def add_score (request, uuid_module_esg) :
         return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
                             status=500)
 
-    # Combine results into a single object with stringified keys
-    combined_scores = stringify_keys({
-        "sub_challenge_scores": sub_challenge_scores,
-        "challenge_scores": challenge_scores,
-        "theme_scores": theme_scores,
-        "global_esg_scores": global_esg_scores
-    })
-
-
-    return JsonResponse(combined_scores, status=200)
+    return JsonResponse(global_esg_scores, status=200)

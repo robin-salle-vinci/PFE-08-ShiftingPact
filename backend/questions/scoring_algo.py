@@ -77,9 +77,9 @@ def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
     return sub_challenge_scores
 
 
-def calculate_challenge_scores(sub_challenge_scores) -> Dict[
-  str, Dict[str, float]]:
+def calculate_challenge_scores(module_esg) -> Dict[str, Dict[str, float]]:
   challenge_scores = {"today": {}, "in_two_years": {}}
+  sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
 
   for sub_challenge_id, scores in sub_challenge_scores["today"].items():
     try:
@@ -119,8 +119,9 @@ def calculate_challenge_scores(sub_challenge_scores) -> Dict[
   return challenge_scores
 
 
-def calculate_theme_scores(challenge_scores) -> Dict[str, Dict[str, float]]:
+def calculate_theme_scores(module_esg) -> Dict[str, Dict[str, float]]:
   theme_scores = {"today": {}, "in_two_years": {}}
+  challenge_scores = calculate_challenge_scores(module_esg)
 
   for challenge_id, scores in challenge_scores["today"].items():
     try:
@@ -158,7 +159,8 @@ def calculate_theme_scores(challenge_scores) -> Dict[str, Dict[str, float]]:
 
 
 # Step 4: Calculate global ESG scores
-def calculate_global_esg_scores(theme_scores) -> Dict[str, float]:
+def calculate_global_esg_scores(module_esg) -> Dict[str, float]:
+  theme_scores = calculate_theme_scores(module_esg)
   try:
     # Calculate the total ESG score for today
     total_score_today = sum(theme["percentage"] for theme in theme_scores["today"].values()) if theme_scores["today"] else 0.0
