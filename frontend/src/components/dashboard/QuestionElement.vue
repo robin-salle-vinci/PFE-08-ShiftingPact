@@ -5,70 +5,86 @@
     <h4>{{ questionModel.value }}</h4>
 
     <!-- Answers -->
-    <div class="answers">
+
+    <!-- Display old answer of the client -->
+
+    <!-- If employee dont have already modify this question -->
+    <div v-if="!alreadyModified" class="answers">
       <div class="each-answer">
-        <!-- Display old answer of the client -->
         <div>
           <h5>Réponse client:</h5>
           <div>
             <label>Réponse:</label>
-            <input type="text" :value="reponseModel.value" disabled />
+            <input type="text" :value="answerToModify.value" :disabled="!isModifying" />
           </div>
           <div>
             <label>Commentaire:</label>
-            <input type="text" :value="reponseModel.commentary" disabled />
+            <textarea :value="answerToModify.commentary" :disabled="!isModifying"></textarea>
           </div>
           <div>
             <label>Engagement:</label>
-            <input type="checkbox" :checked="reponseModel.is_commitment" disabled />
+            <input
+              type="checkbox"
+              :checked="answerToModify.is_commitment"
+              :disabled="!isModifying"
+            />
           </div>
         </div>
+        <button
+          @click="isModifying == true ? (isModifying = false) : (isModifying = true)"
+          v-if="!isModifying"
+        >
+          modifier
+        </button>
+        <button v-else @click="handleSave">sauvagrder</button>
       </div>
+    </div>
 
-      <div class="each-answer" v-if="employeeResponse">
-        <h5>Réponse employé:</h5>
+    <!-- if the epmloyee have already modify the answer -->
+    <div v-else class="answers">
+      <div class="each-answer">
+        <h5>Réponse client:</h5>
         <div>
           <label>Réponse:</label>
-          <input type="text" :value="employeeResponse.value" disabled />
+          <input type="text" :value="originalAnswer.value" disabled />
         </div>
         <div>
           <label>Commentaire:</label>
-          <input type="text" :value="employeeResponse.commentary" disabled />
+          <textarea :value="originalAnswer.commentary" disabled></textarea>
         </div>
         <div>
           <label>Engagement:</label>
-          <input type="checkbox" :checked="employeeResponse.is_commitment" disabled />
+          <input type="checkbox" :checked="originalAnswer.is_commitment" disabled />
         </div>
       </div>
 
-      <!-- New potential response -->
-      <div class="each-answer">
-        <h5>Réponse potentielle:</h5>
+      <div class="each-answer" v-if="answerToModify">
+        <h5>Réponse employé:</h5>
         <div>
-          <label for="new-reponse">Réponse:</label>
-          <div v-if="questionModel.choices.length > 0">
-            <select v-model="newResponseModel.id_choice" @change="updateNewResponseValue">
-              <option v-for="choix in questionModel.choices" :key="choix.id" :value="choix.id">
-                {{ choix.value }}
-              </option>
-            </select>
-          </div>
-          <div v-else>
-            <input type="text" id="new-reponse" v-model="newResponseModel.value" />
-          </div>
+          <label>Réponse:</label>
+          <input v-if="!answerToModify.id_choice" type="text" :value="answerToModify.value" />
+          <select v-else v-model="answerToModify.id_choice" @change="updateAnswerValue">
+            <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
+              {{ choice.value }}
+            </option>
+          </select>
         </div>
         <div>
-          <label for="new-commitment">Engagement:</label>
-          <input type="checkbox" v-model="newResponseModel.is_commitment" id="new-commitment" />
+          <label>Commentaire:</label>
+          <textarea v-model="answerToModify.commentary"></textarea>
         </div>
-        <button @click="handleSave">Modifier</button>
+        <div>
+          <label>Engagement:</label>
+          <input type="checkbox" v-model="answerToModify.is_commitment" />
+        </div>
+        <button @click="handleSave">sauvagrder</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { defineProps, ref } from 'vue'
+  import { defineProps, ref, type Ref } from 'vue'
 
   interface Choice {
     id: string
@@ -104,22 +120,40 @@
     employeeResponse: Reponse | undefined
   }>()
 
-  const questionModel = ref(props.question)
-  const reponseModel = ref(props.clientResponse)
+  const questionModel: Ref<Question> = ref(props.question)
+  const originalAnswer = ref(props.clientResponse)
+  const alreadyModified = ref(true) //ref(props.employeeResponse ? true : false)
+  const answerToModify: Ref<Reponse> = ref({
+    id: props.clientResponse.id,
+    challenge: props.clientResponse.challenge,
+    sub_challenge: props.clientResponse.sub_challenge,
+    id_choice: props.clientResponse.id_choice,
+    value: props.clientResponse.value,
+    commentary: props.clientResponse.commentary,
+    score: props.clientResponse.score,
+    is_commitment: props.clientResponse.is_commitment,
+    score_response: props.clientResponse.score_response,
+  })
+  // if (props.employeeResponse) {
+  //   answerToModify = ref(props.employeeResponse)
+  // } else {
+  //   answerToModify = ref(props.clientResponse)
+  // }
 
-  const newResponseModel = ref({ ...props.clientResponse })
+  // const newResponseModel = ref({ ...props.clientResponse })
 
-  const updateNewResponseValue = () => {
-    const choice = questionModel.value.choices.find(
-      (c) => c.id === newResponseModel.value.id_choice,
-    )
-    newResponseModel.value.value = choice?.value || ''
-    newResponseModel.value.id_choice = choice?.id || ''
+  const isModifying = ref(false)
+
+  const updateAnswerValue = () => {
+    const choice = questionModel.value.choices.find((c) => c.id === answerToModify.value.id_choice)
+    answerToModify.value.value = choice?.value || ''
+    answerToModify.value.id_choice = choice?.id || ''
   }
 
   const handleSave = () => {
+    isModifying.value = false
+    console.log(answerToModify.value)
     // TODO SEND THE MODIFIED RESPONSE TO THE SERVER
-    console.log(newResponseModel.value)
   }
 </script>
 
@@ -137,14 +171,14 @@
 
   .answers {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap: 20px;
+    width: 100%;
   }
+
   .each-answer {
-    background-color: rgb(111, 196, 41);
-    width: 33%;
+    background-color: #dfd4fb;
+    width: 100%;
     padding: 20px;
     border-radius: 10px;
+    margin: 10px;
   }
 </style>

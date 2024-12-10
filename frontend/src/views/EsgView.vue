@@ -115,17 +115,20 @@
   .challenge {
     margin-left: 20%;
     margin-right: 20%;
-    background-color: rgb(182, 126, 41);
+    background-color: #013238;
     border-radius: 10px;
     padding: 30px;
     margin-bottom: 5%;
+  }
+  .challenge h2 {
+    color: white;
   }
 
   .sub-challenge {
     margin-left: 2%;
     margin-right: 2%;
     margin-bottom: 2%;
-    background-color: blanchedalmond;
+    background-color: #b5cdbf;
     border-radius: 10px;
     padding: 30px;
   }

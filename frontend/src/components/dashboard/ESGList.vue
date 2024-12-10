@@ -31,7 +31,7 @@
 
   const fetchESGList = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/modules?state=validated`, {
+      const response = await axios.get(`${apiUrl}/modules?state=verification`, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
@@ -49,17 +49,15 @@
   }
 
   const handleValidate = (_esgId: number) => {
-    // TODO request to validate ESG
-    console.log(_esgId)
-    console.log('validate')
-    // axios
-    //   .post('http://localhost:3000/esg/validate', {
-    //     esgID: _esgId,
-    //   })
-    //   .then((response) => {
-    //     console.log(response)
-    //   })
-    //   .catch(() => {})
+    axios
+      .patch(`${apiUrl}/modules/state/${_esgId}?newState=validated`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      })
+      .catch((error) => {
+        console.error(error)
+      })
   }
 </script>
 
