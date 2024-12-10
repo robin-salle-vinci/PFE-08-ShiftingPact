@@ -68,11 +68,11 @@ def answer_json(answer):
   return \
     {
       'id': str(answer.id),
-      'challenge': challenge_json(Challenges.get_by_id(answer.id_challenge)),
-      'sub_challenge': sub_challenge_json(SubChallenges.get_by_id(answer.id_sub_challenge)),
-      'question': question_json(Questions.get_by_id(answer.id_question)),
+      'challenge': answer.id_challenge,
+      'sub_challenge': answer.id_sub_challenge,
+      'id_choice': str(answer.id_choice) if answer.id_choice is not None else None,
       'value': str(answer.value),
-      'commentary': str(answer.commentary),
+      'commentary': str(answer.commentary) if answer.commentary is not None else None,
       'is_commitment': bool(answer.is_commitment),
       'score_response': float(answer.score_response if answer.score_response else 0),
     }
@@ -84,15 +84,15 @@ def module_json(module):
       'client_information': client_info_json(ClientInformation.get_by_id(module.id_client)),
       'date_last_modification': module.date_last_modification.isoformat(),
       'original_answers':
-        [
-          answer_json(answer)
+        {
+          str(answer.id_question): answer_json(answer)
           for answer in (Answers.get_by_id(idAnswer) for idAnswer in module.original_answers)
-        ],
+        },
       'modified_answers':
-        [
-          answer_json(answer)
+        {
+          str(answer.id_question): answer_json(answer)
           for answer in (Answers.get_by_id(idAnswer) for idAnswer in module.modified_answers)
-        ],
+        },
       'state': module.state,
       'calculated_score': module.calculated_score
     }
@@ -112,7 +112,7 @@ def module_single_json(module):
         for idAnswer in module.modified_answers
       ],
       'state': str(module.state),
-      'calculated_score': float(module.calculated_score)
+      'calculated_score': float(module.calculated_score if module.calculated_score else 0)
     }
 
 def commitment_json(commitment):
