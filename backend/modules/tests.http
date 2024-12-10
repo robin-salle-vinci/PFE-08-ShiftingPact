@@ -22,17 +22,6 @@ Content-Type: application/json
 > {% client.global.set("clientVerification", response.body.token); %}
 
 
-### login a client_open
-POST http://localhost:8000/users/login/
-Content-Type: application/json
-
-{
-  "username": "client_open",
-  "password": "admin"
-}
-> {% client.global.set("client_open", response.body.token); %}
-
-
 ### login an employee
 POST http://localhost:8000/users/login/
 Content-Type: application/json
@@ -69,7 +58,7 @@ Authorization: Bearer {{clientOpen}}
 
 ### a user(client) is adding a answer in original answers
 PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
-Authorization: Bearer {{client_open}}
+Authorization: Bearer {{clientOpen}}
 Content-Type: application/json
 
 {
@@ -87,7 +76,7 @@ Content-Type: application/json
 
 ### a user(client) is adding a answer in original answers
 PATCH {{baseUrl}}/modules/answer/550e8400-e29b-41d4-a716-446655440024
-Authorization: Bearer {{client_open}}
+Authorization: Bearer {{clientOpen}}
 Content-Type: application/json
 
 {
@@ -96,18 +85,18 @@ Content-Type: application/json
 
 
 ### get a module by module id
-GET {{baseUrl}}/modules/esg/550e8400-e29b-41d4-a716-446655440023
-Authorization: Bearer {{client_open}}
+GET {{baseUrl}}/modules/module/550e8400-e29b-41d4-a716-446655440023
+Authorization: Bearer {{clientOpen}}
 
 
 ### get all modules by client id
-GET {{baseUrl}}/modules/esgs/550e8400-e29b-41d4-a716-446655440020
-Authorization: Bearer {{client_open}}
+GET {{baseUrl}}/modules/client/550e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{clientOpen}}
 
 
 ### get first module of a client in open by client id
-GET {{baseUrl}}/modules/client/550e8400-e29b-41d4-a716-446655440020
-Authorization: Bearer {{client_open}}
+GET {{baseUrl}}/modules/module/client/550e8400-e29b-41d4-a716-446655440020
+Authorization: Bearer {{clientOpen}}
 
 
 ### create a module esg without token
