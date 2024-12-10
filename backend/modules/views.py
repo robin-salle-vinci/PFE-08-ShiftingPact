@@ -49,7 +49,7 @@ def read_one_by_id(request, uuid_module_esg):
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
-        if authenticated_user.role != 'employee' or authenticated_user.id != module.id_client:
+        if authenticated_user.role != 'employee' or (authenticated_user.id != module.id_client and authenticated_user.role == 'client'):
             return JsonResponse({'error': 'Only employees can access this endpoint or the correct client'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
