@@ -10,6 +10,10 @@ Content-Type: application/json
 }
 > {% client.global.set("employee", response.body.token); %}
 
+### get all commitment pact of a client
+GET {{baseUrl}}/commitments/all/550e8400-e29b-41d4-a716-446655440022
+Authorization: Bearer {{employee}}
+
 
 ### get one commitment pact
 GET {{baseUrl}}/commitments/550e8400-e29b-41d4-a716-446655440047

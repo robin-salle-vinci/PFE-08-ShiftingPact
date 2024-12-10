@@ -213,14 +213,7 @@ def add_modified_answers(request):
         id_choice = data.get('id_choice')
         value = data.get('value')
         is_commitment = data.get('is_commitment')
-        print("id_esg:", id_esg)
-        print("id_challenge:", id_challenge)
-        print("id_sub_challenge:", id_sub_challenge)
-        print("commentary:", commentary)
-        print("id_question:", id_question)
-        print("id_choice:", id_choice)
-        print("value:", value)
-        print("is_commitment:", is_commitment)
+        
         if id_esg is None or id_question is None or value is None or is_commitment is None :
             return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
@@ -228,6 +221,9 @@ def add_modified_answers(request):
 
         if not module_esg:
             return JsonResponse({'error': 'Module ESG not found'}, status=404)
+        
+        if not module_esg.state == 'verified':
+            return JsonResponse({'error': 'Module ESG is not in verified'}, status=400)
 
         new_choice = Choices.objects.get(pk=id_choice)
         score = 0 if not new_choice else new_choice.score
