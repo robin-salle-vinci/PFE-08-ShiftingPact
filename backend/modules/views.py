@@ -41,24 +41,23 @@ def read_modules(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-# @require_GET
-# def read_modules_by_client_id(request, uuid_client):
-#     try:
-#         authenticated_user = check_authenticated_user(request)
-#         if isinstance(authenticated_user, HttpResponse):
-#             return authenticated_user
+@require_GET
+def read_modules_by_client_id(request):
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
 
-#         modules = ModulesESG.objects.all().filter(client_id=uuid_client)
+        if authenticated_user.role == 'employee':
+            return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
 
-#         if authenticated_user.role != 'employee':
-#             return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
+        modules = ModulesESG.objects.all().filter(client_id=authenticated_user.id)
+        data_json = [module_single_json(module) for module in modules]
 
-#         data_json = [module_single_json(module) for module in modules]
+        return JsonResponse(data_json, status=200)
 
-#         return JsonResponse(data_json, status=200)
-
-#     except Exception as e:
-#         return JsonResponse({'error': str(e)}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 # Get one ESG module by esg id(for employees only)
@@ -84,7 +83,7 @@ def read_module_by_esg_id(request, uuid_module_esg):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-# Get one ESG module by client id(for employees and clients)
+# Get one ESG module by client id(clients)
 @require_GET
 def read_module_by_client_id(request, uuid_client):
     try:
@@ -99,7 +98,6 @@ def read_module_by_client_id(request, uuid_client):
 
         if not (authenticated_user.role != 'employee' or str(authenticated_user.id) == str(uuid_client)):
             return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
-        
 
         return JsonResponse(module_json(module), status=200)
 
@@ -221,7 +219,7 @@ def add_modified_answers(request):
         print("id_choice:", id_choice)
         print("value:", value)
         print("is_commitment:", is_commitment)
-        if id_esg is None or id_question is None or value is None or is_commitment is None :
+        if id_esg is None or id_question is None or value is None or is_commitment is None:
             return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
         module_esg = ModulesESG.objects.get(pk=id_esg)
@@ -236,7 +234,7 @@ def add_modified_answers(request):
         if answer:
 
             answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice,
-                                                 score_response=score, commentary=commentary)
+                          score_response=score, commentary=commentary)
         else:
             print("create answer")
             new_answer = Answers.objects.create(
@@ -300,7 +298,7 @@ def add_original_answers(request, uuid_module_esg):
 
         if answer:
             answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice,
-                                                 score_response=score, commentary=commentary)
+                          score_response=score, commentary=commentary)
         else:
             new_answer = Answers.objects.create(
                 id_challenge=id_challenge,
@@ -332,8 +330,9 @@ def stringify_keys(data):
         return [stringify_keys(item) for item in data]
     return data
 
+
 @require_http_methods(["PATCH"])
-def add_score (request, uuid_module_esg) :
+def add_score(request, uuid_module_esg):
     # check authentication
     authenticated_user = check_authenticated_user(request)
     if isinstance(authenticated_user, HttpResponse):
@@ -378,6 +377,5 @@ def add_score (request, uuid_module_esg) :
         "theme_scores": theme_scores,
         "global_esg_scores": global_esg_scores
     })
-
 
     return JsonResponse(combined_scores, status=200)
