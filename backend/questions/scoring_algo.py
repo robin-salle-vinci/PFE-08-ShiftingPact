@@ -43,7 +43,20 @@ def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
         "in_two_years": {},
     }
 
-    for answer_id in module_esg.original_answers:
+    # If there are modified answers, map them to the original ones
+    if module_esg.modified_answers:
+      # Replace IDs with their modified versions if a match is found
+      answer_id_list = [
+        modified_id if modified_id in [ans for ans in
+                                       module_esg.modified_answers]
+        else original_id
+        for original_id, modified_id in
+        zip(module_esg.original_answers, module_esg.modified_answers)
+      ]
+    else:
+      answer_id_list = module_esg.original_answers
+
+    for answer_id in answer_id_list:
         try:
             # Retrieve associated data
             answer = Answers.get_by_id(answer_id)
