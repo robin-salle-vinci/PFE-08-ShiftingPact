@@ -156,8 +156,8 @@ def calculate_theme_scores(module_esg) -> tuple[
       theme = Challenges.get_theme_from_color(challenge.color)
 
       if theme not in theme_scores["today"]:
-        theme_scores["today"][theme] = {"score": 0.0, "score_max": 0.0}
-        theme_scores["in_two_years"][theme] = {"score": 0.0, "score_max": 0.0}
+        theme_scores["today"][theme] = {"name": "", "score": 0.0, "score_max": 0.0}
+        theme_scores["in_two_years"][theme] = {"name": "", "score": 0.0, "score_max": 0.0}
 
       # Add challenge scores to the theme
       theme_scores["today"][theme]["score"] += scores["score"]
@@ -172,10 +172,13 @@ def calculate_theme_scores(module_esg) -> tuple[
   for theme, scores in theme_scores["today"].items():
     today_max = scores["score_max"]
     theme_scores["today"][theme]["total30"] = (scores["score"] / today_max * 30) if today_max > 0 else 0.0
+    theme_scores["today"][theme]["name"] = theme
+
 
   for theme, scores in theme_scores["in_two_years"].items():
     in_two_years_max = scores["score_max"]
     theme_scores["in_two_years"][theme]["total30"] = (scores["score"] / in_two_years_max * 30) if in_two_years_max > 0 else 0.0
+    theme_scores["in_two_years"][theme]["name"] = theme
 
   return sub_challenge_scores, challenge_scores, theme_scores
 
