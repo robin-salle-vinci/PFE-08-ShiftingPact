@@ -167,7 +167,6 @@ def change_state_esg(request, uuid_module_esg):
                             status=403)
 
     if new_state == 'validated':
-        print(module_esg.original_answers)
         # Récupérer toutes les réponses originales et modifiées pour le pacte d'engagement
         original_answers = Answers.objects.filter(id__in=module_esg.original_answers, is_commitment=True)
         modified_answers = Answers.objects.filter(id__in=module_esg.modified_answers, is_commitment=True)
@@ -321,17 +320,6 @@ def add_original_answers(request, uuid_module_esg):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-def stringify_keys(data):
-    """
-    Recursively convert all dictionary keys to strings.
-    """
-    if isinstance(data, dict):
-        return {str(key): stringify_keys(value) for key, value in data.items()}
-    elif isinstance(data, list):
-        return [stringify_keys(item) for item in data]
-    return data
-
 @require_http_methods(["PATCH"])
 def add_score (request, uuid_module_esg) :
     # check authentication
@@ -368,7 +356,7 @@ def add_score (request, uuid_module_esg) :
         return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
                             status=500)
 
-    return JsonResponse(global_esg_scores, status=200)
+    return JsonResponse({'score_total': global_esg_scores['total_esg_score']}, status=200)
 
 @require_GET
 def get_score(request, uuid_module_esg):
@@ -390,7 +378,6 @@ def get_score(request, uuid_module_esg):
 
     # Calculate ESG scores
     try:
-
         global_esg_scores = calculate_global_esg_scores(module_esg)
     except Exception as e:
         return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},

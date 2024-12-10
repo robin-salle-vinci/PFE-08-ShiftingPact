@@ -52,23 +52,21 @@ def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
         "today": {},
         "in_two_years": {},
     }
-    # print(module_esg.original_answers)
-    # print(module_esg.modified_answers)
-    # # If there are modified answers, map them to the original ones
-    # if module_esg.modified_answers:
-    #   # Replace IDs with their modified versions if a match is found
-    #   answer_id_list = [
-    #     modified_id if modified_id in [ans for ans in
-    #                                    module_esg.modified_answers]
-    #     else original_id
-    #     for original_id, modified_id in
-    #     zip(module_esg.original_answers, module_esg.modified_answers)
-    #   ]
-    # else:
-    #   answer_id_list = module_esg.original_answers
-    # print(answer_id_list)
+    # Récupérer toutes les réponses originales et modifiées pour le pacte d'engagement
+    original_answers = Answers.objects.filter(id__in=module_esg.original_answers)
+    modified_answers = Answers.objects.filter(id__in=module_esg.modified_answers)
 
-    for answer_id in module_esg.original_answers:
+    # Créer un dictionnaire basé sur id_question pour permettre un écrasement des réponses originales
+    answers_dict = {answer.id_question: answer for answer in original_answers}
+
+    # Remplacer ou ajouter les réponses modifiées
+    for answer in modified_answers:
+      answers_dict[answer.id_question] = answer
+
+    # Obtenir la liste des réponses finales
+    answers_to_commitment = [answer.id for answer in answers_dict.values()]
+
+    for answer_id in answers_to_commitment:
         try:
             # Retrieve associated data
             answer = Answers.get_by_id(answer_id)
@@ -173,13 +171,11 @@ def calculate_theme_scores(module_esg) -> tuple[
   # Calculate percentage scores for each theme
   for theme, scores in theme_scores["today"].items():
     today_max = scores["score_max"]
-    theme_scores["today"][theme]["percentage"] = (
-        scores["score"] / today_max * 100) if today_max > 0 else 0.0
+    theme_scores["today"][theme]["total30"] = (scores["score"] / today_max * 30) if today_max > 0 else 0.0
 
   for theme, scores in theme_scores["in_two_years"].items():
     in_two_years_max = scores["score_max"]
-    theme_scores["in_two_years"][theme]["percentage"] = (scores[
-                                                           "score"] / in_two_years_max * 100) if in_two_years_max > 0 else 0.0
+    theme_scores["in_two_years"][theme]["total30"] = (scores["score"] / in_two_years_max * 30) if in_two_years_max > 0 else 0.0
 
   return sub_challenge_scores, challenge_scores, theme_scores
 
@@ -190,13 +186,13 @@ def calculate_global_esg_scores(module_esg) -> Dict[str, float]:
   sub_challenge_scores, challenge_scores, theme_scores = calculate_theme_scores(module_esg)
   try:
     # Calculate the total ESG score for today
-    total_score_today = sum(theme["percentage"] for theme in theme_scores["today"].values()) if theme_scores["today"] else 0.0
+    total_score_today = sum(theme["total30"] for theme in theme_scores["today"].values()) if theme_scores["today"] else 0.0
     # Calculate the total ESG score for in two years
-    total_score_in_two_years = sum(theme["percentage"] for theme in theme_scores["in_two_years"].values()) if theme_scores["in_two_years"] else 0.0
+    total_score_in_two_years = sum(theme["total30"] for theme in theme_scores["in_two_years"].values()) if theme_scores["in_two_years"] else 0.0
 
     # Average scores for global ESG calculation
-    total_esg_score_today = total_score_today / len(theme_scores["today"]) if theme_scores["today"] else 0.0
-    total_esg_score_in_two_years = total_score_in_two_years / len(theme_scores["in_two_years"]) if theme_scores["in_two_years"] else 0.0
+    total_esg_score_today = total_score_today / 90 * 100
+    total_esg_score_in_two_years = total_score_in_two_years / 90 * 100
 
     # Sum of global scores
     total_esg_score = total_esg_score_today + total_esg_score_in_two_years
