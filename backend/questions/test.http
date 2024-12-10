@@ -1,0 +1,15 @@
+@baseUrl=http://localhost:8000/
+
+### login a client_open
+POST {{baseUrl}}/users/login/
+Content-Type: application/json
+
+{
+  "username": "client_open",
+  "password": "admin"
+}
+> {% client.global.set("client_open", response.body.token); %}
+
+### get all questions
+GET {{baseUrl}}/questions/
+Authorization: Bearer {{client_open}}

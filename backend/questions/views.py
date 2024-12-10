@@ -11,15 +11,18 @@ from questions.models import Challenges, SubChallenges, Questions, Choices
 
 @require_GET
 def get_all_questions_views(request):
-    authenticated_user = check_authenticated_user(request)
-    if isinstance(authenticated_user, HttpResponse):
-        return authenticated_user
+    try:
+        authenticated_user = check_authenticated_user(request)
+        if isinstance(authenticated_user, HttpResponse):
+            return authenticated_user
 
-    challenges = Challenges.objects.all()
-    challenge_list = []
+        challenges = Challenges.objects.all()
+        challenge_list = []
 
-    for challenge in challenges:
-        challenge_list.append(challenge_json(challenge))
+        for challenge in challenges:
+            challenge_list.append(challenge_json(challenge))
 
-    # Retourner les données au format JSON
-    return JsonResponse({'challenges': challenge_list}, safe=False)
+        # Retourner les données au format JSON
+        return JsonResponse({'challenges': challenge_list}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

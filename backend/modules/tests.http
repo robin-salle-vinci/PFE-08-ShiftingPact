@@ -94,6 +94,11 @@ Content-Type: application/json
    "idAnswer":"550e8400-e29b-41d4-a716-446655440027"
 }
 
+### get a module id by module esg
+GET {{baseUrl}}/modules/esg/550e8400-e29b-41d4-a716-446655440023
+
+### get a module id by client id
+GET {{baseUrl}}/modules/client/550e8400-e29b-41d4-a716-446655440020
 ### create a module esg without token
 POST http://localhost:8000/modules/create/550e8400-e29b-41d4-a716-446655440020
 Authorization:
