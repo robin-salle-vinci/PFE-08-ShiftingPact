@@ -7,11 +7,10 @@ urlpatterns = [
     path('',views.read_modules, name='read_modules'),
 
     # Get one ESG module for 
-    path('esg/<str:uuid_module_esg>', views.read_module_by_esg_id, name='read_module_by_esg_id'),
-
+    path('module/<str:uuid_module_esg>', views.read_module_by_esg_id, name='read_module_by_esg_id'),
+    path('client/<str:uuid_client>', views.read_modules_by_client_id, name='read_modules_by_client_id'),
     # Get one ESG module by client id most recent
-    path('client/<str:uuid_client>', views.read_module_by_client_id, name='read_module_by_client_id'),
-
+    path('module/client/<str:uuid_client>', views.read_module_by_client_id, name='read_module_by_client_id'),
     # Create ESG module
     path('create/<str:uuid_client>', views.create_esg_views, name='create_esg_views'),
 
@@ -25,5 +24,5 @@ urlpatterns = [
     path('add/answer/<str:uuid_module_esg>', views.add_original_answers, name='add_original_answer'),
 
     # Add score to module
-    path('addScore/<str:uuid_module_esg>', views.add_score, name='add_score'),
+    path('addScore/<str:uuid_module_esg>', views.add_score, name='add_score')
 ]
