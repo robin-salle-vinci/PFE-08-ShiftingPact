@@ -1,13 +1,52 @@
 <template>
   <div class="container">
-    <h1>Questionaires ESG en attente de validation</h1>
-    <div class="list" v-for="item in allEsg" :key="item.id">
+    <h1>Questionnaires ESG en attente de vérification</h1>
+    <div
+      class="list"
+      v-for="item in allEsg.filter((esg) => esg.state === 'verification')"
+      :key="item.id"
+    >
       <div class="item">
-        <span>{{ item.client_information.company_name }}</span>
-        <span>{{ new Date(item.date_last_modification).toLocaleDateString('fr-FR') }}</span>
-        <div>
-          <button @click="handleSeeForm(item.id)">Voir/Editer</button>
+        <span class="company-name">{{ item.client_information.company_name }}</span>
+        <span class="modification-date">{{
+          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
+        }}</span>
+        <div class="actions">
+          <button @click="handleSeeForm(item.id)">Voir/Éditer</button>
           <button @click="handleValidate(item.id)">Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <h1>Questionnaires ESG ouverts</h1>
+    <div class="list" v-for="item in allEsg.filter((esg) => esg.state === 'open')" :key="item.id">
+      <div class="item">
+        <span class="company-name">{{ item.client_information.company_name }}</span>
+        <span class="modification-date">{{
+          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
+        }}</span>
+        <div class="actions">
+          <button @click="handleSeeForm(item.id)">Voir/Éditer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <h1>Questionnaires ESG validés</h1>
+    <div
+      class="list"
+      v-for="item in allEsg.filter((esg) => esg.state === 'validated')"
+      :key="item.id"
+    >
+      <div class="item">
+        <span class="company-name">{{ item.client_information.company_name }}</span>
+        <span class="modification-date">{{
+          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
+        }}</span>
+        <div class="actions">
+          <button @click="handleSeeForm(item.id)">Voir</button>
+          <button>Voir le pacte d'engagement</button>
         </div>
       </div>
     </div>
@@ -24,14 +63,11 @@
 
   const fetchESGList = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/modules?state=verification`,
-        {
-          headers: {
-            Authorization: 'Bearer ' + localStorage.getItem('token'),
-          },
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/modules`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
-      )
+      })
       allEsg.value = response.data
     } catch (error) {
       console.error(error)
@@ -64,21 +100,42 @@
     align-items: center;
     gap: 20px;
   }
+  .container h1 {
+    margin-top: 2%;
+    margin-bottom: 0px;
+  }
 
   .list {
     display: flex;
     flex-direction: column;
-    /* background-color: blue; */
-    width: 80%;
+    width: 50%;
   }
 
   .item {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     background-color: #dfd4fb;
     border-radius: 10px;
     padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .company-name {
+    flex: 1;
+  }
+
+  .modification-date {
+    flex: 1;
+    text-align: center;
+  }
+
+  .actions {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
   }
 
   button {

@@ -1,24 +1,27 @@
 <template>
   <div class="question">
     <!-- Question -->
-
     <h4>{{ questionModel.value }}</h4>
 
     <!-- Answers -->
-
-    <!-- If employee dont have already modify this question -->
+    <!-- If employee don't have already modified this question -->
     <div v-if="!alreadyModified" class="answers">
       <div class="each-answer">
         <div>
           <h5>Réponse client:</h5>
           <div>
             <label>Réponse:</label>
-            <input v-if="!answerToModify.id_choice" type="text" :value="answerToModify.value" />
+            <input
+              v-if="!answerToModify.id_choice"
+              type="text"
+              :value="answerToModify.value"
+              :disabled="props.state === 'validated' || !isModifying"
+            />
             <select
               v-else
               v-model="answerToModify.id_choice"
               @change="updateAnswerValue"
-              :disabled="!isModifying"
+              :disabled="props.state === 'validated' || !isModifying"
             >
               <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
                 {{ choice.value }}
@@ -27,28 +30,31 @@
           </div>
           <div>
             <label>Commentaire:</label>
-            <textarea v-model="answerToModify.commentary" :disabled="!isModifying"></textarea>
+            <textarea
+              v-model="answerToModify.commentary"
+              :disabled="props.state === 'validated' || !isModifying"
+            ></textarea>
           </div>
           <div>
             <label>Engagement:</label>
             <input
               type="checkbox"
               v-model="answerToModify.is_commitment"
-              :disabled="!isModifying"
+              :disabled="props.state === 'validated' || !isModifying"
             />
           </div>
         </div>
         <button
           @click="isModifying == true ? (isModifying = false) : (isModifying = true)"
-          v-if="!isModifying"
+          v-if="!isModifying && props.state !== 'validated'"
         >
           modifier
         </button>
-        <button v-else @click="handleSave">sauvagarder</button>
+        <button v-else @click="handleSave" v-if="props.state !== 'validated'">sauvagarder</button>
       </div>
     </div>
 
-    <!-- if the epmloyee have already modify the answer -->
+    <!-- If the employee has already modified the answer -->
     <div v-else class="answers">
       <div class="each-answer">
         <h5>Réponse client:</h5>
@@ -70,8 +76,18 @@
         <h5>Réponse employé:</h5>
         <div>
           <label>Réponse:</label>
-          <input v-if="!answerToModify.id_choice" type="text" :value="answerToModify.value" />
-          <select v-else v-model="answerToModify.id_choice" @change="updateAnswerValue">
+          <input
+            v-if="!answerToModify.id_choice"
+            type="text"
+            :value="answerToModify.value"
+            :disabled="props.state === 'validated'"
+          />
+          <select
+            v-else
+            v-model="answerToModify.id_choice"
+            @change="updateAnswerValue"
+            :disabled="props.state === 'validated'"
+          >
             <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
               {{ choice.value }}
             </option>
@@ -79,13 +95,20 @@
         </div>
         <div>
           <label>Commentaire:</label>
-          <textarea v-model="answerToModify.commentary"></textarea>
+          <textarea
+            v-model="answerToModify.commentary"
+            :disabled="props.state === 'validated'"
+          ></textarea>
         </div>
         <div>
           <label>Engagement:</label>
-          <input type="checkbox" v-model="answerToModify.is_commitment" />
+          <input
+            type="checkbox"
+            v-model="answerToModify.is_commitment"
+            :disabled="props.state === 'validated'"
+          />
         </div>
-        <button @click="handleSave">sauvagarder</button>
+        <button @click="handleSave" v-if="props.state !== 'validated'">sauvagarder</button>
       </div>
     </div>
   </div>
@@ -102,15 +125,16 @@
     clientAnswer: Answer
     employeeAnswer?: Answer
     idEsg: string
+    state: string
   }>()
 
-  // toogle the modification mode
+  // Toggle the modification mode
   const isModifying = ref(false)
   const questionModel: Ref<Question> = ref(props.question)
   const originalAnswer = ref(props.clientAnswer)
   const alreadyModified = ref(props.employeeAnswer ? true : false)
 
-  // if no employee answer, we use the client answer for the modification
+  // If no employee answer, we use the client answer for the modification
   let answerToModify: Ref<Answer>
   if (props.employeeAnswer) {
     answerToModify = ref({ ...props.employeeAnswer })

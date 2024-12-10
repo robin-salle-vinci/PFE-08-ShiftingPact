@@ -2,9 +2,9 @@
   <HeaderElement />
   <button class="back-button" @click="handleBack"><span class="arrow-left"></span></button>
 
-  <div v-if="!esgForm"></div>
+  <div v-if="!esgForm || !client"></div>
   <div v-else class="container">
-    <h1>Questionaires ESG de l'entreprise: {{ clientName }}</h1>
+    <h1>Questionaires ESG de l'entreprise: {{ client.company_name }}</h1>
     <div class="form challenge" v-for="challenge in esgForm.challenges" v-bind:key="challenge.id" c>
       <h2>{{ challenge.value }}</h2>
       <div
@@ -16,9 +16,11 @@
         <div v-for="question in subChallenge.questions" v-bind:key="question.id" class="question">
           <QuestionElement
             :idEsg="idEsg"
+            :state="stateEsg"
             :question="question"
             :clientAnswer="clientResponse[question.id]"
             :employeeAnswer="employeeResponse ? employeeResponse[question.id] : undefined"
+            v-if="checkDisplayTemplate(question)"
           />
         </div>
       </div>
@@ -31,6 +33,8 @@
   import HeaderElement from '@/components/structure/HeaderElement.vue'
   import router from '@/router'
   import type { Challenge } from '@/types/Challenge'
+  import type { ClientInformation } from '@/types/ClientInformation'
+  import type { Question } from '@/types/Question'
   import type { Answer } from '@/types/Reponse'
   import axios from 'axios'
   import { onMounted, ref } from 'vue'
@@ -41,8 +45,9 @@
   const esgForm = ref<{ challenges: Array<Challenge> }>()
   const clientResponse = ref<Record<string, Answer>>({})
   const employeeResponse = ref<Record<string, Answer>>({})
-  const clientName = ref<string>()
+  const client = ref<ClientInformation>()
   const idEsg = ref<string>('')
+  const stateEsg = ref<string>('')
 
   onMounted(async () => {
     try {
@@ -60,8 +65,11 @@
           },
         }),
       ])
+      // Get esg information
       idEsg.value = clientEsg.data.id
-      clientName.value = clientEsg.data.client_information.company_name
+      client.value = clientEsg.data.client_information
+      console.log(clientEsg.data.client_information)
+      stateEsg.value = clientEsg.data.state
 
       // Get the questions
       esgForm.value = questionsResponse.data
@@ -73,6 +81,24 @@
       console.error('Error fetching data:', error)
     }
   })
+
+  const checkDisplayTemplate = (question: Question) => {
+    switch (question.template) {
+      case 'ALL':
+        return true
+
+      case 'OWNED FACILITY':
+        return client.value?.owned_facility
+
+      case 'PRODUITS':
+        return client.value?.service_or_product == 'produit'
+
+      case 'SERVICES':
+        return client.value?.service_or_product == 'service'
+      default:
+        return false
+    }
+  }
 
   const handleBack = () => {
     router.push('/dashboard')
