@@ -59,7 +59,7 @@
           },
         }),
         // Get All answers from ESG module
-        axios.get(`${import.meta.env.VITE_API_URL}/modules/esg/${id}`, {
+        axios.get(`${import.meta.env.VITE_API_URL}/modules/${id}`, {
           headers: {
             Authorization: 'Bearer ' + localStorage.getItem('token'),
           },
