@@ -39,17 +39,17 @@ def read_all(request):
 
 # Get one ESG Module by id
 @require_GET
-def read_one_by_id(request, uuid_module_esg):
+def read_one_by_id(request, uuid_esg_module):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        module = ModulesESG.objects(id=uuid_module_esg).first()
+        module = ModulesESG.objects(id=uuid_esg_module).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
-        if authenticated_user.role != 'employee' or authenticated_user.id != module.id_client:
+        if authenticated_user.role != 'employee' or (authenticated_user.id != module.id_client and authenticated_user.role == 'client'):
             return JsonResponse({'error': 'Only employees can access this endpoint or the correct client'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
@@ -64,14 +64,14 @@ def read_last_module_for_client(request):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-
-        if authenticated_user.role == 'employee' or str(authenticated_user.id) != str(authenticated_user.id):
-            return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
-
+        
         module = ModulesESG.objects(id_client=authenticated_user.id).filter(state='open').first()
 
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
+
+        if authenticated_user.role == 'employee' or str(module.id_client) != str(authenticated_user.id):
+            return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
 
