@@ -98,7 +98,7 @@ def read_module_by_client_id(request, uuid_client):
             return JsonResponse({'error': 'Module not found'}, status=404)
 
         if not (authenticated_user.role != 'employee' or str(authenticated_user.id) == str(uuid_client)):
-            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
+            return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
         
 
         return JsonResponse(module_json(module), status=200)
