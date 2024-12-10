@@ -378,6 +378,41 @@ def add_score (request, uuid_module_esg) :
         "theme_scores": theme_scores,
         "global_esg_scores": global_esg_scores
     })
+    return JsonResponse(combined_scores, status=200)
 
+@require_GET
+def get_score(request, uuid_module_esg):
 
+    authenticated_user = check_authenticated_user(request)
+    if isinstance(authenticated_user, HttpResponse):
+        return authenticated_user
+
+    try:
+        module_esg = ModulesESG.get_by_id(uuid_module_esg)
+    except ModulesESG.DoesNotExist:
+        return JsonResponse({'error': 'Module ESG not found'}, status=404)
+
+    # Check module state
+    if module_esg.state == 'open':
+        return JsonResponse(
+            {'error': 'Module ESG must be in verification or validated state'},
+            status=400)
+
+    # Calculate ESG scores
+    try:
+        sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
+        challenge_scores = calculate_challenge_scores(sub_challenge_scores)
+        theme_scores = calculate_theme_scores(challenge_scores)
+        global_esg_scores = calculate_global_esg_scores(theme_scores)
+    except Exception as e:
+        return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
+                            status=500)
+
+    # Combine results into a single object with stringified keys
+    combined_scores = stringify_keys({
+        "sub_challenge_scores": sub_challenge_scores,
+        "challenge_scores": challenge_scores,
+        "theme_scores": theme_scores,
+        "global_esg_scores": global_esg_scores
+    })
     return JsonResponse(combined_scores, status=200)
