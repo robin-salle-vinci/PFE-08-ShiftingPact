@@ -44,7 +44,7 @@
         >
           modifier
         </button>
-        <button v-else @click="handleSave">sauvagrder</button>
+        <button v-else @click="handleSave">sauvagarder</button>
       </div>
     </div>
 
@@ -85,69 +85,38 @@
           <label>Engagement:</label>
           <input type="checkbox" v-model="answerToModify.is_commitment" />
         </div>
-        <button @click="handleSave">sauvagrder</button>
+        <button @click="handleSave">sauvagarder</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  import type { Question } from '@/types/Question'
+  import type { Answer } from '@/types/Reponse'
   import axios from 'axios'
   import { defineProps, ref, type Ref } from 'vue'
 
-  interface Choice {
-    id: string
-    index_choice: string
-    value: string
-    score: number
-  }
-
-  interface Question {
-    id: string
-    indexation_question: string
-    template: string
-    value: string
-    type_response: string
-    choices: Choice[]
-  }
-
-  interface Reponse {
-    id: string
-    challenge: string
-    sub_challenge: string
-    id_choice: string
-    value: string
-    commentary: string
-    score: number
-    is_commitment: boolean
-    score_response: number
-  }
-
   const props = defineProps<{
     question: Question
-    clientResponse: Reponse
-    employeeResponse?: Reponse
+    clientAnswer: Answer
+    employeeAnswer?: Answer
     idEsg: string
   }>()
 
-  const questionModel: Ref<Question> = ref(props.question)
-  const originalAnswer = ref(props.clientResponse)
-  const alreadyModified = ref(props.employeeResponse ? true : false)
-  let answerToModify: Ref<Reponse>
-
-  console.log(props.employeeResponse)
-
-  if (props.employeeResponse) {
-    answerToModify = ref({ ...props.employeeResponse })
-  } else {
-    answerToModify = ref({ ...props.clientResponse })
-  }
-
-  // const newResponseModel = ref({ ...props.clientResponse })
-
+  // toogle the modification mode
   const isModifying = ref(false)
+  const questionModel: Ref<Question> = ref(props.question)
+  const originalAnswer = ref(props.clientAnswer)
+  const alreadyModified = ref(props.employeeAnswer ? true : false)
 
-  const apiUrl = import.meta.env.VITE_API_URL
+  // if no employee answer, we use the client answer for the modification
+  let answerToModify: Ref<Answer>
+  if (props.employeeAnswer) {
+    answerToModify = ref({ ...props.employeeAnswer })
+  } else {
+    answerToModify = ref({ ...props.clientAnswer })
+  }
 
   const updateAnswerValue = () => {
     const choice = questionModel.value.choices.find((c) => c.id === answerToModify.value.id_choice)
@@ -161,7 +130,7 @@
     answerToModify = ref({ ...answerToModify.value })
 
     axios.patch(
-      `${apiUrl}/modules/add/answer`,
+      `${import.meta.env.VITE_API_URL}/modules/add/answer`,
       {
         id_esg: props.idEsg,
         id_challenge: answerToModify.value.challenge,
