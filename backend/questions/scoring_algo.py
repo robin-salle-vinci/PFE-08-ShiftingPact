@@ -1,8 +1,17 @@
-import json
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from modules.models import Answers
 from questions.models import Choices, Challenges, SubChallenges, Questions
 
+# Helper function to convert dictionary keys to strings
+def stringify_keys(data):
+  """
+  Recursively convert all dictionary keys to strings.
+  """
+  if isinstance(data, dict):
+    return {str(key): stringify_keys(value) for key, value in data.items()}
+  elif isinstance(data, list):
+    return [stringify_keys(item) for item in data]
+  return data
 
 # Step 1: Calculate scores for a single question
 def calculate_question_score(answer, question, choices) -> Dict[str, float]:
@@ -93,8 +102,10 @@ def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
     return sub_challenge_scores
 
 
-def calculate_challenge_scores(sub_challenge_scores) -> Dict[str, Dict[str, float]]:
+def calculate_challenge_scores(module_esg) -> tuple[
+  dict[str, dict[str, Any]], dict[str, dict[Any, Any]]]:
   challenge_scores = {"today": {}, "in_two_years": {}}
+  sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
 
   for sub_challenge_id, scores in sub_challenge_scores["today"].items():
     try:
@@ -131,11 +142,14 @@ def calculate_challenge_scores(sub_challenge_scores) -> Dict[str, Dict[str, floa
     except Exception as e:
       print(f"Error processing sub-challenge {sub_challenge_id}: {e}")
 
-  return challenge_scores
+  return sub_challenge_scores, challenge_scores
 
 
-def calculate_theme_scores(challenge_scores) -> Dict[str, Dict[str, float]]:
+def calculate_theme_scores(module_esg) -> tuple[
+  dict[str, dict[str, Any]], dict[str, dict[Any, Any]], dict[
+    str, dict[Any, Any]]]:
   theme_scores = {"today": {}, "in_two_years": {}}
+  sub_challenge_scores, challenge_scores = calculate_challenge_scores(module_esg)
 
   for challenge_id, scores in challenge_scores["today"].items():
     try:
@@ -167,11 +181,13 @@ def calculate_theme_scores(challenge_scores) -> Dict[str, Dict[str, float]]:
     theme_scores["in_two_years"][theme]["percentage"] = (scores[
                                                            "score"] / in_two_years_max * 100) if in_two_years_max > 0 else 0.0
 
-  return theme_scores
+  return sub_challenge_scores, challenge_scores, theme_scores
+
 
 
 # Step 4: Calculate global ESG scores
-def calculate_global_esg_scores(theme_scores) -> Dict[str, float]:
+def calculate_global_esg_scores(module_esg) -> Dict[str, float]:
+  sub_challenge_scores, challenge_scores, theme_scores = calculate_theme_scores(module_esg)
   try:
     # Calculate the total ESG score for today
     total_score_today = sum(theme["percentage"] for theme in theme_scores["today"].values()) if theme_scores["today"] else 0.0
@@ -185,10 +201,15 @@ def calculate_global_esg_scores(theme_scores) -> Dict[str, float]:
     # Sum of global scores
     total_esg_score = total_esg_score_today + total_esg_score_in_two_years
 
-    return {
+    combined_scores = stringify_keys( {
+      "sub_challenge_scores": sub_challenge_scores,
+      "challenge_scores": challenge_scores,
+      "theme_scores": theme_scores,
       "total_esg_score_today": total_esg_score_today,
       "total_esg_score_in_two_years": total_esg_score_in_two_years,
       "total_esg_score": total_esg_score,
-    }
+    })
+
+    return combined_scores
   except Exception as e:
     raise ValueError(f"Error calculating global ESG scores: {e}")
