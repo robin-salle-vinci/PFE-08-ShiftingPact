@@ -20,7 +20,7 @@ def choice_json(choice):
       'id': str(choice.id),
       'index_choice': int(choice.index_choice),
       'value': str(choice.value),
-      'score': float(choice.score if choice.score else 0),
+      'score': float(choice.score if choice.score else 0.0),
     }
 
 def question_json(question):
@@ -74,7 +74,7 @@ def answer_json(answer):
       'value': str(answer.value),
       'commentary': str(answer.commentary) if answer.commentary is not None else None,
       'is_commitment': bool(answer.is_commitment),
-      'score_response': float(answer.score_response if answer.score_response else 0),
+      'score_response': float(answer.score_response if answer.score_response else 0.0),
     }
 
 def module_json(module):
@@ -112,7 +112,7 @@ def module_single_json(module):
         for idAnswer in module.modified_answers
       ],
       'state': str(module.state),
-      'calculated_score': float(module.calculated_score if module.calculated_score else 0)
+      'calculated_score': float(module.calculated_score if module.calculated_score else 0.0)
     }
 
 def commitment_json(commitment):

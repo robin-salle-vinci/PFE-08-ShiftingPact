@@ -68,17 +68,14 @@ def read_module_by_esg_id(request, uuid_module_esg):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        module_esg = ModulesESG.objects.get(id=uuid_module_esg)
-
-        if not (authenticated_user.role == 'employee' or authenticated_user.id == module_esg.id_client):
-            return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
-
         module = ModulesESG.objects(id=uuid_module_esg).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
-        return JsonResponse(module_json(module), status=200)
+        if not (authenticated_user.role == 'employee' or authenticated_user.id == module.id_client):
+            return JsonResponse({'error': 'Only employees can access this endpoint or the correct client'}, status=403)
 
+        return JsonResponse(module_json(module), status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
