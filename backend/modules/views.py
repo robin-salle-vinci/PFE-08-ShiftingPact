@@ -27,12 +27,7 @@ def read_modules(request):
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
 
-        state_value = request.GET.get('state')
-
-        if state_value not in ['validated', 'verification']:
-            return JsonResponse({'error': 'Invalid state value'}, status=400)
-        else:
-            modules = ModulesESG.filter_by_state(state_value)
+        modules = ModulesESG.objects.all()
 
         modules_json = [module_single_json(module) for module in modules]
         return JsonResponse(modules_json, safe=False, status=200)

@@ -9,7 +9,7 @@ def client_info_json(client_info):
     {
       'id_user': str(client_info.id_user),
       'number_workers': int(client_info.number_workers),
-      'owned_facility': str(client_info.owned_facility),
+      'owned_facility': client_info.owned_facility,
       'service_or_product': str(client_info.service_or_product),
       'company_name': str(client_info.company_name),
     }
