@@ -52,9 +52,9 @@ def read_modules_by_client_id(request):
             return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
 
         modules = ModulesESG.objects.all().filter(client_id=authenticated_user.id)
-        data_json = [module_single_json(module) for module in modules]
+        modules_json = [module_single_json(module) for module in modules]
 
-        return JsonResponse(data_json, status=200)
+        return JsonResponse(modules_json, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
