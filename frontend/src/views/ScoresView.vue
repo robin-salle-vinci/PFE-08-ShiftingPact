@@ -4,7 +4,7 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
         <HeaderElement />
         <h1 id="titre">Score ESG</h1>
 
-    
+
     <div>
     <table class="esg-table">
       <thead>
@@ -29,7 +29,7 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
         </tr>
       </thead>
       <tbody>
-        <tr class="category" v-for="(category, index) in categories" :key="index" 
+        <tr class="category" v-for="(category, index) in categories" :key="index"
           :class="{
             'environment': category.name === 'Environnement',
             'social': category.name === 'Social',
@@ -38,21 +38,20 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
           }">
           <td>{{ category.name }}</td>
           <td class="bold-cell">{{ category.currentScore }}</td>
-          <td class="bold-cell">/ {{ category.totalScore }}</td>
-          <td class="bold-cell">{{ calculatePercentage(category.currentScore, category.totalScore) }}%</td>
+          <td class="bold-cell">/ {{ category.currentTotal }}</td>
+          <td class="bold-cell">{{ (category.currentPercentage) }}%</td>
           <td class="bold-cell">{{ category.engagementScore }}</td>
-          <td class="bold-cell">/ {{ category.totalScore }}</td>
-          <td class="bold-cell">{{ calculatePercentage(category.engagementScore, category.totalScore) }}%</td>
-          <td class="bold-cell">{{ category.totalScore }}</td>
-          <td class="bold-cell">/ {{ category.totalScore }}</td>
-          <td class="bold-cell">{{ calculatePercentage(category.totalScore, category.totalScore) }}%</td>
-          <td class="bold-cell">{{ 100 - calculatePercentage(category.totalScore, category.totalScore) }}%</td>
-          <td class="bold-cell">{{ calculateFutureScore(category) }}%</td>
+          <td class="bold-cell">/ {{ category.engagementTotal }}</td>
+          <td class="bold-cell">{{ (category.engagementPercentage) }}%</td>
+          <td class="bold-cell">{{ category.total_esg_score }}</td>
+          <td class="bold-cell">/ {{ 30 }}</td>
+          <td class="bold-cell">{{ category.total_esg_score / 30 }}%</td>
+          <td class="bold-cell">{{ 1 - category.total_esg_score / 30 }}%</td>
+          <td class="bold-cell">{{ (category.currentScore + 4 * category.engagementScore ) / 30}}%</td>
         </tr>
       </tbody>
     </table>
   </div>
-
 
 
 
@@ -75,40 +74,38 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
     </tr>
   </thead>
   <tbody>
-    <tr class="category" v-for="(category2, index) in categories2" :key="index" 
+    <tr class="category" v-for="(category2, index) in categories2" :key="index"
       :class="{
-        'environment': category2.name === 'Energie',
-        'social': category2.name === 'empreinte carbone',
-        'gouvernance': category2.name === 'eau',
-        'total': category2.name === 'matières premières & fournitures',
       }">
       <td class="bold-cell">{{ category2.name }}</td>
+
       <td class="bold-cell">{{ category2.currentScore }}</td>
-      <td class="bold-cell">/ {{ category2.totalScore }}</td>
-      <td class="bold-cell">{{ calculatePercentage(category2.currentScore, category2.totalScore) }}%</td>
+      <td class="bold-cell">/ {{ category2.currentTotal}}</td>
+      <td class="bold-cell">{{ (category2.currentScore / category2.currentTotal) }}%</td>
+
       <td class="bold-cell">{{ category2.engagementScore }}</td>
-      <td class="bold-cell">/ {{ category2.totalScore }}</td>
-      <td class="bold-cell">{{ calculatePercentage(category2.engagementScore, category2.totalScore) }}%</td>
+      <td class="bold-cell">/ {{ category2.engagementTotal }}</td>
+      <td class="bold-cell">{{ (category2.engagementScore / category2.engagementTotal) }}%</td>
     </tr>
+    <!--
     <tr class="bonus" v-for="(bonus, index) in bonusItems" :key="index">
       <td>{{ bonus.name }}</td>
       <td>{{ bonus.currentScore }}</td>
-      <!-- Ajout du score d'engagement pour les bonus -->
        <td>/</td>
        <td>/</td>
       <td>{{ bonus.engagementScore }}</td>
       <td>/</td>
       <td>/</td>
     </tr>
+    -->
+
+
   </tbody>
 </table>
-
 </div>
 
 
-
 </template>
-  
 
 
 
@@ -116,7 +113,9 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
 
 
 
-  <script>
+<!--
+  // eslint-disable-next-line vue/block-lang
+  <script lang="ts">
   import HeaderElement from '@/components/structure/HeaderElement.vue';
   export default {
     components: {
@@ -154,18 +153,13 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
             { name: 'protection des données', currentScore: 95, totalScore: 100, engagementScore: 85 },
             { name: 'certifications', currentScore: 60, totalScore: 100, engagementScore: 50 },
             ],
+          score_max_today: today.score_max,
+          score_max_engagement: future.score_max || today.score_max,
       };
     },
-    methods: {
-      calculatePercentage(score, total) {
-        return total > 0 ? ((score / total) * 100).toFixed(2) : 0;
-      },
-      calculateFutureScore(category) {
-        return (category.currentScore + category.engagementScore) / category.totalScore * 100;
-      }
-    }
   };
   </script>
+-->
 
 
 
@@ -177,51 +171,154 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
 
 
 
-<!---
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import HeaderElement from '@/components/structure/HeaderElement.vue';
+import type { AxiosResponse } from 'axios';
 
-const categories = ref([]);
+interface category {
+  name: string;
+  currentScore: number;
+  currentTotal: number;
+  currentPercentage: number;
+  engagementScore: number;
+  engagementTotal: number;
+  engagementPercentage: number;
+  total_esg_score_today: number;
+  total_esg_score_in_two_years: number;
+  total_esg_score: number;
+}
+
+interface category2 {
+  name: string;
+  currentScore: number;
+  currentTotal: number;
+  currentPercentage: number;
+  engagementScore: number;
+  engagementTotal: number;
+  engagementPercentage: number;
+  totalScore: number;
+}
+
+const categories = ref<category[]>([]);
+const categories2 = ref<category2[]>([]);
 
 // Récupérer les données du backend
 const fetchESGData = async () => {
     const apiUrl = import.meta.env.VITE_API_URL;
+    const uuidModuleEsg = '550e8400-e29b-41d4-a716-446655440025';
+    const fullUrl = `${apiUrl}/modules/score/${uuidModuleEsg}`;
+
+    // Récupérer le token depuis localStorage
+    const token = localStorage.getItem('token');  // S'assurer que le token est stocké dans localStorage
+    if (!token) {
+        console.error('Token manquant');
+        return; // Arrêter l'exécution si le token n'est pas trouvé
+    }
+
     try {
-        const response = await axios.get(`${apiUrl}`);
+        // Effectuer la requête GET avec le token dans l'en-tête Authorization
+        const response: AxiosResponse = await axios.get(fullUrl, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
         const moduleData = response.data;
 
-        // Transformation des données du backend
+        // Transformation des données du backend pour les sous-challenges
         const todayScores = moduleData.sub_challenge_scores.today;
         const futureScores = moduleData.sub_challenge_scores.in_two_years;
+        const total_esg_score_today = moduleData.total_esg_score_today;
+        const total_esg_score_in_two_years = moduleData.total_esg_score_in_two_years;
+        const total_esg_score = moduleData.total_esg_score;
 
-        // Fusionner les données basées sur le nom
+        // Fusionner les données basées sur le nom des sous-challenges
         const combinedScores = Object.keys(todayScores).map((id) => {
             const today = todayScores[id];
             const future = futureScores[id] || {};
+
+            const currentPercentage = (today.score / today.score_max) * 100;
+            const engagementPercentage = (future.score / future.score_max) * 100;
 
             return {
                 name: today.name, // Nom du sous-défi
                 currentScore: today.score, // Score actuel
                 currentTotal: today.score_max, // Total actuel
+                currentPercentage: currentPercentage, // Pourcentage actuel
                 engagementScore: future.score || 0, // Score d'engagement (valeur par défaut 0)
                 engagementTotal: future.score_max || today.score_max, // Total d'engagement
+                engagementPercentage: engagementPercentage, // Pourcentage d'engagement
+                total_esg_score_today, // Total aujourd'hui
+                total_esg_score_in_two_years, // Total dans 2 ans
+                total_esg_score, // Score total
+                totalScore: moduleData.total_esg_score, // Ajouter totalScore
             };
         });
 
-        categories.value = combinedScores;
+        // Transformation des données du backend pour les thèmes
+        const todayScores_theme = moduleData.theme_scores.today;
+        const futureScores_theme = moduleData.theme_scores.in_two_years;
+
+        // Fusionner les données basées sur le nom des thèmes (Environnement, Social, etc.)
+        const combinedScores2 = Object.keys(todayScores_theme).map((key) => {
+            const today = todayScores_theme[key];
+            const future = futureScores_theme[key] || {};
+
+            // Calculer les pourcentages
+            const currentPercentage = (today.score / today.score_max) * 100;
+            const engagementPercentage = (future.score / future.score_max) * 100;
+
+            return {
+                name: key, // Nom de la catégorie (Environnement, Social, etc.)
+                currentScore: today.score, // Score actuel
+                currentTotal: today.score_max, // Total actuel
+                currentPercentage: currentPercentage, // Pourcentage actuel
+                engagementScore: future.score || 0, // Score d'engagement
+                engagementTotal: future.score_max || today.score_max, // Total d'engagement
+                engagementPercentage: engagementPercentage, // Pourcentage d'engagement
+                totalScore: moduleData.total_esg_score, // Score total
+            };
+        });
+
+        // Vérifier les données avant de les mapper
+        console.log("Données combinées pour les thèmes (combinedScores2) : ", combinedScores2);
+
+        // Assigner les résultats aux variables réactives
+        categories.value = combinedScores2.map(score => {
+            console.log("Score avant mappage :", score); // Afficher chaque score
+            return {
+                ...score,
+                total_esg_score_today,
+                total_esg_score_in_two_years,
+                total_esg_score
+            };
+        });
+
+        categories2.value = combinedScores;  // Remplir categories2 avec les sous-challenges
+
+        console.log("Noms des catégories extraits : ", combinedScores2.map(c => c.name));
+
     } catch (error) {
-        console.error('Erreur lors de la récupération des données ESG', error);
+        if (axios.isAxiosError(error)) {
+            console.error('Erreur Axios:', error.response ? error.response.data : error.message);
+        } else {
+            console.error('Erreur lors de la récupération des données ESG', error);
+        }
     }
 };
 
-// Charger les données lors de la monté du composant
+// Charger les données lors de la montée du composant
 onMounted(() => {
-  fetchESGData();
+    fetchESGData();
 });
+
+
 </script>
--->
+
+
+
 
 
 
@@ -258,7 +355,7 @@ onMounted(() => {
   margin-right: auto; /* Centrer le tableau */
   border-collapse: collapse;
 }
-  
+
   .esg-table th,
   .esg-table td {
     border: 1px solid black;
@@ -271,27 +368,27 @@ onMounted(() => {
   font-weight: bold;
   border: 2px solid black;  /* Contour plus épais pour les cellules */
 }
-  
+
   .esg-table .category {
     font-weight: bold;
   }
-  
+
   .esg-table .environment {
     background-color: #b5cdbf;
   }
-  
+
   .esg-table .social {
     background-color: #dfd4fb;
   }
-  
+
   .esg-table .gouvernance {
     background-color: #fde791;
   }
-  
+
   .esg-table .total {
     background-color: #c5cae9; /* Bleu clair */
   }
-  
+
   .esg-table .bonus {
     font-style: italic;
   }
@@ -356,7 +453,7 @@ onMounted(() => {
         25% {
             opacity: 0.4;
         }
-    
+
         100% {
             transform: scale(1);
         }
