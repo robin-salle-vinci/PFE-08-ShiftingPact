@@ -20,6 +20,7 @@
             :question="question"
             :clientAnswer="clientResponse[question.id]"
             :employeeAnswer="employeeResponse ? employeeResponse[question.id] : undefined"
+            :companyName="client.company_name"
             v-if="checkDisplayTemplate(question)"
           />
         </div>
@@ -41,7 +42,6 @@
   import { useRoute } from 'vue-router'
 
   const id = useRoute().params.id as string
-  // props
 
   const esgForm = ref<{ challenges: Array<Challenge> }>()
   const clientResponse = ref<Record<string, Answer>>({})

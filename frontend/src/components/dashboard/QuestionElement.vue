@@ -1,7 +1,7 @@
 <template>
   <div class="question">
     <!-- Question -->
-    <h4>{{ questionModel.value }}</h4>
+    <h4>{{ questionModel.value.replace('XXX', companyName) }}</h4>
 
     <!-- Answers -->
     <!-- If employee don't have already modified this question -->
@@ -126,6 +126,7 @@
     employeeAnswer?: Answer
     idEsg: string
     state: string
+    companyName: string
   }>()
 
   // Toggle the modification mode

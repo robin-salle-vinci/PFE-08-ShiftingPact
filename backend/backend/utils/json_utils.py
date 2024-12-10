@@ -20,7 +20,6 @@ def choice_json(choice):
       'id': str(choice.id),
       'index_choice': int(choice.index_choice),
       'value': str(choice.value),
-      'score': float(choice.score if choice.score else 0.0),
     }
 
 def question_json(question):
