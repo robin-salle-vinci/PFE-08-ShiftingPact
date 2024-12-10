@@ -1,13 +1,52 @@
 <template>
   <div class="container">
-    <h1>Questionaires ESG en attente de validation</h1>
-    <div class="list" v-for="item in allEsg" :key="item.id">
+    <h1>Questionnaires ESG en attente de vérification</h1>
+    <div
+      class="list"
+      v-for="item in allEsg.filter((esg) => esg.state === 'verification')"
+      :key="item.id"
+    >
       <div class="item">
-        <span>{{ item.client_information.company_name }}</span>
-        <span>{{ new Date(item.date_last_modification).toLocaleDateString('fr-FR') }}</span>
-        <div>
-          <button @click="handleSeeForm(item.id)">Voir/Editer</button>
+        <span class="company-name">{{ item.client_information.company_name }}</span>
+        <span class="modification-date">{{
+          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
+        }}</span>
+        <div class="actions">
+          <button @click="handleSeeForm(item.id)">Voir/Éditer</button>
           <button @click="handleValidate(item.id)">Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <h1>Questionnaires ESG ouverts</h1>
+    <div class="list" v-for="item in allEsg.filter((esg) => esg.state === 'open')" :key="item.id">
+      <div class="item">
+        <span class="company-name">{{ item.client_information.company_name }}</span>
+        <span class="modification-date">{{
+          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
+        }}</span>
+        <div class="actions">
+          <button @click="handleSeeForm(item.id)">Voir/Éditer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <h1>Questionnaires ESG validés</h1>
+    <div
+      class="list"
+      v-for="item in allEsg.filter((esg) => esg.state === 'validated')"
+      :key="item.id"
+    >
+      <div class="item">
+        <span class="company-name">{{ item.client_information.company_name }}</span>
+        <span class="modification-date">{{
+          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
+        }}</span>
+        <div class="actions">
+          <button @click="handleSeeForm(item.id)">Voir</button>
+          <button>Voir le pacte d'engagement</button>
         </div>
       </div>
     </div>
@@ -16,22 +55,15 @@
 
 <script setup lang="ts">
   import router from '@/router'
+  import type { Esg } from '@/types/Esg'
   import axios from 'axios'
   import { ref } from 'vue'
-  const apiUrl = import.meta.env.VITE_API_URL
-  interface ESGItem {
-    id: number
-    client_information: {
-      company_name: string
-    }
-    date_last_modification: string
-  }
 
-  const allEsg = ref<ESGItem[]>([])
+  const allEsg = ref<Esg[]>([])
 
   const fetchESGList = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/modules?state=verification`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/modules`, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
@@ -41,7 +73,6 @@
       console.error(error)
     }
   }
-
   fetchESGList()
 
   const handleSeeForm = (_esgId: number) => {
@@ -50,7 +81,7 @@
 
   const handleValidate = (_esgId: number) => {
     axios
-      .patch(`${apiUrl}/modules/state/${_esgId}?newState=validated`, {
+      .patch(`${import.meta.env.VITE_API_URL}/modules/state/${_esgId}?newState=validated`, null, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
@@ -69,21 +100,42 @@
     align-items: center;
     gap: 20px;
   }
+  .container h1 {
+    margin-top: 2%;
+    margin-bottom: 0px;
+  }
 
   .list {
     display: flex;
     flex-direction: column;
-    /* background-color: blue; */
-    width: 80%;
+    width: 50%;
   }
 
   .item {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     background-color: #dfd4fb;
     border-radius: 10px;
     padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .company-name {
+    flex: 1;
+  }
+
+  .modification-date {
+    flex: 1;
+    text-align: center;
+  }
+
+  .actions {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
   }
 
   button {
