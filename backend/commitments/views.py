@@ -7,7 +7,31 @@ from commitments.models import CommitmentPacts
 
 # Create your views here.
 
-# read one commitment
+
+# read all commitment for a specific client
+@require_GET
+def get_all_client(request, id_client):
+   try:
+
+      user = check_authenticated_user(request)
+      if isinstance(user, JsonResponse):
+         return user
+
+      if not (id_client == user.id or user.role == 'employee'):
+         return JsonResponse({'error': 'Not Authorized'}, status=403)
+
+      commitments = CommitmentPacts.objects.all().filter(id_client=id_client)
+
+      commitment_data = [ commitment_json(commitment) for commitment in commitments]
+
+      return JsonResponse(commitment_data, safe=False, status=200)
+
+   except Exception as e:
+      print(str(e))
+      return JsonResponse({'error': str(e)}, status=500)
+
+
+# read one commitment by id
 @require_GET
 def get_one(request, id_commitment):
    try:
@@ -21,7 +45,7 @@ def get_one(request, id_commitment):
       if commitment is None:
          return JsonResponse({'error': 'Commitment not found'}, status=404)
 
-      if not (commitment.id_client == user.id_client_information or user.role == 'employee'):
+      if not (commitment.id_client == user.id or user.role == 'employee'):
          return JsonResponse({'error': 'Not Authorized'}, status=403)
 
       commitment_data = commitment_json(commitment)
@@ -31,3 +55,5 @@ def get_one(request, id_commitment):
    except Exception as e:
       print(str(e))
       return JsonResponse({'error': str(e)}, status=500)
+   
+

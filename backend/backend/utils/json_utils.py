@@ -1,4 +1,4 @@
-from questions.models import Challenges, SubChallenges, Questions, Choices
+from questions.models import SubChallenges, Questions, Choices
 from modules.models import Answers
 from users.models import ClientInformation
 
