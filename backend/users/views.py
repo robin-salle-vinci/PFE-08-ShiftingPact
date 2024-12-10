@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
+import re
 
 from backend.utils.token_utils import generate_token
 from .models import Users, ClientInformation
@@ -20,6 +21,11 @@ def register_view(request):
 
         # Change the companyName to username
         username = company_name.replace(' ', '').lower()
+        username = re.sub(r'[^a-z0-9-_]', '', username)
+
+        # Check if username already exists
+        if Users.objects(username=username).first():
+            return JsonResponse({'message': 'Username already exists'}, status=409)
 
         # Check if any field is empty
         if username is None or number_workers is None or owned_facility is None or service_or_product is None:
@@ -28,16 +34,15 @@ def register_view(request):
         # Create User object
         user = Users.create(username=username, password='password', role='client')
 
+        # Create a password with BCrypt with the identifier
+        password = bcrypt.hashpw((str(user.id)).encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        Users.objects(id=user.id).update(password=password)
+
         # Create ClientInformation object
         client_info = ClientInformation.create(id_user=user.id, number_workers=number_workers, owned_facility=owned_facility,
                                                service_or_product=service_or_product, company_name=company_name)
 
         Users.objects(id=user.id).update(id_client_information=client_info.id_user)
-
-        # Create a random password with BCrypt with the identifier
-        identifier = str(user.id)
-        password = bcrypt.hashpw(identifier.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        Users.objects(id=user.id).update(password=password)
 
         # Generate JWT tokens
         try:
@@ -57,7 +62,7 @@ def register_view(request):
                 'serviceOrProduct': client_info.service_or_product
             },
             'token': token,
-            'password': identifier
+            'password': str(user.id)
         }
 
         # add password to the response

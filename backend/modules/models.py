@@ -12,6 +12,14 @@ class ModulesESG(DjangoCassandraModel):
     calculated_score = columns.Double(required=False)  # Calculated score of the module in validation state
 
     @classmethod
+    def get_by_id(cls,id_module_esg):
+        return cls.objects.get(pk=id_module_esg)
+
+    @classmethod
+    def get_most_recent_by_client_id(cls, id_client):
+        return cls.objects.filter(id_client=id_client).order_by('-date_last_modification').first()
+
+    @classmethod
     def get_all(cls):
         return cls.objects.all()
 
@@ -34,9 +42,3 @@ class Answers(DjangoCassandraModel):
     @classmethod
     def get_by_id(cls, id_answer):
         return cls.objects.get(pk=id_answer)
-
-class CommitmentPacts(DjangoCassandraModel):
-    id = columns.UUID(primary_key=True, default=uuid4)
-    id_client = columns.UUID(required=True)
-    creation_date = columns.DateTime(required=True)  # Date of the creation of the "Pacte d'engagement"
-    answers_commitments = columns.List(columns.UUID(required=True), required=True)  # List of answers with isEngagement = True
