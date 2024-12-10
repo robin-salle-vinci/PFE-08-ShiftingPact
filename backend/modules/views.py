@@ -65,7 +65,7 @@ def read_last_module_for_client(request):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        if authenticated_user.role == 'employee' or str(authenticated_user.id) != str(authenticated_user.id):
+        if authenticated_user.role == 'employee':
             return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
 
         module = ModulesESG.objects(id_client=authenticated_user.id).filter(state='open').first()
