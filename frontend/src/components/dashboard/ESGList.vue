@@ -81,7 +81,7 @@
 
   const handleValidate = (_esgId: number) => {
     axios
-      .patch(`${import.meta.env.VITE_API_URL}/modules/state/${_esgId}?newState=validated`, {
+      .patch(`${import.meta.env.VITE_API_URL}/modules/state/${_esgId}?newState=validated`, null, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
