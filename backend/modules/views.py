@@ -26,7 +26,7 @@ def read_modules(request):
 
         state_value = request.GET.get('state')
 
-        if state_value not in ['validated', 'verified']:
+        if state_value not in ['validated', 'verification']:
             return JsonResponse({'error': 'Invalid state value'}, status=400)
         else:
             modules = ModulesESG.filter_by_state(state_value)
@@ -38,24 +38,24 @@ def read_modules(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@require_GET
-def read_modules_by_client_id(request, uuid_client):
-    try:
-        authenticated_user = check_authenticated_user(request)
-        if isinstance(authenticated_user, HttpResponse):
-            return authenticated_user
+# @require_GET
+# def read_modules_by_client_id(request, uuid_client):
+#     try:
+#         authenticated_user = check_authenticated_user(request)
+#         if isinstance(authenticated_user, HttpResponse):
+#             return authenticated_user
 
-        modules = ModulesESG.objects.all().filter(client_id=uuid_client)
+#         modules = ModulesESG.objects.all().filter(client_id=uuid_client)
 
-        if authenticated_user.role != 'employee':
-            return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
+#         if authenticated_user.role != 'employee':
+#             return JsonResponse({'error': 'Only the author can acces to there esg'}, status=403)
 
-        data_json = [module_single_json(module) for module in modules]
+#         data_json = [module_single_json(module) for module in modules]
 
-        return JsonResponse(data_json, status=200)
+#         return JsonResponse(data_json, status=200)
 
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=500)
 
 
 # Get one ESG module by esg id(for employees only)
@@ -66,7 +66,7 @@ def read_module_by_esg_id(request, uuid_module_esg):
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        module_esg = ModulesESG.objects.get(esg_id=uuid_module_esg)
+        module_esg = ModulesESG.objects.get(id=uuid_module_esg)
 
         if not (authenticated_user.role == 'employee' or authenticated_user.id == module_esg.id_client):
             return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
@@ -210,8 +210,15 @@ def add_modified_answers(request):
         id_choice = data.get('id_choice')
         value = data.get('value')
         is_commitment = data.get('is_commitment')
-
-        if not (id_esg or id_question or value or is_commitment or id_choice) is None:
+        print("id_esg:", id_esg)
+        print("id_challenge:", id_challenge)
+        print("id_sub_challenge:", id_sub_challenge)
+        print("commentary:", commentary)
+        print("id_question:", id_question)
+        print("id_choice:", id_choice)
+        print("value:", value)
+        print("is_commitment:", is_commitment)
+        if id_esg is None or id_question is None or value is None or is_commitment is None :
             return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
         module_esg = ModulesESG.objects.get(pk=id_esg)
@@ -222,12 +229,13 @@ def add_modified_answers(request):
         new_choice = Choices.objects.get(pk=id_choice)
         score = 0 if not new_choice else new_choice.score
 
-        answer = Answers.objects(id_question=id_question, id__in=module_esg.original_answers).first()
-
+        answer = Answers.objects(id_question=id_question, id__in=module_esg.modified_answers).first()
         if answer:
-            Answers.objects(id=answer.id).update(value=value, is_commitment=is_commitment, id_choice=id_choice,
-                                                 score_response=score)
+
+            answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice,
+                                                 score_response=score, commentary=commentary)
         else:
+            print("create answer")
             new_answer = Answers.objects.create(
                 id_challenge=id_challenge,
                 id_sub_challenge=id_sub_challenge,
@@ -239,7 +247,8 @@ def add_modified_answers(request):
                 score_response=score,
             )
 
-            list_modified_answers = module_esg.modified_answers.append(new_answer.id)
+            list_modified_answers = module_esg.modified_answers
+            list_modified_answers.append(new_answer.id)
             module_esg.update(modified_answers=list_modified_answers)
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
@@ -287,8 +296,8 @@ def add_original_answers(request, uuid_module_esg):
         answer = Answers.objects(id_question=id_question, id__in=module_esg.original_answers).first()
 
         if answer:
-            Answers.objects(id=answer.id).update(value=value, is_commitment=is_commitment, id_choice=id_choice,
-                                                 score_response=score)
+            answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice,
+                                                 score_response=score, commentary=commentary)
         else:
             new_answer = Answers.objects.create(
                 id_challenge=id_challenge,
@@ -301,7 +310,8 @@ def add_original_answers(request, uuid_module_esg):
                 score_response=score,
             )
 
-            list_original_answers = module_esg.original_answers.append(new_answer.id)
+            list_original_answers = module_esg.original_answers
+            list_original_answers.append(new_answer.id)
             module_esg.update(original_answers=list_original_answers)
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)

@@ -6,8 +6,6 @@
 
     <!-- Answers -->
 
-    <!-- Display old answer of the client -->
-
     <!-- If employee dont have already modify this question -->
     <div v-if="!alreadyModified" class="answers">
       <div class="each-answer">
@@ -15,17 +13,27 @@
           <h5>Réponse client:</h5>
           <div>
             <label>Réponse:</label>
-            <input type="text" :value="answerToModify.value" :disabled="!isModifying" />
+            <input v-if="!answerToModify.id_choice" type="text" :value="answerToModify.value" />
+            <select
+              v-else
+              v-model="answerToModify.id_choice"
+              @change="updateAnswerValue"
+              :disabled="!isModifying"
+            >
+              <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
+                {{ choice.value }}
+              </option>
+            </select>
           </div>
           <div>
             <label>Commentaire:</label>
-            <textarea :value="answerToModify.commentary" :disabled="!isModifying"></textarea>
+            <textarea v-model="answerToModify.commentary" :disabled="!isModifying"></textarea>
           </div>
           <div>
             <label>Engagement:</label>
             <input
               type="checkbox"
-              :checked="answerToModify.is_commitment"
+              v-model="answerToModify.is_commitment"
               :disabled="!isModifying"
             />
           </div>
@@ -84,6 +92,7 @@
 </template>
 
 <script setup lang="ts">
+  import axios from 'axios'
   import { defineProps, ref, type Ref } from 'vue'
 
   interface Choice {
@@ -117,32 +126,28 @@
   const props = defineProps<{
     question: Question
     clientResponse: Reponse
-    employeeResponse: Reponse | undefined
+    employeeResponse?: Reponse
+    idEsg: string
   }>()
 
   const questionModel: Ref<Question> = ref(props.question)
   const originalAnswer = ref(props.clientResponse)
-  const alreadyModified = ref(true) //ref(props.employeeResponse ? true : false)
-  const answerToModify: Ref<Reponse> = ref({
-    id: props.clientResponse.id,
-    challenge: props.clientResponse.challenge,
-    sub_challenge: props.clientResponse.sub_challenge,
-    id_choice: props.clientResponse.id_choice,
-    value: props.clientResponse.value,
-    commentary: props.clientResponse.commentary,
-    score: props.clientResponse.score,
-    is_commitment: props.clientResponse.is_commitment,
-    score_response: props.clientResponse.score_response,
-  })
-  // if (props.employeeResponse) {
-  //   answerToModify = ref(props.employeeResponse)
-  // } else {
-  //   answerToModify = ref(props.clientResponse)
-  // }
+  const alreadyModified = ref(props.employeeResponse ? true : false)
+  let answerToModify: Ref<Reponse>
+
+  console.log(props.employeeResponse)
+
+  if (props.employeeResponse) {
+    answerToModify = ref({ ...props.employeeResponse })
+  } else {
+    answerToModify = ref({ ...props.clientResponse })
+  }
 
   // const newResponseModel = ref({ ...props.clientResponse })
 
   const isModifying = ref(false)
+
+  const apiUrl = import.meta.env.VITE_API_URL
 
   const updateAnswerValue = () => {
     const choice = questionModel.value.choices.find((c) => c.id === answerToModify.value.id_choice)
@@ -152,8 +157,27 @@
 
   const handleSave = () => {
     isModifying.value = false
-    console.log(answerToModify.value)
-    // TODO SEND THE MODIFIED RESPONSE TO THE SERVER
+    alreadyModified.value = true
+    answerToModify = ref({ ...answerToModify.value })
+
+    axios.patch(
+      `${apiUrl}/modules/add/answer`,
+      {
+        id_esg: props.idEsg,
+        id_challenge: answerToModify.value.challenge,
+        id_sub_challenge: answerToModify.value.sub_challenge,
+        commentary: answerToModify.value.commentary,
+        id_question: questionModel.value.id,
+        id_choice: answerToModify.value.id_choice,
+        value: answerToModify.value.value,
+        is_commitment: answerToModify.value.is_commitment,
+      },
+      {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      },
+    )
   }
 </script>
 

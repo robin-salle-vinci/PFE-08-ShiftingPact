@@ -21,6 +21,7 @@
         <h3>{{ subChallenge.value }}</h3>
         <div v-for="question in subChallenge.questions" v-bind:key="question.id" class="question">
           <QuestionElement
+            :idEsg="idEsg"
             :question="question"
             :clientResponse="clientResponse[question.id]"
             :employeeResponse="employeeResponse ? employeeResponse[question.id] : undefined"
@@ -45,9 +46,10 @@
   const apiUrl = import.meta.env.VITE_API_URL
 
   const questionDb = ref(null)
-  const clientResponse = ref<Record<string, any>>({})
-  const employeeResponse = ref<Record<string, any>>({})
+  const clientResponse = ref<Record<string, unknown>>({})
+  const employeeResponse = ref<Record<string, unknown>>({})
   const clientName = ref('')
+  const idEsg = ref('')
 
   const fetchData = async () => {
     try {
@@ -65,10 +67,10 @@
           },
         }),
       ])
-
+      idEsg.value = reponseResponse.data.id
       questionDb.value = questionsResponse.data
       clientResponse.value = reponseResponse.data.original_answers
-      employeeResponse.value = reponseResponse.data.employee_answers
+      employeeResponse.value = reponseResponse.data.modified_answers
       clientName.value = reponseResponse.data.client_information.company_name
     } catch (error) {
       console.error('Error fetching data:', error)
