@@ -16,6 +16,7 @@
   import HeaderElement from '@/components/structure/HeaderElement.vue'
   import router from '@/router'
   import type { Pact } from '@/types/Pact'
+  import { getToken, getUser } from '@/utils/localstorage'
   import axios from 'axios'
   import { ref } from 'vue'
   import { useRoute } from 'vue-router'
@@ -25,27 +26,31 @@
 
   const pact = ref<Pact>()
   const questions = ref<{ value: string }[]>([])
+  const user = getUser()
 
   async function getPact(id: string) {
     await axios
       .get(`${import.meta.env.VITE_API_URL}/questions/only/`, {
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('token'),
+          Authorization: 'Bearer ' + getToken(),
         },
       })
       .then((response) => {
         questions.value = response.data
-        console.log(questions.value)
       })
 
     await axios
       .get(`${import.meta.env.VITE_API_URL}/commitments/module/${id}`, {
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('token'),
+          Authorization: 'Bearer ' + getToken(),
         },
       })
       .then((response) => {
         pact.value = response.data
+
+        // Check if the user is the client of the pact
+        if (user.role === 'client' && pact.value?.client_information.id_user !== user.id)
+          router.push('/')
       })
   }
   getPact(id)
