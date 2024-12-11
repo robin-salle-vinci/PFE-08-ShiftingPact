@@ -31,7 +31,6 @@ def read_all(request):
 
         return JsonResponse(modules_json, safe=False, status=200)
     except Exception as e:
-        print(str(e))
         return JsonResponse({'error': str(e)}, status=500)
 
 

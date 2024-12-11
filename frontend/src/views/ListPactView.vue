@@ -28,8 +28,7 @@
 
 <template>
   <HeaderElement />
-
-  <div class="container">
+  <div class="container" v-if="allPacts.length > 0">
     <h1>List Pacts</h1>
     <div class="list" v-for="item in allPacts" :key="item.id">
       <div class="item">
@@ -44,6 +43,9 @@
       </div>
     </div>
   </div>
+  <div v-else class="container">
+    <h1>Aucun pacte d'engagement</h1>
+  </div>
 </template>
 
 <style>
@@ -57,6 +59,7 @@
   .container h1 {
     margin-top: 2%;
     margin-bottom: 0px;
+    text-align: center;
   }
 
   .list {

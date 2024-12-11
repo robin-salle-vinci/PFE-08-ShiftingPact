@@ -15,11 +15,13 @@ function isEmployee() {
 }
 
 async function hasOpenEsg() {
-  const response = await axios.get(`${import.meta.env.VITE_API_URL}/modules/`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
-  })
+  const response = await axios
+    .get(`${import.meta.env.VITE_API_URL}/modules/`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    })
+    .catch()
   for (const module of response.data) {
     if (module.state === 'open') {
       return true
@@ -68,11 +70,11 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const token = getToken()
-  const esgOpen = await hasOpenEsg()
 
   if (!token && to.path !== '/login') {
     next('/login')
   } else if (token) {
+    const esgOpen = await hasOpenEsg()
     if (isEmployee() && to.path === '/') {
       next('/dashboard')
     } else if (!isEmployee() && to.path === '/dashboard') {
