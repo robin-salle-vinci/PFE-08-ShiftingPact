@@ -8,7 +8,7 @@
       <img src="@/assets/profils.png" alt="profil" />
       <div class="profils-info">
         <span>{{ username }}</span>
-        <a @click="handleLogout">se deconnecter</a>
+        <button @click="handleLogout" class="logout">Se déconnecter</button>
       </div>
     </div>
   </header>
@@ -67,10 +67,22 @@
     font-size: 1.2em;
   }
 
-  .profils-info a {
-    color: #fde791;
+  .profils-info button {
+    color: #013238; /* Text color */
+    background-color: #fde791; /* Background color */
     font-size: 0.8em;
     text-decoration: none;
-    font-weight: 900;
+    font-weight: 600;
+    border: 2px solid #013238;
+    border-radius: 5px;
+    padding: 5px 10px; /* Add some padding for better appearance */
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+  }
+
+  /* Hover effect */
+  .profils-info button:hover {
+    background-color: #c5fddf; /* New background color on hover */
+    color: #013238; /* Text color on hover */
+    border-color: #c5fddf; /* Border color matches background */
   }
 </style>
