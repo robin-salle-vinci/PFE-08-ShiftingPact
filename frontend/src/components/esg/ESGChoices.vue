@@ -12,7 +12,12 @@
 
   <div v-if="question.type_response === 'qrm'" class="group">
     <div v-for="choice in question.choices" :key="choice.id" class="choice">
-      <ESGCheckboxChoice v-if="choice.value != 'nan'" :choice="choice" :questionId="question.id" />
+      <ESGCheckboxChoice
+        v-if="choice.value != 'nan'"
+        :choice="choice"
+        :questionId="question.id"
+        :isActive="responseId == choice.id"
+      />
     </div>
   </div>
 

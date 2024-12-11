@@ -115,7 +115,7 @@
       }
     }
 
-    return (responses.length / totalQuestions) * 100
+    return (Object.keys(responses).length / totalQuestions) * 100
   })
 
   const categoryState = ref<Record<string, boolean>>({})
