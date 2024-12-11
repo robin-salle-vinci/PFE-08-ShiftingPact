@@ -33,6 +33,7 @@ const router = createRouter({
       path: '/esg/:id',
       name: 'esg',
       component: EsgView,
+      meta: { requiresEmployee: true },
     },
     {
       path: '/pact/:id',
@@ -41,6 +42,7 @@ const router = createRouter({
     },
   ],
 })
+
 router.beforeEach((to, from, next) => {
   const token = getToken()
   if (!token && to.path !== '/login') {
@@ -49,6 +51,8 @@ router.beforeEach((to, from, next) => {
     if (isEmployee() && to.path === '/') {
       next('/dashboard')
     } else if (!isEmployee() && to.path === '/dashboard') {
+      next('/')
+    } else if (to.matched.some((record) => record.meta.requiresEmployee) && !isEmployee()) {
       next('/')
     } else {
       next()

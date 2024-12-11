@@ -67,6 +67,7 @@
     padding: 20px;
     margin: 10px;
     width: 35%;
+    color: white;
   }
 
   .container h1 {

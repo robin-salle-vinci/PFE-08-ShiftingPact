@@ -7,6 +7,7 @@
     :handleValidate="handleValidate"
     :seePact="false"
     :onlySee="false"
+    :dontValidate="false"
   />
 
   <ListElement
@@ -16,7 +17,8 @@
     :handleSeeEditForm="handleSeeEditForm"
     :handleValidate="handleValidate"
     :seePact="false"
-    :onlySee="true"
+    :onlySee="false"
+    :dontValidate="true"
   />
 
   <ListElement
@@ -27,6 +29,7 @@
     :handleSeePactForm="handleSeePactForm"
     :seePact="true"
     :onlySee="true"
+    :dontValidate="true"
   />
 </template>
 

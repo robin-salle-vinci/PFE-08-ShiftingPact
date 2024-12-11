@@ -6,6 +6,7 @@
     title: string
     onlySee: boolean
     seePact: boolean
+    dontValidate: boolean
     handleSeeEditForm: (payload: MouseEvent, id: string) => void
     handleValidate?: (payload: MouseEvent, id: string) => void
     handleSeePactForm?: (payload: MouseEvent, id: string) => void
@@ -26,14 +27,14 @@
             {{ onlySee ? 'Voir' : 'Voir/Éditer' }}
           </button>
           <button
-            v-if="!onlySee"
+            v-if="!dontValidate"
             @click="(event) => handleValidate && handleValidate(event, item.id)"
           >
             Valider
           </button>
           <button
-            @click="(event) => handleSeePactForm && handleSeePactForm(event, item.id)"
             v-if="seePact"
+            @click="(event) => handleSeePactForm && handleSeePactForm(event, item.id)"
           >
             Voir Pacte
           </button>
