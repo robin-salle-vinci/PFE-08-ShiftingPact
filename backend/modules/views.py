@@ -301,18 +301,6 @@ def add_modified_answers(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-def stringify_keys(data):
-    """
-    Recursively convert all dictionary keys to strings.
-    """
-    if isinstance(data, dict):
-        return {str(key): stringify_keys(value) for key, value in data.items()}
-    elif isinstance(data, list):
-        return [stringify_keys(item) for item in data]
-    return data
-
-# Calculate ESG Module score
 @require_http_methods(["PATCH"])
 def add_score(request, uuid_module_esg):
     # check authentication
@@ -337,27 +325,43 @@ def add_score(request, uuid_module_esg):
 
     # Calculate ESG scores
     try:
-        sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
-        challenge_scores = calculate_challenge_scores(sub_challenge_scores)
-        theme_scores = calculate_theme_scores(challenge_scores)
-        global_esg_scores = calculate_global_esg_scores(theme_scores)
+        global_esg_scores = calculate_global_esg_scores(module_esg)
     except Exception as e:
         return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
                             status=500)
 
     try:
-        module_esg.update(calculated_score=global_esg_scores['total_esg_score'])
+        module_esg.update(calculated_score=global_esg_scores['total_percentage'])
         module_esg.save()
     except Exception as e:
         return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
                             status=500)
 
-    # Combine results into a single object with stringified keys
-    combined_scores = stringify_keys({
-        "sub_challenge_scores": sub_challenge_scores,
-        "challenge_scores": challenge_scores,
-        "theme_scores": theme_scores,
-        "global_esg_scores": global_esg_scores
-    })
+    return JsonResponse({'score_total': global_esg_scores['total_percentage']}, status=200)
 
-    return JsonResponse(combined_scores, status=200)
+@require_GET
+def get_score(request, uuid_module_esg):
+
+    authenticated_user = check_authenticated_user(request)
+    if isinstance(authenticated_user, HttpResponse):
+        return authenticated_user
+
+    try:
+        module_esg = ModulesESG.get_by_id(uuid_module_esg)
+    except ModulesESG.DoesNotExist:
+        return JsonResponse({'error': 'Module ESG not found'}, status=404)
+
+    # Check module state
+    if module_esg.state == 'open':
+        return JsonResponse(
+            {'error': 'Module ESG must be in verification or validated state'},
+            status=400)
+
+    # Calculate ESG scores
+    try:
+        global_esg_scores = calculate_global_esg_scores(module_esg)
+    except Exception as e:
+        return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
+                            status=500)
+
+    return JsonResponse(global_esg_scores, status=200)
