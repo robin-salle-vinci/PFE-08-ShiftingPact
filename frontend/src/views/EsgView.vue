@@ -14,12 +14,9 @@
       >
         <h3>{{ subChallenge.value }}</h3>
         <div v-for="question in subChallenge.questions" v-bind:key="question.id" class="question">
-          {{ question.value }}
           <QuestionElement
             :idEsg="idEsg"
             :state="stateEsg"
-            :challenge="challenge.id"
-            :subChallenge="subChallenge.id"
             :question="question"
             :clientAnswer="clientResponse[question.id]"
             :employeeAnswer="employeeResponse ? employeeResponse[question.id] : undefined"
@@ -76,7 +73,6 @@
 
       // Get the questions
       esgForm.value = questionsResponse.data
-      console.log(esgForm)
 
       // Get the client and employee answers
       clientResponse.value = clientEsg.data.original_answers

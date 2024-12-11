@@ -119,7 +119,6 @@
   import type { Question } from '@/types/Question'
   import axios from 'axios'
   import { defineProps, ref, type Ref } from 'vue'
-
   const props = defineProps<{
     question: Question
     clientAnswer: Answer
@@ -127,8 +126,6 @@
     idEsg: string
     state: string
     companyName: string
-    challenge: string
-    subChallenge: string
   }>()
 
   // Toggle the modification mode
@@ -141,18 +138,8 @@
   let answerToModify: Ref<Answer>
   if (props.employeeAnswer) {
     answerToModify = ref({ ...props.employeeAnswer })
-  } else if (props.clientAnswer) {
-    answerToModify = ref({ ...props.clientAnswer })
   } else {
-    console.log(questionModel.value)
-    answerToModify = ref({
-      challenge: props.challenge,
-      sub_challenge: props.subChallenge,
-      commentary: '',
-      id_choice: '',
-      value: '',
-      is_commitment: false,
-    })
+    answerToModify = ref({ ...props.clientAnswer })
   }
 
   const updateAnswerValue = () => {
