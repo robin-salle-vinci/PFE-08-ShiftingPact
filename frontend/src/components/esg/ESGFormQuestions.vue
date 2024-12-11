@@ -46,37 +46,51 @@
 
 <script setup lang="ts">
   import type { Question } from '@/types/Question'
-  import { getToken, getUser } from '@/utils/localstorage'
+  import { getToken } from '@/utils/localstorage'
   import axios from 'axios'
   import ESGChoices from './ESGChoices.vue'
   import ESGRadioChoice from './ESGRadioChoice.vue'
 
   const apiUrl = import.meta.env.VITE_API_URL
-  const client = getUser()
 
-  const { responses, idESG, selectedChallengeId, selectedSubChallengeId, selectedSubChallenge } =
-    defineProps({
-      responses: {
-        type: Object,
-        default: () => ({}),
-      },
-      idESG: {
-        type: String,
-        default: '',
-      },
-      selectedChallengeId: {
-        type: String,
-        default: '',
-      },
-      selectedSubChallengeId: {
-        type: String,
-        default: '',
-      },
-      selectedSubChallenge: {
-        type: Object,
-        default: null,
-      },
-    })
+  const {
+    responses,
+    idESG,
+    selectedChallengeId,
+    selectedSubChallengeId,
+    selectedSubChallenge,
+    canAnswer,
+    addOneAnswer,
+  } = defineProps({
+    responses: {
+      type: Object,
+      default: () => ({}),
+    },
+    idESG: {
+      type: String,
+      default: '',
+    },
+    selectedChallengeId: {
+      type: String,
+      default: '',
+    },
+    selectedSubChallengeId: {
+      type: String,
+      default: '',
+    },
+    selectedSubChallenge: {
+      type: Object,
+      default: null,
+    },
+    canAnswer: {
+      type: Function,
+      default: () => {},
+    },
+    addOneAnswer: {
+      type: Function,
+      default: () => {},
+    },
+  })
 
   const saveResponses = () => {
     selectedSubChallenge.forEach((question: Question) => {
@@ -85,7 +99,7 @@
       let idChoice = null
       let valueChoice = null
 
-      if (question.type_response === 'qcm') {
+      if (question.type_response === 'qcm' || question.type_response === 'pourcentage') {
         const selectedRadio = document.querySelector(`input[name="${question.id}"]:checked`)
         idChoice = selectedRadio?.getAttribute('id_choice')
         valueChoice = selectedRadio?.getAttribute('value')
@@ -100,7 +114,7 @@
       }
 
       if (question.type_response === 'question ouverte') {
-        const textarea = document.querySelector(`textarea[name="${question.id + '-comment'}"]`)
+        const textarea = document.querySelector(`textarea[name="${question.id}"]`)
         valueChoice = (textarea as HTMLTextAreaElement)?.value
         if (valueChoice === '') valueChoice = null
       }
@@ -130,38 +144,18 @@
             },
           },
         )
-        .then((response) => {
-          console.log(response)
+        .then(() => {
+          addOneAnswer(question.id, {
+            challenge: selectedChallengeId,
+            sub_challenge: selectedSubChallengeId,
+            id_choice: idChoice,
+            value: valueChoice,
+            commentary: comment,
+            is_commitment: isCommitment,
+          })
         })
-        .catch((error) => {
-          console.error(error)
-        })
+        .catch(() => {})
     })
-  }
-
-  const canAnswer = (question: Question) => {
-    switch (question.template) {
-      case 'ALL':
-        return true
-
-      case 'OWNED FACILITY':
-        return client.ownedFacility
-
-      case 'FACILITY':
-        return client.ownedFacility
-
-      case 'WORKERS':
-        return Number(client.numberWorkers) > 0
-
-      case 'PRODUITS':
-        return client.serviceOrProduct == 'produit'
-
-      case 'SERVICES':
-        return client.serviceOrProduct == 'service'
-
-      default:
-        return false
-    }
   }
 </script>
 
