@@ -83,7 +83,6 @@
   })
 
   const checkDisplayTemplate = (question: Question) => {
-    console.log(client.value?.owned_facility)
     switch (question.template) {
       case 'ALL':
         return true
