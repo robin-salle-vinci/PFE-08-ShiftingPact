@@ -42,7 +42,7 @@
   const selectedSubChallenge = ref<Question[]>([])
 
   const questions = ref({})
-  const responses = ref<Answer[]>([])
+  const responses = ref<{ [key: string]: Answer }>({})
 
   async function getQuestions() {
     const response = await axios.get(`${apiUrl}/questions/`, {
