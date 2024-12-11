@@ -39,13 +39,13 @@ def read_all(request):
 
 # Get one ESG Module by id
 @require_GET
-def read_one_by_id(request, uuid_module_esg):
+def read_one_by_id(request, uuid_esg_module):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        module = ModulesESG.objects(id=uuid_module_esg).first()
+        module = ModulesESG.objects(id=uuid_esg_module).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
@@ -64,6 +64,7 @@ def read_last_module_for_client(request):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
+        
 
         if authenticated_user.role == 'employee':
             return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
@@ -72,6 +73,9 @@ def read_last_module_for_client(request):
 
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
+
+        if  str(module.id_client) != str(authenticated_user.id):
+            return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
 
@@ -88,13 +92,19 @@ def create_one(request):
 
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
+        
+        request_body = json.loads(request.body)
+        id_client = request_body.get('id_client')
+
+        if id_client is None:
+            return JsonResponse({'error': 'id_client field is required'}, status=400)
 
         # check if client exist
-        if Users.objects.filter(id=authenticated_user.id).count() == 0:
+        if Users.objects.filter(id=id_client).count() == 0:
             return JsonResponse({'message': 'Client does not exist'}, status=404)
 
         ModulesESG.objects.create(
-            id_client=authenticated_user.id,
+            id_client=id_client,
             date_last_modification=datetime.today().date(),
             original_answers=[],
             modified_answers=[],
