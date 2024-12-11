@@ -66,6 +66,8 @@
     border-radius: 10px;
     padding: 20px;
     margin: 10px;
+    width: 25%;
+    text-align: center;
   }
 
   .container h1 {
