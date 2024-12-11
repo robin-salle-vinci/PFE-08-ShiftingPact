@@ -347,7 +347,153 @@ onMounted(async () => {
 
 
 
+<!--
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import HeaderElement from '@/components/structure/HeaderElement.vue';
+import type { AxiosResponse } from 'axios';
 
+interface Category {
+  name: string;
+  currentScore: number;
+  currentTotal: number;
+  currentPercentage: number;
+  engagementScore: number;
+  engagementTotal: number;
+  engagementPercentage: number;
+  total_esg_score_today: number;
+  total_esg_score_in_two_years: number;
+  total_esg_score: number;
+}
+
+interface Category2 {
+  name: string;
+  currentScore: number;
+  currentTotal: number;
+  currentPercentage: number;
+  engagementScore: number;
+  engagementTotal: number;
+  engagementPercentage: number;
+  total_esg_score_today: number;
+  total_esg_score_in_two_years: number;
+  total_esg_score: number;
+}
+
+const categories = ref<Category[]>([]);
+const categories2 = ref<Category2[]>([]);
+
+const isLoading = ref(true); // État du loader
+
+// Récupérer les données du backend
+const fetchESGData = async () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const uuidModuleEsg = '550e8400-e29b-41d4-a716-446655440026';
+    const fullUrl = `${apiUrl}/modules/score/${uuidModuleEsg}?t=${Date.now()}`;
+    console.log("URL appelée :", fullUrl);
+
+    const token = localStorage.getItem('token'); // Récupérer le token
+    if (!token) {
+        console.error('Token manquant');
+        return;
+    }
+
+    try {
+        const response: AxiosResponse = await axios.get(fullUrl, {
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        const moduleData = response.data;
+        console.log('Données renvoyées par l\'API :', response.data);
+
+        // Récupérer les sous-challenges
+        const todayScores = moduleData.sub_challenge_scores?.today || {};
+        const futureScores = moduleData.sub_challenge_scores?.in_two_years || {};
+
+        const total_esg_score_today = moduleData.total_today?.score || 0;
+        const total_esg_score_in_two_years = moduleData.total_in_two_years?.score || 0;
+        const total_esg_score = moduleData.combined_total?.score || 0;
+
+        // Fusionner les sous-challenges
+        const combinedScores2 = Object.keys(todayScores).map((id) => {
+            const today = todayScores[id];
+            const future = futureScores[id] || {};
+
+            const currentPercentage = today.score_max
+                ? (today.score / today.score_max) * 100
+                : 0;
+            const engagementPercentage = future.score_max
+                ? (future.score / future.score_max) * 100
+                : 0;
+
+            return {
+                name: today.name,
+                currentScore: today.score,
+                currentTotal: today.score_max,
+                currentPercentage,
+                engagementScore: future.score || 0,
+                engagementTotal: future.score_max || today.score_max,
+                engagementPercentage,
+                total_esg_score_today,
+                total_esg_score_in_two_years,
+                total_esg_score,
+            };
+        });
+
+        // Récupérer les thèmes
+        const todayScoresTheme = moduleData.theme_scores?.today || {};
+        const futureScoresTheme = moduleData.theme_scores?.in_two_years || {};
+
+        const combinedScores = Object.keys(todayScoresTheme).map((key) => {
+            const today = todayScoresTheme[key];
+            const future = futureScoresTheme[key] || {};
+
+            const currentPercentage = today.score_max
+                ? (today.score / today.score_max) * 100
+                : 0;
+            const engagementPercentage = future.score_max
+                ? (future.score / future.score_max) * 100
+                : 0;
+
+            return {
+                name: key, // Nom du thème
+                currentScore: today.score,
+                currentTotal: today.score_max,
+                currentPercentage,
+                engagementScore: future.score || 0,
+                engagementTotal: future.score_max || today.score_max,
+                engagementPercentage,
+                total_esg_score_today,
+                total_esg_score_in_two_years,
+                total_esg_score,
+            };
+        });
+
+        // Assigner les résultats
+        categories.value = combinedScores;
+        categories2.value = combinedScores2;
+
+        console.log("Catégories (Thèmes) :", categories.value);
+        console.log("Catégories2 (Sous-challenges) :", categories2.value);
+
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Erreur Axios:', error.response ? error.response.data : error.message);
+        } else {
+            console.error('Erreur lors de la récupération des données ESG:', error);
+        }
+    }
+};
+
+// Charger les données et gérer le loader
+onMounted(async () => {
+  await fetchESGData();
+  setTimeout(() => {
+    isLoading.value = false; // Cache le loader après un délai
+  }, 4000); // Durée de l'animation
+});
+</script>
+-->
 
 
 
@@ -682,7 +828,7 @@ onMounted(async () => {
   top: 50px;
   left: calc(50% - 3px);
   background-color: #74372b;
-  animation: liquid 6s linear;
+  animation: liquid 3s linear;
 }
 .coffee-medium__smoke {
   width: 8px;
