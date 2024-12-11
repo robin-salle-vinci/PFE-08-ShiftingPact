@@ -29,9 +29,9 @@
   import ESGFormQuestions from '@/components/esg/ESGFormQuestions.vue'
   import type { Answer } from '@/types/Answer.ts'
   import type { Question } from '@/types/Question.ts'
+  import { getToken, getUser } from '@/utils/localstorage'
   import axios from 'axios'
   import { ref } from 'vue'
-  import { getToken, getUser } from '@/utils/localstorage'
 
   const apiUrl = import.meta.env.VITE_API_URL
   const client = getUser()
