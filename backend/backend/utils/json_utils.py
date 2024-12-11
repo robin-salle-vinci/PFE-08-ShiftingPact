@@ -125,4 +125,5 @@ def commitment_json(commitment):
         answer_json(answer)
         for answer in (Answers.get_by_id(idAnswer) for idAnswer in commitment.answers_commitments)
       ],
+    'id_module_esg': str(commitment.id_module_esg),
   }
