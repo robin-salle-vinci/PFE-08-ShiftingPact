@@ -5,6 +5,8 @@ import PactView from '@/views/PactView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import ESGFormView from '../views/ESGFormView.vue'
+import ScoresView from '../views/ScoresView.vue'
 
 function isEmployee() {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -25,6 +27,11 @@ const router = createRouter({
       component: LoginView,
     },
     {
+      path: '/form/esg',
+      name: 'formesg',
+      component: ESGFormView,
+    },
+    {
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
@@ -40,6 +47,12 @@ const router = createRouter({
       name: 'pact',
       component: PactView,
     },
+    {
+      path: '/scores',
+      name: 'scores',
+      component: ScoresView,
+    },
+
   ],
 })
 
