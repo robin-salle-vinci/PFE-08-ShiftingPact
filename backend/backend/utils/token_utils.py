@@ -54,6 +54,7 @@ def decode_token(token):
 
 def check_authenticated_user(request):
   header = request.headers.get('Authorization')
+
   if not header or not header.startswith('Bearer '):
       return HttpResponse("error: Invalid Authorization header", status=400)
 

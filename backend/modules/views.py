@@ -27,7 +27,7 @@ def read_all(request):
         if authenticated_user.role == 'employee':
             modules = ModulesESG.objects.all()
         else:
-            modules = ModulesESG.objects.all().filter(client_id=authenticated_user.id)
+            modules = ModulesESG.objects.all().filter(id_client=authenticated_user.id)
 
         modules_json = [module_single_json(module) for module in modules]
 
