@@ -7,4 +7,6 @@ export interface Question {
   value: string
   type_response: string
   choices: Choice[]
+  challenge: string
+  sub_challenge: string
 }

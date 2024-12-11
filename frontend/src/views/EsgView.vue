@@ -14,9 +14,12 @@
       >
         <h3>{{ subChallenge.value }}</h3>
         <div v-for="question in subChallenge.questions" v-bind:key="question.id" class="question">
+          {{ question.value }}
           <QuestionElement
             :idEsg="idEsg"
             :state="stateEsg"
+            :challenge="challenge.id"
+            :subChallenge="subChallenge.id"
             :question="question"
             :clientAnswer="clientResponse[question.id]"
             :employeeAnswer="employeeResponse ? employeeResponse[question.id] : undefined"
@@ -33,10 +36,10 @@
   import QuestionElement from '@/components/dashboard/QuestionElement.vue'
   import HeaderElement from '@/components/structure/HeaderElement.vue'
   import router from '@/router'
+  import type { Answer } from '@/types/Answer'
   import type { Challenge } from '@/types/Challenge'
   import type { ClientInformation } from '@/types/ClientInformation'
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Reponse'
   import axios from 'axios'
   import { onMounted, ref } from 'vue'
   import { useRoute } from 'vue-router'
@@ -73,6 +76,7 @@
 
       // Get the questions
       esgForm.value = questionsResponse.data
+      console.log(esgForm)
 
       // Get the client and employee answers
       clientResponse.value = clientEsg.data.original_answers
