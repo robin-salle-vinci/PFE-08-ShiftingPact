@@ -9,8 +9,8 @@
         <h4>{{ question.value }}</h4>
         <ESGChoices
           :question="question"
-          :responseId="questionResponses[question.id]?.id_choice"
-          :responseValue="questionResponses[question.id]?.value"
+          :responseId="responses[question.id]?.id_choice"
+          :responseValue="responses[question.id]?.value"
         />
 
         <h4>Mise en place de la pratique :</h4>
@@ -18,20 +18,12 @@
           <ESGRadioChoice
             :choice="{ id: question.id + '-' + 1, value: 'Maintenant' }"
             :questionId="question.id + '-when'"
-            :isActive="
-              !questionResponses[question.id]
-                ? false
-                : !questionResponses[question.id]?.is_commitment
-            "
+            :isActive="!responses[question.id] ? false : !responses[question.id]?.is_commitment"
           />
           <ESGRadioChoice
             :choice="{ id: question.id + '-' + 2, value: 'Dans les 2 ans' }"
             :questionId="question.id + '-when'"
-            :isActive="
-              !questionResponses[question.id]
-                ? false
-                : questionResponses[question.id]?.is_commitment
-            "
+            :isActive="!responses[question.id] ? false : responses[question.id]?.is_commitment"
           />
         </div>
 
@@ -40,7 +32,7 @@
           <textarea
             placeholder="Entrez votre commentaire ici"
             :name="question.id + '-comment'"
-            :value="questionResponses[question.id]?.commentary"
+            :value="responses[question.id]?.commentary"
           ></textarea>
         </div>
       </div>
@@ -53,12 +45,10 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
   import axios from 'axios'
   import ESGChoices from './ESGChoices.vue'
   import ESGRadioChoice from './ESGRadioChoice.vue'
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Answer'
   import { getToken, getUser } from '@/utils/localstorage'
 
   const apiUrl = import.meta.env.VITE_API_URL
@@ -148,17 +138,6 @@
         })
     })
   }
-
-  const questionResponses = computed(() => {
-    const questionResponsesTemp: { [key: string]: Answer | null } = {}
-
-    selectedSubChallenge.forEach((question: Question) => {
-      questionResponsesTemp[question.id] =
-        responses.find((r: Response) => r.id_question === question.id) || null
-    })
-
-    return questionResponsesTemp
-  })
 
   const canAnswer = (question: Question) => {
     switch (question.template) {

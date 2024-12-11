@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-  import type { Answer } from '@/types/Answer.ts'
   import type { Question } from '@/types/Question.ts'
   const { type, responses, questions } = defineProps({
     type: {
@@ -24,11 +23,10 @@
     const begin = type === 'challenge' ? 'progress-challenge' : 'progress-sub-challenge'
 
     const totalQuestions = questions.length
-
-    const answeredQuestions = responses.reduce((count: number, response: Answer) => {
-      const question = questions.some((q: Question) => q.id === response.id_question)
-      return question ? count + 1 : count
-    }, 0)
+    let answeredQuestions = 0
+    questions.forEach((question: Question) => {
+      if (responses[question.id]) return answeredQuestions++
+    })
 
     if (answeredQuestions === totalQuestions) return begin + '-completed'
     if (answeredQuestions > 0) return begin + '-in-progress'

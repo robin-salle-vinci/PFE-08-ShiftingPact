@@ -56,21 +56,8 @@
       },
     })
 
-    response.data.original_answers = Object.keys(response.data.original_answers)
-    responses.value = response.data.original_answers.map((answer: Answer) => ({
-      id: answer.id,
-      challenge: answer.challenge,
-      sub_challenge: answer.sub_challenge,
-      id_choice: answer.id_choice,
-      value: answer.value,
-      commentary: answer.commentary,
-      score: answer.score,
-      is_commitment: answer.is_commitment,
-      score_response: answer.score_response,
-    }))
-
+    responses.value = response.data.original_answers
     idESG.value = response.data.id
-    console.log(response.data)
   }
 
   getQuestions()
