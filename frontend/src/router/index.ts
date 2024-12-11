@@ -33,7 +33,6 @@ const router = createRouter({
       path: '/esg/:id',
       name: 'esg',
       component: EsgView,
-      props: true,
     },
     {
       path: '/pact/:id',
