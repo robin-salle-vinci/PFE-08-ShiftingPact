@@ -1,6 +1,6 @@
 <template>
   <input
-    type="radio"
+    type="checkbox"
     :name="questionId"
     :value="choice.value"
     :id="`choice-${choice.id}-${questionId}`"
@@ -34,7 +34,7 @@
     box-sizing: border-box;
   }
 
-  input[type='radio'] {
+  input[type='checkbox'] {
     display: none;
   }
 
@@ -42,7 +42,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 15px; /* Espacement interne */
+    padding: 10px 15px;
     font-size: 16px;
     cursor: pointer;
     background-color: #f9f9f9;
@@ -51,11 +51,11 @@
     transition: all 0.3s;
     text-align: center;
     user-select: none;
-    max-width: 100%; /* Empêche le dépassement si trop long */
-    word-wrap: break-word; /* Gère les retours à la ligne */
+    max-width: 100%;
+    word-wrap: break-word;
   }
 
-  [type='radio']:checked + label {
+  [type='checkbox']:checked + label {
     background-color: #013238;
     color: white;
     border-color: #013238;

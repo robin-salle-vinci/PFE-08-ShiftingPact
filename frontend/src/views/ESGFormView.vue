@@ -29,34 +29,54 @@
   const selectedSubChallenge = ref<object | null>(null)
 
   const questions = ref([])
+  const responses = ref([])
 
-  axios
-    .get(`${apiUrl}/questions/`, {
+  async function createModule() {
+    const response = await axios.post(`${apiUrl}/modules/create/`, {
+      headers: {
+        Authorization: 'Bearer ' + getToken(),
+        Test: 'test',
+      },
+    })
+
+    console.log(response.data)
+    responses.value = response.data
+  }
+
+  createModule()
+
+  async function getQuestions() {
+    const response = await axios.get(`${apiUrl}/questions/`, {
       headers: {
         Authorization: 'Bearer ' + getToken(),
       },
     })
-    .then((response) => {
-      questions.value = response.data
-    })
-    .catch((error) => {
-      console.error('Erreur lors de la requête:', error)
+
+    questions.value = response.data
+  }
+
+  async function getResponses() {
+    const response = await axios.get(`${apiUrl}/modules/esg/`, {
+      headers: {
+        Authorization: 'Bearer ' + getToken(),
+      },
     })
 
-  const responses = ref([
-    {
-      id: 'c03ba929-1427-4612-9ec2-c5efa943e616',
-      id_client: 1,
-      id_question: '550e8400-e29b-41d4-a716-44665544000e',
-      comment: "Commentaire de l'utilisateur",
-      isEngagement: true,
-      value: 'b',
-      score_response: 1.0,
-      date_modification: '2021-09-01T00:00:00.000Z',
-    },
-  ])
+    console.log(response.data)
+    responses.value = response.data
+  }
+
+  getQuestions()
+  // getResponses()
 
   function handleSubChallengeSelected(question: object) {
+    if (selectedSubChallenge.value === question) return
+    const radios = document.querySelectorAll('input[type="radio"]')
+
+    radios.forEach((radio) => {
+      ;(radio as HTMLInputElement).checked = false
+    })
+
     selectedSubChallenge.value = question
   }
 </script>

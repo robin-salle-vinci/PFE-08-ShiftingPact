@@ -1,7 +1,8 @@
 <template>
-  <div v-if="question.type_response === 'qcm'" class="radio-group">
-    <div v-for="choice in question.choices" :key="choice.id" class="radio-choice">
+  <div v-if="question.type_response === 'qcm'" class="group">
+    <div v-for="choice in question.choices" :key="choice.id" class="choice">
       <ESGRadioChoice
+        v-if="choice.value != 'nan'"
         :choice="choice"
         :questionId="question.id"
         :isActive="responseId == choice.id"
@@ -9,13 +10,20 @@
     </div>
   </div>
 
-  <div v-if="question.type_response === 'open'" class="textarea-container">
+  <div v-if="question.type_response === 'qrm'" class="group">
+    <div v-for="choice in question.choices" :key="choice.id" class="choice">
+      <ESGCheckboxChoice v-if="choice.value != 'nan'" :choice="choice" :questionId="question.id" />
+    </div>
+  </div>
+
+  <div v-if="question.type_response === 'question ouverte'" class="textarea-container">
     <textarea placeholder="Entrez votre réponse ici" :value="responseValue"></textarea>
   </div>
 </template>
 
 <script setup lang="ts">
   import ESGRadioChoice from './ESGRadioChoice.vue'
+  import ESGCheckboxChoice from './ESGCheckboxChoice.vue'
 
   const { question, responseId, responseValue } = defineProps({
     question: {
@@ -39,13 +47,13 @@
     box-sizing: border-box;
   }
 
-  .radio-group {
+  .group {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
   }
 
-  .radio-choice {
+  .choice {
     position: relative;
   }
 

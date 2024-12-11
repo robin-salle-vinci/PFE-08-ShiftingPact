@@ -1,7 +1,11 @@
 <template>
   <div class="main-container-esg-from-questions">
     <div class="form-container-questions">
-      <div v-for="(question, questionIndex) in selectedSubChallenge" :key="questionIndex">
+      <div
+        v-for="(question, questionIndex) in selectedSubChallenge"
+        :key="questionIndex"
+        class="question"
+      >
         <h4>{{ question.value }}</h4>
         <ESGChoices
           :question="question"
@@ -25,7 +29,6 @@
               !questionResponses[question.id] ? false : questionResponses[question.id].isEngagement
             "
           />
-          
         </div>
 
         <h4>Commentaire ?</h4>
@@ -35,15 +38,10 @@
             :value="questionResponses[question.id]?.comment"
           ></textarea>
         </div>
-
-        <div
-          v-if="parseInt(questionIndex) < selectedSubChallenge.length - 1"
-          class="separator"
-        ></div>
       </div>
 
       <div class="save-button-container">
-        <button class="save-button">Sauvegarder</button>
+        <button class="save-button" @click="saveResponses()">Sauvegarder</button>
       </div>
     </div>
   </div>
@@ -74,6 +72,13 @@
     value: string
     score_response: number
     date_modification: string
+  }
+
+  const saveResponses = () => {
+    selectedSubChallenge.forEach((question) => {
+      const selectedRadio = document.querySelector(`input[name="${question.id}"]:checked`)
+      console.log(selectedRadio)
+    })
   }
 
   const questionResponses = computed(() => {
@@ -109,11 +114,21 @@
 
   .form-container-questions {
     height: 100%;
-    background-color: #e7e7e9;
-    border-radius: 5px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0% 2% 2% 2%;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  .question {
+    background-color: #e7e7e9;
+    border-radius: 5px;
+    margin: 0;
+    padding: 1% 2% 2% 2%;
+  }
+
+  .question:not(:last-child) {
+    margin-bottom: 1%;
   }
 
   .radio-group {
@@ -140,22 +155,13 @@
     box-shadow: 0 0 5px #b5cdbf;
   }
 
-  .separator {
-    width: 100%;
-    height: 2px;
-    background-color: #ccc;
-    margin-top: 20px;
-    margin-bottom: 20px;
-  }
-
   .save-button-container {
-    position: -webkit-sticky;
-    position: sticky;
-    bottom: 0;
-    right: 0;
-    text-align: right;
-    margin-top: 0;
-    z-index: 1000;
+    bottom: 1%;
+    margin-right: 1%;
+    text-align: center;
+    background-color: #e7e7e9;
+    border-radius: 4px;
+    padding: 1%;
   }
 
   .save-button {

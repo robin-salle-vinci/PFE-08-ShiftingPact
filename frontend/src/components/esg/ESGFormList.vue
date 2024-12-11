@@ -24,7 +24,11 @@
         :key="challengeIndex"
         class="category"
       >
-        <div class="category-header" @click="toggleCategory(challengeIndex)">
+        <div
+          class="category-header"
+          :style="`background-color: #${challenge.color};`"
+          @click="toggleCategory(challengeIndex)"
+        >
           <h3>{{ challenge.value }}</h3>
           <div class="category-right-content">
             <div class="category-progress">
@@ -230,7 +234,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #013238;
     color: #ffffff;
     padding: 10px 20px;
     border-radius: 5px;
@@ -239,7 +242,6 @@
   }
 
   .category-header:hover {
-    background-color: #00252a;
     transform: scale(1.005);
     transition: transform 0.3s ease;
   }
