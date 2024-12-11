@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { Answer } from '@/types/Response.ts'
+  import type { Answer } from '@/types/Answer.ts'
   import type { Question } from '@/types/Question.ts'
   const { type, responses, questions } = defineProps({
     type: {

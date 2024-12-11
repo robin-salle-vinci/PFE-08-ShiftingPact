@@ -24,19 +24,19 @@ def choice_json(choice):
 
 
 def question_json(question):
-    return \
-        {
-            'id': str(question.id),
-            'index_question': int(question.index_question),
-            'value': str(question.value),
-            'type_response': str(question.type_response),
-            'choices':
-                [
-                    choice_json(choice)
-                    for choice in (Choices.get_by_id(id_choice) for id_choice in question.choices)
-                ]
-        }
-
+  return \
+    {
+      'id': str(question.id),
+      'index_question': int(question.index_question),
+      'value': str(question.value),
+      'type_response': str(question.type_response),
+      'template': str(question.template), 
+      'choices':
+        [
+          choice_json(choice)
+          for choice in (Choices.get_by_id(id_choice) for id_choice in question.choices)
+        ]
+    }
 
 def sub_challenge_json(sub_challenge):
     return \
@@ -123,13 +123,14 @@ def module_single_json(module):
 
 
 def commitment_json(commitment):
-    return {
-        'id': str(commitment.id),
-        'id_client': str(commitment.id_client),
-        'creation_date': commitment.creation_date.isoformat(),
-        'answers_commitment':
-            [
-                answer_json(answer)
-                for answer in (Answers.get_by_id(idAnswer) for idAnswer in commitment.answers_commitments)
-            ],
-    }
+  return {
+    'id': str(commitment.id),
+    'client_information': client_info_json(ClientInformation.get_by_id(commitment.id_client)),
+    'creation_date': commitment.creation_date.isoformat(),
+    'answers_commitment':
+      {
+        str(answer.id_question): answer_json(answer)
+        for answer in (Answers.get_by_id(idAnswer) for idAnswer in commitment.answers_commitments)       
+      },
+    'id_module_esg': str(commitment.id_module_esg),
+  }

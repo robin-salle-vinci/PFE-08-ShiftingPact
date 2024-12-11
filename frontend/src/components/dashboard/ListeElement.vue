@@ -5,8 +5,11 @@
     esgElement: Array<Esg>
     title: string
     onlySee: boolean
+    seePact: boolean
+    dontValidate: boolean
     handleSeeEditForm: (payload: MouseEvent, id: string) => void
-    handleValidate: (payload: MouseEvent, id: string) => void
+    handleValidate?: (payload: MouseEvent, id: string) => void
+    handleSeePactForm?: (payload: MouseEvent, id: string) => void
   }>()
 </script>
 
@@ -23,8 +26,17 @@
           <button @click="(event) => handleSeeEditForm(event, item.id)">
             {{ onlySee ? 'Voir' : 'Voir/Éditer' }}
           </button>
-          <button @click="(event) => handleValidate(event, item.id)" v-if="!onlySee">
+          <button
+            v-if="!dontValidate"
+            @click="(event) => handleValidate && handleValidate(event, item.id)"
+          >
             Valider
+          </button>
+          <button
+            v-if="seePact"
+            @click="(event) => handleSeePactForm && handleSeePactForm(event, item.id)"
+          >
+            Voir Pacte
           </button>
         </div>
       </div>

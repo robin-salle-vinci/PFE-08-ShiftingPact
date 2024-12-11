@@ -27,7 +27,7 @@
   import ESGFormList from '@/components/esg/ESGFormList.vue'
   import ESGFormQuestions from '@/components/esg/ESGFormQuestions.vue'
   import type { Question } from '@/types/Question.ts'
-  import type { Answer } from '@/types/Response.ts'
+  import type { Answer } from '@/types/Answer.ts'
 
   const apiUrl = import.meta.env.VITE_API_URL
 

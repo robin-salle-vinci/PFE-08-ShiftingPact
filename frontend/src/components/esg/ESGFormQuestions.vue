@@ -58,7 +58,7 @@
   import ESGChoices from './ESGChoices.vue'
   import ESGRadioChoice from './ESGRadioChoice.vue'
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Response'
+  import type { Answer } from '@/types/Answer'
   import { getToken, getUser } from '@/utils/localstorage'
 
   const apiUrl = import.meta.env.VITE_API_URL
@@ -90,6 +90,8 @@
 
   const saveResponses = () => {
     selectedSubChallenge.forEach((question: Question) => {
+      if (!canAnswer(question)) return
+
       let idChoice = null
       let valueChoice = null
 
@@ -113,11 +115,6 @@
         if (valueChoice === '') valueChoice = null
       }
 
-      if (!canAnswer(question)) {
-        idChoice = null
-        valueChoice = 'N/A'
-      }
-
       const selectedRadioWhen = document.querySelector(`input[name="${question.id}-when"]:checked`)
       const isCommitment = selectedRadioWhen?.getAttribute('id_choice') === question.id + '-2'
       const comment = (
@@ -134,7 +131,7 @@
             id_question: question.id,
             id_choice: idChoice,
             value: valueChoice,
-            is_commitment: selectedRadioWhen ? isCommitment : null,
+            is_commitment: isCommitment,
           },
           {
             headers: {
