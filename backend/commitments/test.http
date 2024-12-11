@@ -8,7 +8,9 @@ Content-Type: application/json
   "username": "admin",
   "password": "admin"
 }
-> {% client.global.set("employee", response.body.token); %}
+> {%
+    client.global.set("employee", response.body.token);
+%}
 
 
 ### get one commitment pact

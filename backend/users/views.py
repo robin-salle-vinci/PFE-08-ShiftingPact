@@ -1,13 +1,15 @@
 # views.py
+import json
+import re
+
 import bcrypt
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-import json
-import re
 
 from backend.utils.token_utils import generate_token, check_authenticated_user
 from .models import Users, ClientInformation
+
 
 @csrf_exempt
 @require_POST  # Only allow POST requests
@@ -47,8 +49,12 @@ def register_view(request):
         Users.objects(id=user.id).update(password=password)
 
         # Create ClientInformation object
-        client_info = ClientInformation.create(id_user=user.id, number_workers=number_workers, owned_facility=owned_facility,
-                                               service_or_product=service_or_product, company_name=company_name)
+        client_info = ClientInformation.create(
+                                              id_user=user.id,
+                                              number_workers=number_workers,
+                                              owned_facility=owned_facility,
+                                              service_or_product=service_or_product,
+                                              company_name=company_name)
 
         Users.objects(id=user.id).update(id_client_information=client_info.id_user)
 
@@ -97,7 +103,6 @@ def login_view(request):
 
         # Check if credentials exist in Cassandra DB
         user = Users.objects(username=username).first()
-
 
         if user:
             # Check if password matches

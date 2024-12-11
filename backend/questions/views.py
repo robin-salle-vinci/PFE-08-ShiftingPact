@@ -15,7 +15,7 @@ def get_all_questions_views(request):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-        
+
         challenges = Challenges.objects.all()
         challenge_list = []
 

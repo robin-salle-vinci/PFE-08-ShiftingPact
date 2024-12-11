@@ -1,6 +1,8 @@
-from django_cassandra_engine.models import DjangoCassandraModel
-from cassandra.cqlengine import columns
 from uuid import uuid4
+
+from cassandra.cqlengine import columns
+from django_cassandra_engine.models import DjangoCassandraModel
+
 
 class CommitmentPacts(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
