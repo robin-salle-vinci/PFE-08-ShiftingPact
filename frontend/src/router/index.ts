@@ -1,15 +1,31 @@
 import { getToken } from '@/utils/localstorage'
 import DashboardView from '@/views/DashboardView.vue'
 import EsgView from '@/views/EsgView.vue'
+import ListPactView from '@/views/ListPactView.vue'
 import PactView from '@/views/PactView.vue'
+import axios from 'axios'
 import { createRouter, createWebHistory } from 'vue-router'
+import ESGFormView from '../views/ESGFormView.vue'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
-import ESGFormView from '../views/ESGFormView.vue'
 
 function isEmployee() {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   return user && user.role === 'employee'
+}
+
+async function hasOpenEsg() {
+  const response = await axios.get(`${import.meta.env.VITE_API_URL}/modules/`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  })
+  for (const module of response.data) {
+    if (module.state === 'open') {
+      return true
+    }
+  }
+  return false
 }
 
 const router = createRouter({
@@ -46,11 +62,14 @@ const router = createRouter({
       name: 'pact',
       component: PactView,
     },
+    { path: '/listpact', name: 'listpact', component: ListPactView },
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const token = getToken()
+  const esgOpen = await hasOpenEsg()
+
   if (!token && to.path !== '/login') {
     next('/login')
   } else if (token) {
@@ -60,6 +79,10 @@ router.beforeEach((to, from, next) => {
       next('/')
     } else if (to.matched.some((record) => record.meta.requiresEmployee) && !isEmployee()) {
       next('/')
+    } else if (to.path === '/' && esgOpen) {
+      next('/form/esg')
+    } else if (to.path === '/' && !esgOpen) {
+      next('/listpact')
     } else {
       next()
     }
