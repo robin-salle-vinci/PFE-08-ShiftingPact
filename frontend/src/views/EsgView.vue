@@ -20,6 +20,7 @@
             :question="question"
             :clientAnswer="clientResponse[question.id]"
             :employeeAnswer="employeeResponse ? employeeResponse[question.id] : undefined"
+            :companyName="client.company_name"
             v-if="checkDisplayTemplate(question)"
           />
         </div>
@@ -32,15 +33,15 @@
   import QuestionElement from '@/components/dashboard/QuestionElement.vue'
   import HeaderElement from '@/components/structure/HeaderElement.vue'
   import router from '@/router'
+  import type { Answer } from '@/types/Answer'
   import type { Challenge } from '@/types/Challenge'
   import type { ClientInformation } from '@/types/ClientInformation'
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Reponse'
   import axios from 'axios'
   import { onMounted, ref } from 'vue'
   import { useRoute } from 'vue-router'
 
-  const id = useRoute().params.id
+  const id = useRoute().params.id as string
 
   const esgForm = ref<{ challenges: Array<Challenge> }>()
   const clientResponse = ref<Record<string, Answer>>({})
@@ -68,7 +69,6 @@
       // Get esg information
       idEsg.value = clientEsg.data.id
       client.value = clientEsg.data.client_information
-      console.log(clientEsg.data.client_information)
       stateEsg.value = clientEsg.data.state
 
       // Get the questions
@@ -89,6 +89,9 @@
 
       case 'OWNED FACILITY':
         return client.value?.owned_facility
+
+      case 'WORKERS':
+        return Number(client.value?.number_workers) > 0
 
       case 'PRODUITS':
         return client.value?.service_or_product == 'produit'

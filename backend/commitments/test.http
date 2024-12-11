@@ -8,9 +8,15 @@ Content-Type: application/json
   "username": "admin",
   "password": "admin"
 }
-> {% client.global.set("employee", response.body.token); %}
+> {%
+    client.global.set("employee", response.body.token);
+%}
 
 
 ### get one commitment pact
 GET {{baseUrl}}/commitments/550e8400-e29b-41d4-a716-446655440047
+Authorization: Bearer {{employee}}
+
+### get one commitment pact by module id
+GET {{baseUrl}}/commitments/module/550e8400-e29b-41d4-a716-446655440026
 Authorization: Bearer {{employee}}

@@ -1,19 +1,17 @@
-import uuid
+import json
+from datetime import datetime
+
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
-import json
 
+from backend.utils.json_utils import module_json, module_single_json
+from backend.utils.token_utils import check_authenticated_user
 from commitments.models import CommitmentPacts
 from modules.models import Answers
-from backend.utils.json_utils import module_json, module_single_json, answer_json
-from backend.utils.token_utils import check_authenticated_user
 from modules.models import ModulesESG
-from questions.scoring_algo import calculate_sub_challenge_scores, \
-    calculate_theme_scores, \
-    calculate_global_esg_scores, calculate_challenge_scores
-from users.models import Users
 from questions.models import Choices, Questions
-from datetime import datetime
+from questions.scoring_algo import calculate_global_esg_scores
+from users.models import Users, ClientInformation
 
 
 # Get all ESG modules
@@ -27,7 +25,7 @@ def read_all(request):
         if authenticated_user.role == 'employee':
             modules = ModulesESG.objects.all()
         else:
-            modules = ModulesESG.objects.all().filter(client_id=authenticated_user.id)
+            modules = ModulesESG.objects.all().filter(id_client=authenticated_user.id)
 
         modules_json = [module_single_json(module) for module in modules]
 
@@ -39,17 +37,18 @@ def read_all(request):
 
 # Get one ESG Module by id
 @require_GET
-def read_one_by_id(request, uuid_module_esg):
+def read_one_by_id(request, uuid_esg_module):
     try:
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
 
-        module = ModulesESG.objects(id=uuid_module_esg).first()
+        module = ModulesESG.objects(id=uuid_esg_module).first()
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
-        if authenticated_user.role != 'employee' or (authenticated_user.id != module.id_client and authenticated_user.role == 'client'):
+        if authenticated_user.role != 'employee' or (
+                authenticated_user.id != module.id_client and authenticated_user.role == 'client'):
             return JsonResponse({'error': 'Only employees can access this endpoint or the correct client'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
@@ -73,6 +72,9 @@ def read_last_module_for_client(request):
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
+        if str(module.id_client) != str(authenticated_user.id):
+            return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
+
         return JsonResponse(module_json(module), status=200)
 
     except Exception as e:
@@ -89,12 +91,18 @@ def create_one(request):
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
 
+        request_body = json.loads(request.body)
+        id_client = request_body.get('id_client')
+
+        if id_client is None:
+            return JsonResponse({'error': 'id_client field is required'}, status=400)
+
         # check if client exist
-        if Users.objects.filter(id=authenticated_user.id).count() == 0:
+        if Users.objects.filter(id=id_client).count() == 0:
             return JsonResponse({'message': 'Client does not exist'}, status=404)
 
         ModulesESG.objects.create(
-            id_client=authenticated_user.id,
+            id_client=id_client,
             date_last_modification=datetime.today().date(),
             original_answers=[],
             modified_answers=[],
@@ -138,6 +146,18 @@ def change_state(request, uuid_module_esg):
         return HttpResponse("An employee can only validate and a client can only set to verification an ESG module",
                             status=403)
 
+    # check if the client had answer to all questions
+    if new_state == 'verification':
+        client_infos = ClientInformation.objects(id_user=authenticated_user.id).first()
+        filters_template = ['ALL']
+        if client_infos.number_workers > 0: filters_template.append('WORKERS')
+        if client_infos.owned_facility: filters_template.append('OWNED FACILITY')
+        if client_infos.service_or_product == 'produit': filters_template.append('PRODUITS')
+        questions_to_answer = Questions.objects.filter(template__in=filters_template).all()
+        if len(module_esg.original_answers) != questions_to_answer.count():
+            return HttpResponse("The client has not answered all questions", status=400)
+
+    # créer pacte d'engagement si validated
     if new_state == 'validated':
         # Récupérer toutes les réponses originales et modifiées pour le pacte d'engagement
         original_answers = Answers.objects.filter(id__in=module_esg.original_answers, is_commitment=True)
@@ -159,9 +179,6 @@ def change_state(request, uuid_module_esg):
             creation_date=datetime.today().date(),
             answers_commitments=answers_to_commitment
         )
-
-    # if(new_state == 'verification'):
-    # TODO calculate_global_esg_scores() + add score to module_esg
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification of state", status=201)
@@ -187,7 +204,7 @@ def add_original_answers(request, uuid_module_esg):
         value = data.get('value')
         is_commitment = data.get('is_commitment')
 
-        if not (uuid_module_esg or id_question or value or is_commitment or id_choice) is None:
+        if uuid_module_esg is None or id_question is None or value is None or is_commitment is None:
             return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
         module_esg = ModulesESG.objects.get(pk=uuid_module_esg)
@@ -201,8 +218,12 @@ def add_original_answers(request, uuid_module_esg):
         if module_esg.state != 'open':
             return JsonResponse({'message': 'Not Authorized'}, status=403)
 
-        new_choice = Choices.objects.get(pk=id_choice)
-        score = 0.0 if not new_choice else new_choice.score
+        if id_choice is not None:
+            new_choice = Choices.objects.get(pk=id_choice)
+            score = new_choice.score
+        else:
+            new_choice = None
+            score = 0
 
         answer = Answers.objects(id_question=id_question, id__in=module_esg.original_answers).first()
 
@@ -253,21 +274,25 @@ def add_modified_answers(request):
         is_commitment = data.get('is_commitment')
 
         if id_esg is None or id_question is None or value is None or is_commitment is None:
-            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
+            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=409)
 
         module_esg = ModulesESG.objects.get(pk=id_esg)
 
         if not module_esg:
             return JsonResponse({'error': 'Module ESG not found'}, status=404)
 
-        new_choice = Choices.objects.get(pk=id_choice)
-        score = 0 if not new_choice else new_choice.score
+        if id_choice is not None:
+            new_choice = Choices.objects.get(pk=id_choice)
+            score = new_choice.score
+        else:
+            new_choice = None
+            score = 0
 
         answer = Answers.objects(id_question=id_question, id__in=module_esg.modified_answers).first()
-        if answer:
 
-            answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice,
-                          score_response=score, commentary=commentary)
+        if answer:
+            answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice, score_response=score,
+                          commentary=commentary)
         else:
             print("create answer")
             new_answer = Answers.objects.create(
@@ -284,10 +309,10 @@ def add_modified_answers(request):
             list_modified_answers = module_esg.modified_answers
             list_modified_answers.append(new_answer.id)
             module_esg.update(modified_answers=list_modified_answers)
-
             module_esg.update(date_last_modification=datetime.today().date())
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -301,6 +326,7 @@ def stringify_keys(data):
     elif isinstance(data, list):
         return [stringify_keys(item) for item in data]
     return data
+
 
 # Calculate ESG Module score
 @require_http_methods(["PATCH"])
@@ -327,27 +353,43 @@ def add_score(request, uuid_module_esg):
 
     # Calculate ESG scores
     try:
-        sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
-        challenge_scores = calculate_challenge_scores(sub_challenge_scores)
-        theme_scores = calculate_theme_scores(challenge_scores)
-        global_esg_scores = calculate_global_esg_scores(theme_scores)
+        global_esg_scores = calculate_global_esg_scores(module_esg)
     except Exception as e:
         return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
                             status=500)
 
     try:
-        module_esg.update(calculated_score=global_esg_scores['total_esg_score'])
+        module_esg.update(calculated_score=global_esg_scores['total_percentage'])
         module_esg.save()
     except Exception as e:
         return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
                             status=500)
 
-    # Combine results into a single object with stringified keys
-    combined_scores = stringify_keys({
-        "sub_challenge_scores": sub_challenge_scores,
-        "challenge_scores": challenge_scores,
-        "theme_scores": theme_scores,
-        "global_esg_scores": global_esg_scores
-    })
+    return JsonResponse({'score_total': global_esg_scores['total_percentage']}, status=200)
 
-    return JsonResponse(combined_scores, status=200)
+
+@require_GET
+def get_score(request, uuid_module_esg):
+    authenticated_user = check_authenticated_user(request)
+    if isinstance(authenticated_user, HttpResponse):
+        return authenticated_user
+
+    try:
+        module_esg = ModulesESG.get_by_id(uuid_module_esg)
+    except ModulesESG.DoesNotExist:
+        return JsonResponse({'error': 'Module ESG not found'}, status=404)
+
+    # Check module state
+    if module_esg.state == 'open':
+        return JsonResponse(
+            {'error': 'Module ESG must be in verification or validated state'},
+            status=400)
+
+    # Calculate ESG scores
+    try:
+        global_esg_scores = calculate_global_esg_scores(module_esg)
+    except Exception as e:
+        return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
+                            status=500)
+
+    return JsonResponse(global_esg_scores, status=200)

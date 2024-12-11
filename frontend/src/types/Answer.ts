@@ -1,11 +1,11 @@
 export interface Answer {
-  id: string
+  id?: string
   challenge: string
   sub_challenge: string
-  id_choice: string
+  id_choice?: string
   value: string
   commentary: string
-  score: number
+  score?: number
   is_commitment: boolean
-  score_response: number
+  score_response?: number
 }

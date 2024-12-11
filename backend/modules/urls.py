@@ -4,7 +4,7 @@ from modules import views
 
 urlpatterns = [
     # Get all ESG modules
-    path('',views.read_all, name='read_all_esg_modules'),
+    path('', views.read_all, name='read_all_esg_modules'),
 
     # Get one ESG module by id
     path('<str:uuid_esg_module>', views.read_one_by_id, name='read_one_module_by_id'),
@@ -13,7 +13,7 @@ urlpatterns = [
     path('esg/', views.read_last_module_for_client, name='read_last_module_for_client'),
 
     # Create ESG module
-    path('create/', views.create_one, name='create_one_module'),
+    path('create/', views.create_one, name='create_one'),
 
     # Update ESG module
     path('state/<str:uuid_module_esg>', views.change_state, name='change_state'),
@@ -25,5 +25,8 @@ urlpatterns = [
     path('add/answer/<str:uuid_module_esg>', views.add_original_answers, name='add_original_answers'),
 
     # Add score to module
-    path('addScore/<str:uuid_module_esg>', views.add_score, name='add_score')
+    path('add/score/<str:uuid_module_esg>', views.add_score, name='add_score'),
+
+    # Get all info about score of module
+    path('score/<str:uuid_module_esg>', views.get_score, name='get_score'),
 ]

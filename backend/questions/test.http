@@ -8,7 +8,9 @@ Content-Type: application/json
   "username": "client_open",
   "password": "admin"
 }
-> {% client.global.set("client_open", response.body.token); %}
+> {%
+    client.global.set("client_open", response.body.token);
+%}
 
 ### get all questions
 GET {{baseUrl}}/questions/

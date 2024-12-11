@@ -1,7 +1,7 @@
 <template>
   <div class="question">
     <!-- Question -->
-    <h4>{{ questionModel.value }}</h4>
+    <h4>{{ questionModel.value.replace('XXX', companyName) }}</h4>
 
     <!-- Answers -->
     <!-- If employee don't have already modified this question -->
@@ -14,8 +14,8 @@
             <input
               v-if="!answerToModify.id_choice"
               type="text"
-              :value="answerToModify.value"
               :disabled="props.state === 'validated' || !isModifying"
+              v-model="answerToModify.value"
             />
             <select
               v-else
@@ -50,7 +50,7 @@
         >
           modifier
         </button>
-        <button v-else @click="handleSave" v-if="props.state !== 'validated'">sauvagarder</button>
+        <button v-else-if="props.state !== 'validated'" @click="handleSave">sauvagarder</button>
       </div>
     </div>
 
@@ -115,17 +115,17 @@
 </template>
 
 <script setup lang="ts">
+  import type { Answer } from '@/types/Answer'
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Reponse'
   import axios from 'axios'
   import { defineProps, ref, type Ref } from 'vue'
-
   const props = defineProps<{
     question: Question
     clientAnswer: Answer
     employeeAnswer?: Answer
     idEsg: string
     state: string
+    companyName: string
   }>()
 
   // Toggle the modification mode

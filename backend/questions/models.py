@@ -1,7 +1,8 @@
-
-from django_cassandra_engine.models import DjangoCassandraModel
-from cassandra.cqlengine import columns
 from uuid import uuid4
+
+from cassandra.cqlengine import columns
+from django_cassandra_engine.models import DjangoCassandraModel
+
 
 class Challenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
@@ -14,7 +15,6 @@ class Challenges(DjangoCassandraModel):
     def get_by_id(cls, id_challenge):
         return cls.objects.get(pk=id_challenge)
 
-
     @classmethod
     def get_theme_from_color(cls, color):
         color_to_theme = {
@@ -23,6 +23,7 @@ class Challenges(DjangoCassandraModel):
             "#fde79": "Gouvernance",
         }
         return color_to_theme.get(color.lower(), "Inconnu")
+
 
 class SubChallenges(DjangoCassandraModel):
     id = columns.UUID(primary_key=True, default=uuid4)
@@ -40,7 +41,7 @@ class Questions(DjangoCassandraModel):
     index_question = columns.Integer(required=True)
     template = columns.Text(required=True)
     value = columns.Text(required=True)
-    type_response = columns.Text(required=True) # qcm, question ouverte ou %
+    type_response = columns.Text(required=True)  # qcm, qrm, question ouverte ou %
     choices = columns.List(columns.UUID(required=False), required=False)
 
     @classmethod

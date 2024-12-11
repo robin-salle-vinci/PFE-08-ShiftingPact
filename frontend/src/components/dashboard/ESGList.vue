@@ -1,56 +1,36 @@
 <template>
-  <div class="container">
-    <h1>Questionnaires ESG en attente de vérification</h1>
-    <div
-      class="list"
-      v-for="item in allEsg.filter((esg) => esg.state === 'verification')"
-      :key="item.id"
-    >
-      <div class="item">
-        <span class="company-name">{{ item.client_information.company_name }}</span>
-        <span class="modification-date">{{
-          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
-        }}</span>
-        <div class="actions">
-          <button @click="handleSeeForm(item.id)">Voir/Éditer</button>
-          <button @click="handleValidate(item.id)">Valider</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="container">
-    <h1>Questionnaires ESG ouverts</h1>
-    <div class="list" v-for="item in allEsg.filter((esg) => esg.state === 'open')" :key="item.id">
-      <div class="item">
-        <span class="company-name">{{ item.client_information.company_name }}</span>
-        <span class="modification-date">{{
-          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
-        }}</span>
-        <div class="actions">
-          <button @click="handleSeeForm(item.id)">Voir/Éditer</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="container">
-    <h1>Questionnaires ESG validés</h1>
-    <div
-      class="list"
-      v-for="item in allEsg.filter((esg) => esg.state === 'validated')"
-      :key="item.id"
-    >
-      <div class="item">
-        <span class="company-name">{{ item.client_information.company_name }}</span>
-        <span class="modification-date">{{
-          new Date(item.date_last_modification).toLocaleDateString('fr-FR')
-        }}</span>
-        <div class="actions">
-          <button @click="handleSeeForm(item.id)">Voir</button>
-          <button>Voir le pacte d'engagement</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <ListElement
+    v-if="esgVerification.length > 0"
+    :title="'Questionnaires ESG en attente de vérification'"
+    :esgElement="esgVerification"
+    :handleSeeEditForm="handleSeeEditForm"
+    :handleValidate="handleValidate"
+    :seePact="false"
+    :onlySee="false"
+    :dontValidate="false"
+  />
+
+  <ListElement
+    v-if="esgOpen.length > 0"
+    :title="'Questionnaires ESG ouverts'"
+    :esgElement="esgOpen"
+    :handleSeeEditForm="handleSeeEditForm"
+    :handleValidate="handleValidate"
+    :seePact="false"
+    :onlySee="false"
+    :dontValidate="true"
+  />
+
+  <ListElement
+    v-if="esgValidated.length > 0"
+    :title="'Questionnaires ESG validés'"
+    :esgElement="esgValidated"
+    :handleSeeEditForm="handleSeeEditForm"
+    :handleSeePactForm="handleSeePactForm"
+    :seePact="true"
+    :onlySee="true"
+    :dontValidate="true"
+  />
 </template>
 
 <script setup lang="ts">
@@ -58,8 +38,7 @@
   import type { Esg } from '@/types/Esg'
   import axios from 'axios'
   import { ref } from 'vue'
-
-  const allEsg = ref<Esg[]>([])
+  import ListElement from './ListeElement.vue'
 
   const fetchESGList = async () => {
     try {
@@ -68,18 +47,25 @@
           Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
       })
-      allEsg.value = response.data
+      esgOpen.value = response.data.filter((esg: Esg) => esg.state === 'open')
+      esgVerification.value = response.data.filter((esg: Esg) => esg.state === 'verification')
+      esgValidated.value = response.data.filter((esg: Esg) => esg.state === 'validated')
     } catch (error) {
       console.error(error)
     }
   }
   fetchESGList()
 
-  const handleSeeForm = (_esgId: number) => {
+  const esgVerification = ref<Esg[]>([])
+  const esgOpen = ref<Esg[]>([])
+  const esgValidated = ref<Esg[]>([])
+
+  const handleSeeEditForm = (event: MouseEvent, _esgId: string) => {
+    event.preventDefault()
     router.push(`/esg/${_esgId}`)
   }
 
-  const handleValidate = (_esgId: number) => {
+  const handleValidate = (event: MouseEvent, _esgId: string) => {
     axios
       .patch(`${import.meta.env.VITE_API_URL}/modules/state/${_esgId}?newState=validated`, null, {
         headers: {
@@ -90,63 +76,10 @@
         console.error(error)
       })
   }
+  const handleSeePactForm = (event: MouseEvent, _esgId: string) => {
+    event.preventDefault()
+    router.push(`/pact/${_esgId}`)
+  }
 </script>
 
-<style scoped>
-  .container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-  }
-  .container h1 {
-    margin-top: 2%;
-    margin-bottom: 0px;
-  }
-
-  .list {
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-  }
-
-  .item {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #dfd4fb;
-    border-radius: 10px;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .company-name {
-    flex: 1;
-  }
-
-  .modification-date {
-    flex: 1;
-    text-align: center;
-  }
-
-  .actions {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    background-color: #b5cdbf;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-</style>
+<style scoped></style>

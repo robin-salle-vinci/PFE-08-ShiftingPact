@@ -1,9 +1,11 @@
 import { getToken } from '@/utils/localstorage'
 import DashboardView from '@/views/DashboardView.vue'
 import EsgView from '@/views/EsgView.vue'
+import PactView from '@/views/PactView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import ESGFormView from '../views/ESGFormView.vue'
 import ScoresView from '../views/ScoresView.vue'
 
 function isEmployee() {
@@ -25,24 +27,35 @@ const router = createRouter({
       component: LoginView,
     },
     {
+      path: '/form/esg',
+      name: 'formesg',
+      component: ESGFormView,
+    },
+    {
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
     },
     {
-<<<<<<< HEAD
-      path: '/scores',
-      name: 'scores',
-      component: ScoresView,
-=======
       path: '/esg/:id',
       name: 'esg',
       component: EsgView,
-      props: true,
->>>>>>> 2da6043ba0ea81e65c91e4cc2e7c0c7546af2bf7
+      meta: { requiresEmployee: true },
     },
+    {
+      path: '/pact/:id',
+      name: 'pact',
+      component: PactView,
+    },
+    {
+      path: '/scores',
+      name: 'scores',
+      component: ScoresView,
+    },
+
   ],
 })
+
 router.beforeEach((to, from, next) => {
   const token = getToken()
   if (!token && to.path !== '/login') {
@@ -51,6 +64,8 @@ router.beforeEach((to, from, next) => {
     if (isEmployee() && to.path === '/') {
       next('/dashboard')
     } else if (!isEmployee() && to.path === '/dashboard') {
+      next('/')
+    } else if (to.matched.some((record) => record.meta.requiresEmployee) && !isEmployee()) {
       next('/')
     } else {
       next()

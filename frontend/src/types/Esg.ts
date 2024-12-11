@@ -1,5 +1,5 @@
 export interface Esg {
-  id: number
+  id: string
   state: string
   client_information: {
     company_name: string
