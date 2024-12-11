@@ -4,7 +4,7 @@ from modules import views
 
 urlpatterns = [
     # Get all ESG modules
-    path('',views.read_all, name='read_all_esg_modules'),
+    path('', views.read_all, name='read_all_esg_modules'),
 
     # Get one ESG module by id
     path('<str:uuid_esg_module>', views.read_one_by_id, name='read_one_module_by_id'),
