@@ -36,7 +36,7 @@
   import type { Challenge } from '@/types/Challenge'
   import type { ClientInformation } from '@/types/ClientInformation'
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Reponse'
+  import type { Answer } from '@/types/Response'
   import axios from 'axios'
   import { onMounted, ref } from 'vue'
   import { useRoute } from 'vue-router'

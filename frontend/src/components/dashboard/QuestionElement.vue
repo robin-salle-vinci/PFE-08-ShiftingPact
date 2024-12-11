@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Reponse'
+  import type { Answer } from '@/types/Response'
   import axios from 'axios'
   import { defineProps, ref, type Ref } from 'vue'
 

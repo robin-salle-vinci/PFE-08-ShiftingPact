@@ -19,14 +19,18 @@
             :choice="{ id: question.id + '-' + 1, value: 'Maintenant' }"
             :questionId="question.id + '-when'"
             :isActive="
-              !questionResponses[question.id] ? false : !questionResponses[question.id].isEngagement
+              !questionResponses[question.id]
+                ? false
+                : !questionResponses[question.id]?.is_commitment
             "
           />
           <ESGRadioChoice
             :choice="{ id: question.id + '-' + 2, value: 'Dans les 2 ans' }"
             :questionId="question.id + '-when'"
             :isActive="
-              !questionResponses[question.id] ? false : questionResponses[question.id].isEngagement
+              !questionResponses[question.id]
+                ? false
+                : questionResponses[question.id]?.is_commitment
             "
           />
         </div>
@@ -35,7 +39,8 @@
         <div class="textarea-container">
           <textarea
             placeholder="Entrez votre commentaire ici"
-            :value="questionResponses[question.id]?.comment"
+            :name="question.id + '-comment'"
+            :value="questionResponses[question.id]?.commentary"
           ></textarea>
         </div>
       </div>
@@ -49,42 +54,102 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
+  import axios from 'axios'
   import ESGChoices from './ESGChoices.vue'
   import ESGRadioChoice from './ESGRadioChoice.vue'
+  import type { Question } from '@/types/Question'
+  import type { Answer } from '@/types/Response'
+  import { getToken } from '@/utils/localstorage'
 
-  const { responses, selectedSubChallenge } = defineProps({
-    responses: {
-      type: Object,
-      default: () => ({}),
-    },
-    selectedSubChallenge: {
-      type: Object,
-      default: null,
-    },
-  })
+  const apiUrl = import.meta.env.VITE_API_URL
 
-  interface Response {
-    id: string
-    id_client: number
-    id_question: string
-    comment: string
-    isEngagement: boolean
-    value: string
-    score_response: number
-    date_modification: string
-  }
+  const { responses, idESG, selectedChallengeId, selectedSubChallengeId, selectedSubChallenge } =
+    defineProps({
+      responses: {
+        type: Object,
+        default: () => ({}),
+      },
+      idESG: {
+        type: String,
+        default: '',
+      },
+      selectedChallengeId: {
+        type: String,
+        default: '',
+      },
+      selectedSubChallengeId: {
+        type: String,
+        default: '',
+      },
+      selectedSubChallenge: {
+        type: Object,
+        default: null,
+      },
+    })
 
   const saveResponses = () => {
-    selectedSubChallenge.forEach((question) => {
-      const selectedRadio = document.querySelector(`input[name="${question.id}"]:checked`)
-      console.log(selectedRadio)
+    selectedSubChallenge.forEach((question: Question) => {
+      let idChoice = null
+      let valueChoice = null
+
+      if (question.type_response === 'qcm') {
+        const selectedRadio = document.querySelector(`input[name="${question.id}"]:checked`)
+        idChoice = selectedRadio?.getAttribute('id_choice')
+        valueChoice = selectedRadio?.getAttribute('value')
+      }
+
+      if (question.type_response === 'qrm') {
+        const selectedCheckboxes = document.querySelectorAll(`input[name="${question.id}"]:checked`)
+        valueChoice = Array.from(selectedCheckboxes).map(
+          (checkbox) => (checkbox as HTMLInputElement).value,
+        )
+        if (valueChoice.length === 0) valueChoice = null
+      }
+
+      if (question.type_response === 'question ouverte') {
+        const textarea = document.querySelector(`textarea[name="${question.id + '-comment'}"]`)
+        valueChoice = (textarea as HTMLTextAreaElement)?.value
+        if (valueChoice === '') valueChoice = null
+      }
+
+      const selectedRadioWhen = document.querySelector(`input[name="${question.id}-when"]:checked`)
+      const isCommitment = selectedRadioWhen?.getAttribute('id_choice') === question.id + '-2'
+      const comment = (
+        document.querySelector(`textarea[name="${question.id}-comment"]`) as HTMLTextAreaElement
+      )?.value
+
+      axios
+        .patch(
+          `${apiUrl}/modules/add/answer/${idESG}`,
+          {
+            id_challenge: selectedChallengeId,
+            id_sub_challenge: selectedSubChallengeId,
+            commentary: comment,
+            id_question: question.id,
+            id_choice: idChoice,
+            value: valueChoice,
+            is_commitment: selectedRadioWhen ? isCommitment : null,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     })
   }
 
   const questionResponses = computed(() => {
-    const questionResponsesTemp: any = {}
+    const questionResponsesTemp: { [key: string]: Answer | null } = {}
 
-    selectedSubChallenge.forEach((question) => {
+    selectedSubChallenge.forEach((question: Question) => {
       questionResponsesTemp[question.id] =
         responses.find((r: Response) => r.id_question === question.id) || null
     })

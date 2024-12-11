@@ -4,6 +4,7 @@
     :name="questionId"
     :value="choice.value"
     :id="`choice-${choice.id}-${questionId}`"
+    :id_choice="choice.id"
     :checked="isActive"
   />
   <label :for="`choice-${choice.id}-${questionId}`">

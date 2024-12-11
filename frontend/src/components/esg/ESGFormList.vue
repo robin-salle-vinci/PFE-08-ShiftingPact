@@ -55,7 +55,7 @@
             v-for="(subChallenge, subChallengeIndex) in challenge.sub_challenges"
             :key="subChallengeIndex"
             class="subcategory"
-            @click="onSubChallengeSelected(subChallenge.questions)"
+            @click="onSubChallengeSelected(subChallenge.questions, challenge.id, subChallenge.id)"
           >
             <h4>{{ subChallenge.value }}</h4>
             <ChallengeProgress
@@ -73,6 +73,7 @@
 <script setup lang="ts">
   import { ref, computed } from 'vue'
   import ChallengeProgress from './ChallengeProgress.vue'
+  import type { SubChallenge } from '@/types/SubChallenge.ts'
 
   const { questions, responses, isSubChallengeSelected, onSubChallengeSelected } = defineProps({
     questions: {
@@ -92,21 +93,6 @@
       default: () => {},
     },
   })
-
-  interface Question {
-    id: string
-    index_question: number
-    value: string
-    type_response: string
-    choices: { id: string; index_choice: number; value: string; score: number }[]
-  }
-
-  interface SubChallenge {
-    id: string
-    index_sub_challenge: number
-    value: string
-    questions: Question[]
-  }
 
   const progress = computed(() => {
     if (!questions.challenges) return 0

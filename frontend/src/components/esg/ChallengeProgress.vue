@@ -3,6 +3,8 @@
 </template>
 
 <script setup lang="ts">
+  import type { Answer } from '@/types/Response.ts'
+  import type { Question } from '@/types/Question.ts'
   const { type, responses, questions } = defineProps({
     type: {
       type: String,
@@ -18,35 +20,15 @@
     },
   })
 
-  interface Question {
-    id: string
-    challenge: string
-    sub_challenge: string
-    template: string
-    type_response: string
-    value: string
-  }
-
-  interface Response {
-    id: string
-    id_client: number
-    id_question: string
-    comment: string
-    isEngagement: boolean
-    value: string
-    score_response: number
-    date_modification: string
-  }
-
   const getProgress = () => {
+    const begin = type === 'challenge' ? 'progress-challenge' : 'progress-sub-challenge'
+
     const totalQuestions = questions.length
 
-    const answeredQuestions = responses.reduce((count: number, response: Response) => {
+    const answeredQuestions = responses.reduce((count: number, response: Answer) => {
       const question = questions.some((q: Question) => q.id === response.id_question)
       return question ? count + 1 : count
     }, 0)
-
-    const begin = type === 'challenge' ? 'progress-challenge' : 'progress-sub-challenge'
 
     if (answeredQuestions === totalQuestions) return begin + '-completed'
     if (answeredQuestions > 0) return begin + '-in-progress'
