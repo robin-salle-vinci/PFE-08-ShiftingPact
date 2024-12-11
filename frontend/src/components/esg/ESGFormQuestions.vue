@@ -4,7 +4,7 @@
       <div
         v-for="(question, questionIndex) in selectedSubChallenge"
         :key="questionIndex"
-        class="question"
+        :class="['question', { 'question-disabled': !canAnswer(question) }]"
       >
         <h4>{{ question.value }}</h4>
         <ESGChoices
@@ -59,9 +59,10 @@
   import ESGRadioChoice from './ESGRadioChoice.vue'
   import type { Question } from '@/types/Question'
   import type { Answer } from '@/types/Response'
-  import { getToken } from '@/utils/localstorage'
+  import { getToken, getUser } from '@/utils/localstorage'
 
   const apiUrl = import.meta.env.VITE_API_URL
+  const client = getUser()
 
   const { responses, idESG, selectedChallengeId, selectedSubChallengeId, selectedSubChallenge } =
     defineProps({
@@ -112,6 +113,11 @@
         if (valueChoice === '') valueChoice = null
       }
 
+      if (!canAnswer(question)) {
+        idChoice = null
+        valueChoice = 'N/A'
+      }
+
       const selectedRadioWhen = document.querySelector(`input[name="${question.id}-when"]:checked`)
       const isCommitment = selectedRadioWhen?.getAttribute('id_choice') === question.id + '-2'
       const comment = (
@@ -156,6 +162,31 @@
 
     return questionResponsesTemp
   })
+
+  const canAnswer = (question: Question) => {
+    switch (question.template) {
+      case 'ALL':
+        return true
+
+      case 'OWNED FACILITY':
+        return client.ownedFacility
+
+      case 'FACILITY':
+        return client.ownedFacility
+
+      case 'WORKERS':
+        return Number(client.numberWorkers) > 0
+
+      case 'PRODUITS':
+        return client.serviceOrProduct == 'produit'
+
+      case 'SERVICES':
+        return client.serviceOrProduct == 'service'
+
+      default:
+        return false
+    }
+  }
 </script>
 
 <style scoped>
@@ -190,6 +221,20 @@
     border-radius: 5px;
     margin: 0;
     padding: 1% 2% 2% 2%;
+  }
+
+  .question-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .question-disabled textarea,
+  .question-disabled input,
+  .question-disabled button {
+    pointer-events: none;
+    background-color: #f0f0f0;
+    cursor: not-allowed;
   }
 
   .question:not(:last-child) {
