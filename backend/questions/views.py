@@ -34,7 +34,6 @@ def get_all_questions_views(request):
                                 'id': str(choice.id),
                                 'index_choice': choice.index_choice,
                                 'value': choice.value,
-                                'score': choice.score
                             })
                     question_list.append({
                         'id': str(question.id),
