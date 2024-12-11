@@ -3,7 +3,7 @@
   <button class="back-button" @click="handleBack"><span class="arrow-left"></span></button>
   <div v-if="pact?.answers_commitment" class="container">
     <h1>
-      Pacte d'Engagements du {{ new Date(pact.creation_date).toLocaleDateString('fr-FR') }} de
+      Pacte d'engagement du {{ new Date(pact.creation_date).toLocaleDateString('fr-FR') }} de
       {{ pact.client_information.company_name }}
     </h1>
     <div v-for="(answer, key) in pact.answers_commitment" :key="key" class="item">
