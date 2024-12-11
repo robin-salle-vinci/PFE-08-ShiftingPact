@@ -22,7 +22,7 @@
     router.push(`/pact/${id}`)
   }
   const handleSeeScore = (id: string) => {
-    router.push(`/score/${id}`)
+    router.push(`/scores/${id}`)
   }
 </script>
 

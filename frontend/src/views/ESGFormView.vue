@@ -63,7 +63,6 @@
 
     responses.value = response.data.original_answers
     idESG.value = response.data.id
-    console.log(response.data)
   }
 
   getQuestions()

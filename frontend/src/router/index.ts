@@ -67,7 +67,7 @@ const router = createRouter({
     },
     { path: '/listpact', name: 'listpact', component: ListPactView },
     {
-      path: '/scores',
+      path: '/scores/:id',
       name: 'scores',
       component: ScoresView,
     },
