@@ -108,25 +108,43 @@
   const username = ref<string>('username')
   const password = ref<string>('password')
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!companyName.value) return
 
-    axios
-      .post(`${apiUrl}/users/register/`, {
-        companyName: companyName.value,
-        numberWorkers: numberWorkers.value,
-        facilityOwner: facilityOwner.value,
-        isService: isService.value,
-      })
-      .then((response: AxiosResponse) => {
-        submited.value = true
+    await axios
+      .post(
+        `${apiUrl}/users/register/`,
+        {
+          companyName: companyName.value,
+          numberWorkers: numberWorkers.value,
+          facilityOwner: facilityOwner.value,
+          isService: isService.value,
+        },
+        {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+        },
+      )
+      .then(async (response: AxiosResponse) => {
         const data = response.data
         username.value = data.user.username
         password.value = data.password
-        const token = data.token
-        localStorage.setItem('token', token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        console.log(data)
+
+        // future proofing
+        await axios
+          .post(
+            `${apiUrl}/modules/create/`,
+            {
+              id_client: data.user.id,
+            },
+            {
+              headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token'),
+              },
+            },
+          )
+          .catch(() => {})
       })
       .catch(() => {})
 

@@ -92,13 +92,19 @@ def create_one(request):
 
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
+        
+        request_body = json.loads(request.body)
+        id_client = request_body.get('id_client')
+
+        if id_client is None:
+            return JsonResponse({'error': 'id_client field is required'}, status=400)
 
         # check if client exist
-        if Users.objects.filter(id=authenticated_user.id).count() == 0:
+        if Users.objects.filter(id=id_client).count() == 0:
             return JsonResponse({'message': 'Client does not exist'}, status=404)
 
         ModulesESG.objects.create(
-            id_client=authenticated_user.id,
+            id_client=id_client,
             date_last_modification=datetime.today().date(),
             original_answers=[],
             modified_answers=[],
