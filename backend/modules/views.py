@@ -10,9 +10,7 @@ from commitments.models import CommitmentPacts
 from modules.models import Answers
 from modules.models import ModulesESG
 from questions.models import Choices
-from questions.scoring_algo import calculate_sub_challenge_scores, \
-    calculate_theme_scores, \
-    calculate_global_esg_scores, calculate_challenge_scores
+from questions.scoring_algo import calculate_global_esg_scores
 from users.models import Users
 
 
@@ -49,7 +47,8 @@ def read_one_by_id(request, uuid_esg_module):
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
-        if authenticated_user.role != 'employee' or (authenticated_user.id != module.id_client and authenticated_user.role == 'client'):
+        if authenticated_user.role != 'employee' or (
+                authenticated_user.id != module.id_client and authenticated_user.role == 'client'):
             return JsonResponse({'error': 'Only employees can access this endpoint or the correct client'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
@@ -210,8 +209,12 @@ def add_original_answers(request, uuid_module_esg):
         if module_esg.state != 'open':
             return JsonResponse({'message': 'Not Authorized'}, status=403)
 
-        new_choice = Choices.objects.get(pk=id_choice)
-        score = 0.0 if not new_choice else new_choice.score
+        if id_choice is not None:
+            new_choice = Choices.objects.get(pk=id_choice)
+            score = new_choice.score
+        else:
+            new_choice = None
+            score = 0
 
         answer = Answers.objects(id_question=id_question, id__in=module_esg.original_answers).first()
 
@@ -269,14 +272,18 @@ def add_modified_answers(request):
         if not module_esg:
             return JsonResponse({'error': 'Module ESG not found'}, status=404)
 
-        new_choice = Choices.objects.get(pk=id_choice)
-        score = 0 if not new_choice else new_choice.score
+        if id_choice is not None:
+            new_choice = Choices.objects.get(pk=id_choice)
+            score = new_choice.score
+        else:
+            new_choice = None
+            score = 0
 
         answer = Answers.objects(id_question=id_question, id__in=module_esg.modified_answers).first()
-        if answer:
 
-            answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice,
-                          score_response=score, commentary=commentary)
+        if answer:
+            answer.update(value=value, is_commitment=is_commitment, id_choice=id_choice, score_response=score,
+                          commentary=commentary)
         else:
             print("create answer")
             new_answer = Answers.objects.create(
@@ -294,9 +301,10 @@ def add_modified_answers(request):
             list_modified_answers.append(new_answer.id)
             module_esg.update(modified_answers=list_modified_answers)
 
-            module_esg.update(date_last_modification=datetime.today().date())
+        module_esg.update(date_last_modification=datetime.today().date())
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -351,9 +359,9 @@ def add_score(request, uuid_module_esg):
 
     return JsonResponse({'score_total': global_esg_scores['total_percentage']}, status=200)
 
+
 @require_GET
 def get_score(request, uuid_module_esg):
-
     authenticated_user = check_authenticated_user(request)
     if isinstance(authenticated_user, HttpResponse):
         return authenticated_user
