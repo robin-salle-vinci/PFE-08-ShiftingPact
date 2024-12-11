@@ -16,7 +16,7 @@
         v-if="choice.value != 'nan'"
         :choice="choice"
         :questionId="question.id"
-        :isActive="responseId == choice.id"
+        :isActive="choice.value.includes(responseValue)"
       />
     </div>
   </div>
