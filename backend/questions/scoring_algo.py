@@ -146,7 +146,7 @@ def calculate_challenge_scores(module_esg) -> tuple[
 def calculate_theme_scores(module_esg) -> tuple[
   dict[str, dict[str, Any]], dict[str, dict[Any, Any]], dict[
     str, dict[Any, Any]]]:
-  theme_scores = {"today": {}, "in_two_years": {}}
+  theme_scores = {"name": [] ,"today": {}, "in_two_years": {}}
   sub_challenge_scores, challenge_scores = calculate_challenge_scores(module_esg)
 
   for challenge_id, scores in challenge_scores["today"].items():
@@ -156,8 +156,9 @@ def calculate_theme_scores(module_esg) -> tuple[
       theme = Challenges.get_theme_from_color(challenge.color)
 
       if theme not in theme_scores["today"]:
-        theme_scores["today"][theme] = {"name": "", "score": 0.0, "score_max": 0.0}
-        theme_scores["in_two_years"][theme] = {"name": "", "score": 0.0, "score_max": 0.0}
+        theme_scores["today"][theme] = {"score": 0.0, "score_max": 0.0}
+        theme_scores["in_two_years"][theme] = {"score": 0.0, "score_max": 0.0}
+        theme_scores["name"].append(theme)
 
       # Add challenge scores to the theme
       theme_scores["today"][theme]["score"] += scores["score"]
@@ -168,17 +169,17 @@ def calculate_theme_scores(module_esg) -> tuple[
     except Exception as e:
       print(f"Error processing challenge {challenge_id}: {e}")
 
-  # Calculate percentage scores for each theme
-  for theme, scores in theme_scores["today"].items():
-    today_max = scores["score_max"]
-    theme_scores["today"][theme]["total30"] = (scores["score"] / today_max * 30) if today_max > 0 else 0.0
-    theme_scores["today"][theme]["name"] = theme
-
-
-  for theme, scores in theme_scores["in_two_years"].items():
-    in_two_years_max = scores["score_max"]
-    theme_scores["in_two_years"][theme]["total30"] = (scores["score"] / in_two_years_max * 30) if in_two_years_max > 0 else 0.0
-    theme_scores["in_two_years"][theme]["name"] = theme
+  # # Calculate percentage scores for each theme
+  # for theme, scores in theme_scores["today"].items():
+  #   today_max = scores["score_max"]
+  #   # theme_scores["today"][theme]["total30"] = (scores["score"] / today_max * 30) if today_max > 0 else 0.0
+  #   theme_scores["today"][theme]["name"] = theme
+  #
+  #
+  # for theme, scores in theme_scores["in_two_years"].items():
+  #   in_two_years_max = scores["score_max"]
+  #   # theme_scores["in_two_years"][theme]["total30"] = (scores["score"] / in_two_years_max * 30) if in_two_years_max > 0 else 0.0
+  #   theme_scores["in_two_years"][theme]["name"] = theme
 
   return sub_challenge_scores, challenge_scores, theme_scores
 
@@ -188,25 +189,43 @@ def calculate_theme_scores(module_esg) -> tuple[
 def calculate_global_esg_scores(module_esg) -> Dict[str, float]:
   sub_challenge_scores, challenge_scores, theme_scores = calculate_theme_scores(module_esg)
   try:
-    # Calculate the total ESG score for today
-    total_score_today = sum(theme["total30"] for theme in theme_scores["today"].values()) if theme_scores["today"] else 0.0
-    # Calculate the total ESG score for in two years
-    total_score_in_two_years = sum(theme["total30"] for theme in theme_scores["in_two_years"].values()) if theme_scores["in_two_years"] else 0.0
+    # Initialize variables for total scores and max scores
+    total_today = {"score": 0, "max_score": 0}
+    total_in_two_years = {"score": 0, "max_score": 0}
 
-    # Average scores for global ESG calculation
-    total_esg_score_today = total_score_today / 90 * 100
-    total_esg_score_in_two_years = total_score_in_two_years / 90 * 100
+    # Calculate the sum of scores and max scores for today
+    if theme_scores.get("today"):
+      for theme in theme_scores["today"].values():
+        total_today["score"] += theme.get("score", 0)
+        total_today["max_score"] += theme.get("score_max", 0)
 
-    # Sum of global scores
-    total_esg_score = total_esg_score_today + total_esg_score_in_two_years
+    # Calculate the sum of scores and max scores for in two years
+    if theme_scores.get("in_two_years"):
+      for theme in theme_scores["in_two_years"].values():
+        total_in_two_years["score"] += theme.get("score", 0)
+        total_in_two_years["max_score"] += theme.get("score_max", 0)
 
-    combined_scores = stringify_keys( {
+    # Combine total scores for today and in two years
+    combined_total = {
+      "score": total_today["score"] + total_in_two_years["score"],
+      "max_score": total_today["max_score"] + total_in_two_years["max_score"]
+    }
+
+    # Calculate total ESG percentages
+    total_percentage = (
+      combined_total["score"] / combined_total["max_score"] * 100
+      if combined_total["max_score"] > 0 else 0
+    )
+
+    # Prepare combined scores for return
+    combined_scores = stringify_keys({
       "sub_challenge_scores": sub_challenge_scores,
       "challenge_scores": challenge_scores,
       "theme_scores": theme_scores,
-      "total_esg_score_today": total_esg_score_today,
-      "total_esg_score_in_two_years": total_esg_score_in_two_years,
-      "total_esg_score": total_esg_score,
+      "total_today": total_today,
+      "total_in_two_years": total_in_two_years,
+      "combined_total": combined_total,
+      "total_percentage": total_percentage
     })
 
     return combined_scores

@@ -321,13 +321,13 @@ def add_score(request, uuid_module_esg):
                             status=500)
 
     try:
-        module_esg.update(calculated_score=global_esg_scores['total_esg_score'])
+        module_esg.update(calculated_score=global_esg_scores['total_percentage'])
         module_esg.save()
     except Exception as e:
         return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
                             status=500)
 
-    return JsonResponse({'score_total': global_esg_scores['total_esg_score']}, status=200)
+    return JsonResponse({'score_total': global_esg_scores['total_percentage']}, status=200)
 
 @require_GET
 def get_score(request, uuid_module_esg):
