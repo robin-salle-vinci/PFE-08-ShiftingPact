@@ -17,19 +17,19 @@ def get_one(request, id_commitment):
 
       user = check_authenticated_user(request)
       if isinstance(user, HTTPResponse):
-         return users
+         return user
 
       commitment = CommitmentPacts.get_by_id(id_commitment)
 
-        if commitment is None:
-            return JsonResponse({'error': 'Commitment not found'}, status=404)
+      if commitment is None:
+         return JsonResponse({'error': 'Commitment not found'}, status=404)
 
-        if not (commitment.id_client == user.id_client_information or user.role == 'employee'):
-            return JsonResponse({'error': 'Not Authorized'}, status=403)
+      if not (commitment.id_client == user.id_client_information or user.role == 'employee'):
+         return JsonResponse({'error': 'Not Authorized'}, status=403)
 
-        commitment_data = commitment_json(commitment)
+      commitment_data = commitment_json(commitment)
 
-        return JsonResponse(commitment_data, safe=False, status=200)
+      return JsonResponse(commitment_data, safe=False, status=200)
 
     except Exception as e:
         print(str(e))
