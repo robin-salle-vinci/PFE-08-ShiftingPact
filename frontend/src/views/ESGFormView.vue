@@ -14,6 +14,7 @@
     <ESGFormList
       :questions="questions"
       :responses="responses"
+      :idESG="idESG"
       :isSubChallengeSelected="selectedSubChallenge.length !== 0 ? true : false"
       :onSubChallengeSelected="handleSubChallengeSelected"
     />
@@ -21,13 +22,13 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import axios from 'axios'
-  import { getToken } from '../utils/localstorage'
   import ESGFormList from '@/components/esg/ESGFormList.vue'
   import ESGFormQuestions from '@/components/esg/ESGFormQuestions.vue'
-  import type { Question } from '@/types/Question.ts'
   import type { Answer } from '@/types/Answer.ts'
+  import type { Question } from '@/types/Question.ts'
+  import axios from 'axios'
+  import { ref } from 'vue'
+  import { getToken } from '../utils/localstorage'
 
   const apiUrl = import.meta.env.VITE_API_URL
 

@@ -66,33 +66,42 @@
           </div>
         </div>
       </div>
+      <div class="container-btn" v-if="progress == 100">
+        <button @click="handleValidateForm" class="save-button">Envoye le formulaire</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import ChallengeProgress from './ChallengeProgress.vue'
   import type { SubChallenge } from '@/types/SubChallenge.ts'
+  import axios from 'axios'
+  import { computed, ref } from 'vue'
+  import ChallengeProgress from './ChallengeProgress.vue'
 
-  const { questions, responses, isSubChallengeSelected, onSubChallengeSelected } = defineProps({
-    questions: {
-      type: Object,
-      default: () => ({}),
-    },
-    responses: {
-      type: Object,
-      default: () => ({}),
-    },
-    isSubChallengeSelected: {
-      type: Boolean,
-      default: () => false,
-    },
-    onSubChallengeSelected: {
-      type: Function,
-      default: () => {},
-    },
-  })
+  const { questions, responses, isSubChallengeSelected, onSubChallengeSelected, idESG } =
+    defineProps({
+      questions: {
+        type: Object,
+        default: () => ({}),
+      },
+      responses: {
+        type: Object,
+        default: () => ({}),
+      },
+      isSubChallengeSelected: {
+        type: Boolean,
+        default: () => false,
+      },
+      onSubChallengeSelected: {
+        type: Function,
+        default: () => {},
+      },
+      idESG: {
+        type: String,
+        default: () => '',
+      },
+    })
 
   const progress = computed(() => {
     if (!questions.challenges) return 0
@@ -113,6 +122,19 @@
 
   const toggleCategory = (challenge: number) => {
     categoryState.value[challenge] = !categoryState.value[challenge]
+  }
+
+  const handleValidateForm = () => {
+    axios
+      .patch(`${import.meta.env.VITE_API_URL}/modules/state/${idESG}?newState=verification`, null, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      })
+      .then((response) => {
+        console.log(response)
+      })
+      .catch(() => {})
   }
 </script>
 
@@ -296,5 +318,27 @@
     border-left: 2px solid #e0e0e0;
     margin: 0 20px 0 20px;
     height: 100%;
+  }
+
+  .save-button {
+    background-color: #013238;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .save-button:hover {
+    background-color: #00252a;
+    transform: scale(1.03);
+    transition: transform 0.3s ease;
+  }
+
+  .container-btn {
+    display: flex;
+    justify-content: center;
+    margin-top: 5%;
   }
 </style>

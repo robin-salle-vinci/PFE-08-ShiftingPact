@@ -53,13 +53,13 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
+  import type { Answer } from '@/types/Answer'
+  import type { Question } from '@/types/Question'
+  import { getToken, getUser } from '@/utils/localstorage'
   import axios from 'axios'
+  import { computed } from 'vue'
   import ESGChoices from './ESGChoices.vue'
   import ESGRadioChoice from './ESGRadioChoice.vue'
-  import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Answer'
-  import { getToken, getUser } from '@/utils/localstorage'
 
   const apiUrl = import.meta.env.VITE_API_URL
   const client = getUser()
