@@ -25,7 +25,7 @@ def read_all(request):
         if authenticated_user.role == 'employee':
             modules = ModulesESG.objects.all()
         else:
-            modules = ModulesESG.objects.all().filter(client_id=authenticated_user.id)
+            modules = ModulesESG.objects.all().filter(id_client=authenticated_user.id)
 
         modules_json = [module_single_json(module) for module in modules]
 
@@ -205,7 +205,7 @@ def add_original_answers(request, uuid_module_esg):
         is_commitment = data.get('is_commitment')
 
         if uuid_module_esg is None or id_question is None or value is None or is_commitment is None:
-            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=409)
+            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
         module_esg = ModulesESG.objects.get(pk=uuid_module_esg)
 

@@ -78,7 +78,7 @@ def answer_json(answer):
             'value': str(answer.value),
             'commentary': str(answer.commentary) if answer.commentary is not None else None,
             'is_commitment': bool(answer.is_commitment),
-            'score_response': float(answer.score_response if answer.score_response else 0.0),
+           # 'score_response': float(answer.score_response if answer.score_response else 0.0),
         }
 
 

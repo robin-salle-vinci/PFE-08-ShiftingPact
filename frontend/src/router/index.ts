@@ -5,6 +5,7 @@ import PactView from '@/views/PactView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import ESGFormView from '../views/ESGFormView.vue'
 import ScoresView from '../views/ScoresView.vue'
 
 function isEmployee() {
@@ -24,6 +25,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/form/esg',
+      name: 'formesg',
+      component: ESGFormView,
     },
     {
       path: '/dashboard',
