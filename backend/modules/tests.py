@@ -1,6 +1,7 @@
-from uuid import uuid4
-from django.test import TestCase, Client
 from unittest.mock import patch
+from uuid import uuid4
+
+from django.test import TestCase, Client
 from django.urls import reverse
 
 from modules.models import Answers
@@ -21,14 +22,14 @@ class ModulesViewTests(TestCase):
 
         self.answers = Answers(
             id=uuid4(),
-            id_challenge = uuid4(),
-            id_sub_challenge = uuid4(),
-            id_question = uuid4(),
-            id_choice = uuid4(),  # Optional, only for QCM type questions
-            value = 'test',
-            commentary = 'test',
-            is_commitment = False,  # Boolean pour savoir si engagement ou pas
-            score_response = 85
+            id_challenge=uuid4(),
+            id_sub_challenge=uuid4(),
+            id_question=uuid4(),
+            id_choice=uuid4(),  # Optional, only for QCM type questions
+            value='test',
+            commentary='test',
+            is_commitment=False,  # Boolean pour savoir si engagement ou pas
+            score_response=85
         )
 
     def mock_decode_function(self, token):
@@ -39,7 +40,7 @@ class ModulesViewTests(TestCase):
     @patch('users.models.Users.get_by_id')
     @patch('questions.models.Answers.get_by_id')
     @patch('modules.models.ModuleESG.get_all')
-    def test_successful_get_modules(self, mock_get_all, mock_answers_get, mock_users_get, mock_decode, mock_module_json):
+    def test_successful_get_modules(self, mock_get_all, mock_answers_get, mock_users_get, mock_decode,mock_module_json):
         mock_users_get.return_value = self.user
         mock_decode.side_effect = self.mock_decode_function
         mock_module_json.return_value = {}
@@ -49,7 +50,6 @@ class ModulesViewTests(TestCase):
         response = self.client.get(self.url, **{'HTTP_AUTHORIZATION': 'Bearer valid_token'})
 
         self.assertEqual(response.status_code, 200)
-
 
     @patch('modules.views.decode_token')
     def test_invalid_token(self, mock_decode):

@@ -1,19 +1,19 @@
-import uuid
+import json
+from datetime import datetime
+
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
-import json
 
+from backend.utils.json_utils import module_json, module_single_json
+from backend.utils.token_utils import check_authenticated_user
 from commitments.models import CommitmentPacts
 from modules.models import Answers
-from backend.utils.json_utils import module_json, module_single_json, answer_json
-from backend.utils.token_utils import check_authenticated_user
 from modules.models import ModulesESG
+from questions.models import Choices
 from questions.scoring_algo import calculate_sub_challenge_scores, \
     calculate_theme_scores, \
     calculate_global_esg_scores, calculate_challenge_scores
 from users.models import Users
-from questions.models import Choices, Questions
-from datetime import datetime
 
 
 # Get all ESG modules
