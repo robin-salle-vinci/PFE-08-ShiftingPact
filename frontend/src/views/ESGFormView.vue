@@ -10,6 +10,8 @@
       :selectedChallengeId="selectedChallengeId"
       :selectedSubChallengeId="selectedSubChallengeId"
       :selectedSubChallenge="selectedSubChallenge"
+      :canAnswer="canAnswer"
+      :addOneAnswer="addOneAnswer"
     />
     <ESGFormList
       :questions="questions"
@@ -17,6 +19,7 @@
       :idESG="idESG"
       :isSubChallengeSelected="selectedSubChallenge.length !== 0 ? true : false"
       :onSubChallengeSelected="handleSubChallengeSelected"
+      :canAnswer="canAnswer"
     />
   </div>
 </template>
@@ -28,9 +31,10 @@
   import type { Question } from '@/types/Question.ts'
   import axios from 'axios'
   import { ref } from 'vue'
-  import { getToken } from '../utils/localstorage'
+  import { getToken, getUser } from '@/utils/localstorage'
 
   const apiUrl = import.meta.env.VITE_API_URL
+  const client = getUser()
 
   const idESG = ref('')
   const selectedChallengeId = ref('')
@@ -38,7 +42,7 @@
   const selectedSubChallenge = ref<Question[]>([])
 
   const questions = ref({})
-  const responses = ref<Answer[]>([])
+  const responses = ref<{ [key: string]: Answer }>({})
 
   async function getQuestions() {
     const response = await axios.get(`${apiUrl}/questions/`, {
@@ -59,6 +63,7 @@
 
     responses.value = response.data.original_answers
     idESG.value = response.data.id
+    console.log(response.data)
   }
 
   getQuestions()
@@ -79,6 +84,35 @@
     selectedSubChallenge.value = question
     selectedChallengeId.value = challengeId
     selectedSubChallengeId.value = subChallengeId
+  }
+
+  function addOneAnswer(questionId: string, answer: Answer) {
+    responses.value[questionId] = answer
+  }
+
+  const canAnswer = (question: Question) => {
+    switch (question.template) {
+      case 'ALL':
+        return true
+
+      case 'OWNED FACILITY':
+        return client.ownedFacility
+
+      case 'FACILITY':
+        return client.ownedFacility
+
+      case 'WORKERS':
+        return Number(client.numberWorkers) > 0
+
+      case 'PRODUITS':
+        return client.serviceOrProduct == 'produit'
+
+      case 'SERVICES':
+        return client.serviceOrProduct == 'service'
+
+      default:
+        return false
+    }
   }
 </script>
 

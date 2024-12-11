@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
   import type { Question } from '@/types/Question.ts'
-  const { type, responses, questions } = defineProps({
+  const { type, responses, questions, canAnswer } = defineProps({
     type: {
       type: String,
       default: '',
@@ -17,15 +17,20 @@
       type: Object,
       default: () => ({}),
     },
+    canAnswer: {
+      type: Function,
+      default: () => {},
+    },
   })
 
   const getProgress = () => {
     const begin = type === 'challenge' ? 'progress-challenge' : 'progress-sub-challenge'
 
-    const totalQuestions = questions.length
+    let totalQuestions = 0
     let answeredQuestions = 0
     questions.forEach((question: Question) => {
-      if (responses[question.id]) return answeredQuestions++
+      if (canAnswer(question)) totalQuestions++
+      if (responses[question.id]) answeredQuestions++
     })
 
     if (answeredQuestions === totalQuestions) return begin + '-completed'

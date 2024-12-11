@@ -9,9 +9,9 @@ from backend.utils.token_utils import check_authenticated_user
 from commitments.models import CommitmentPacts
 from modules.models import Answers
 from modules.models import ModulesESG
-from questions.models import Choices
+from questions.models import Choices, Questions
 from questions.scoring_algo import calculate_global_esg_scores
-from users.models import Users
+from users.models import Users, ClientInformation
 
 
 # Get all ESG modules
@@ -145,6 +145,18 @@ def change_state(request, uuid_module_esg):
         return HttpResponse("An employee can only validate and a client can only set to verification an ESG module",
                             status=403)
 
+    # check if the client had answer to all questions
+    if new_state == 'verification':
+        client_infos = ClientInformation.objects(id_user=authenticated_user.id).first()
+        filters_template = ['ALL']
+        if client_infos.number_workers > 0: filters_template.append('WORKERS')
+        if client_infos.owned_facility: filters_template.append('OWNED FACILITY')
+        if client_infos.service_or_product == 'produit': filters_template.append('PRODUITS')
+        questions_to_answer = Questions.objects.filter(template__in=filters_template).all()
+        if len(module_esg.original_answers) != questions_to_answer.count():
+            return HttpResponse("The client has not answered all questions", status=400)
+
+    # créer pacte d'engagement si validated
     if new_state == 'validated':
         # Récupérer toutes les réponses originales et modifiées pour le pacte d'engagement
         original_answers = Answers.objects.filter(id__in=module_esg.original_answers, is_commitment=True)
@@ -166,9 +178,6 @@ def change_state(request, uuid_module_esg):
             creation_date=datetime.today().date(),
             answers_commitments=answers_to_commitment
         )
-
-    # if(new_state == 'verification'):
-    # TODO calculate_global_esg_scores() + add score to module_esg
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification of state", status=201)
@@ -195,7 +204,7 @@ def add_original_answers(request, uuid_module_esg):
         is_commitment = data.get('is_commitment')
 
         if uuid_module_esg is None or id_question is None or value is None or is_commitment is None:
-            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=409)
+            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
         module_esg = ModulesESG.objects.get(pk=uuid_module_esg)
 

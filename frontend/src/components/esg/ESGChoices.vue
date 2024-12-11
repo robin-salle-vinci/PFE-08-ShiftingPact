@@ -1,5 +1,8 @@
 <template>
-  <div v-if="question.type_response === 'qcm'" class="group">
+  <div
+    v-if="question.type_response === 'qcm' || question.type_response === 'pourcentage'"
+    class="group"
+  >
     <div v-for="choice in question.choices" :key="choice.id" class="choice">
       <ESGRadioChoice
         v-if="choice.value != 'nan'"
@@ -16,13 +19,17 @@
         v-if="choice.value != 'nan'"
         :choice="choice"
         :questionId="question.id"
-        :isActive="responseId == choice.id"
+        :isActive="choice.value.includes(responseValue)"
       />
     </div>
   </div>
 
   <div v-if="question.type_response === 'question ouverte'" class="textarea-container">
-    <textarea placeholder="Entrez votre réponse ici" :value="responseValue"></textarea>
+    <textarea
+      placeholder="Entrez votre réponse ici"
+      :name="question.id"
+      :value="responseValue"
+    ></textarea>
   </div>
 </template>
 

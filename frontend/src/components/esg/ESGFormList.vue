@@ -40,6 +40,7 @@
                     (subChallenge: SubChallenge) => subChallenge.questions,
                   )
                 "
+                :canAnswer="canAnswer"
               />
             </div>
             <div class="separator"></div>
@@ -62,6 +63,7 @@
               type="subchallenge"
               :responses="responses"
               :questions="subChallenge.questions"
+              :canAnswer="canAnswer"
             />
           </div>
         </div>
@@ -79,7 +81,7 @@
   import { computed, ref } from 'vue'
   import ChallengeProgress from './ChallengeProgress.vue'
 
-  const { questions, responses, isSubChallengeSelected, onSubChallengeSelected, idESG } =
+  const { questions, responses, isSubChallengeSelected, onSubChallengeSelected, idESG, canAnswer } =
     defineProps({
       questions: {
         type: Object,
@@ -101,6 +103,10 @@
         type: String,
         default: () => '',
       },
+      canAnswer: {
+        type: Function,
+        default: () => {},
+      },
     })
 
   const progress = computed(() => {
@@ -111,7 +117,9 @@
 
     for (const challenge of questions.challenges) {
       for (const subChallenge of challenge.sub_challenges) {
-        totalQuestions += subChallenge.questions.length
+        for (const question of subChallenge.questions) {
+          if (canAnswer(question)) totalQuestions++
+        }
       }
     }
 
