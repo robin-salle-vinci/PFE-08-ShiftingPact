@@ -196,7 +196,7 @@ def add_original_answers(request, uuid_module_esg):
         is_commitment = data.get('is_commitment')
 
         if uuid_module_esg is None or id_question is None or value is None or is_commitment is None:
-            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=409)
+            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
 
         module_esg = ModulesESG.objects.get(pk=uuid_module_esg)
 
