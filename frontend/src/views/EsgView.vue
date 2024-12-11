@@ -83,12 +83,16 @@
   })
 
   const checkDisplayTemplate = (question: Question) => {
+    console.log(client.value?.owned_facility)
     switch (question.template) {
       case 'ALL':
         return true
 
       case 'OWNED FACILITY':
         return client.value?.owned_facility
+
+      case 'WORKERS':
+        return Number(client.value?.number_workers) > 0
 
       case 'PRODUITS':
         return client.value?.service_or_product == 'produit'
