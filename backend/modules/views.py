@@ -64,7 +64,6 @@ def read_last_module_for_client(request):
         authenticated_user = check_authenticated_user(request)
         if isinstance(authenticated_user, HttpResponse):
             return authenticated_user
-        
 
         if authenticated_user.role == 'employee':
             return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
@@ -74,7 +73,7 @@ def read_last_module_for_client(request):
         if not module:
             return JsonResponse({'error': 'Module not found'}, status=404)
 
-        if  str(module.id_client) != str(authenticated_user.id):
+        if str(module.id_client) != str(authenticated_user.id):
             return JsonResponse({'error': 'Only the author can access to there esg'}, status=403)
 
         return JsonResponse(module_json(module), status=200)
@@ -92,7 +91,7 @@ def create_one(request):
 
         if authenticated_user.role != 'employee':
             return JsonResponse({'error': 'Only employee can access this endpoint'}, status=403)
-        
+
         request_body = json.loads(request.body)
         id_client = request_body.get('id_client')
 
@@ -197,8 +196,8 @@ def add_original_answers(request, uuid_module_esg):
         value = data.get('value')
         is_commitment = data.get('is_commitment')
 
-        if not (uuid_module_esg or id_question or value or is_commitment or id_choice) is None:
-            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
+        if uuid_module_esg is None or id_question is None or value is None or is_commitment is None:
+            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=409)
 
         module_esg = ModulesESG.objects.get(pk=uuid_module_esg)
 
@@ -263,7 +262,7 @@ def add_modified_answers(request):
         is_commitment = data.get('is_commitment')
 
         if id_esg is None or id_question is None or value is None or is_commitment is None:
-            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=400)
+            return JsonResponse({'error': 'id_esg, id_question, value, is_commitment fields are required'}, status=409)
 
         module_esg = ModulesESG.objects.get(pk=id_esg)
 
@@ -311,6 +310,7 @@ def stringify_keys(data):
     elif isinstance(data, list):
         return [stringify_keys(item) for item in data]
     return data
+
 
 # Calculate ESG Module score
 @require_http_methods(["PATCH"])

@@ -16,7 +16,7 @@ def get_one(request, id_commitment):
       if isinstance(user, JsonResponse):
          return user
 
-      commitment = CommitmentPacts.get_by_id(str(id_commitment))
+      commitment = CommitmentPacts.get_by_id(id_commitment)
 
       if commitment is None:
          return JsonResponse({'error': 'Commitment not found'}, status=404)
