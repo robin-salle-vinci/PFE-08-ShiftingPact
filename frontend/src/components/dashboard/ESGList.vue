@@ -5,7 +5,9 @@
     :esgElement="esgVerification"
     :handleSeeEditForm="handleSeeEditForm"
     :handleValidate="handleValidate"
+    :seePact="false"
     :onlySee="false"
+    :dontValidate="false"
   />
 
   <ListElement
@@ -14,7 +16,9 @@
     :esgElement="esgOpen"
     :handleSeeEditForm="handleSeeEditForm"
     :handleValidate="handleValidate"
-    :onlySee="true"
+    :seePact="false"
+    :onlySee="false"
+    :dontValidate="true"
   />
 
   <ListElement
@@ -22,8 +26,10 @@
     :title="'Questionnaires ESG validés'"
     :esgElement="esgValidated"
     :handleSeeEditForm="handleSeeEditForm"
-    :handleValidate="handleValidate"
+    :handleSeePactForm="handleSeePactForm"
+    :seePact="true"
     :onlySee="true"
+    :dontValidate="true"
   />
 </template>
 
@@ -69,6 +75,10 @@
       .catch((error) => {
         console.error(error)
       })
+  }
+  const handleSeePactForm = (event: MouseEvent, _esgId: string) => {
+    event.preventDefault()
+    router.push(`/pact/${_esgId}`)
   }
 </script>
 

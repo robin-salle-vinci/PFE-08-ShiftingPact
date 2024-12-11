@@ -14,8 +14,8 @@
             <input
               v-if="!answerToModify.id_choice"
               type="text"
-              :value="answerToModify.value"
               :disabled="props.state === 'validated' || !isModifying"
+              v-model="answerToModify.value"
             />
             <select
               v-else
@@ -115,11 +115,10 @@
 </template>
 
 <script setup lang="ts">
+  import type { Answer } from '@/types/Answer'
   import type { Question } from '@/types/Question'
-  import type { Answer } from '@/types/Reponse'
   import axios from 'axios'
   import { defineProps, ref, type Ref } from 'vue'
-
   const props = defineProps<{
     question: Question
     clientAnswer: Answer
