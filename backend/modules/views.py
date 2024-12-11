@@ -300,8 +300,7 @@ def add_modified_answers(request):
             list_modified_answers = module_esg.modified_answers
             list_modified_answers.append(new_answer.id)
             module_esg.update(modified_answers=list_modified_answers)
-
-        module_esg.update(date_last_modification=datetime.today().date())
+            module_esg.update(date_last_modification=datetime.today().date())
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
 
