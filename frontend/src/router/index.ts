@@ -1,5 +1,6 @@
 import { getToken } from '@/utils/localstorage'
 import DashboardView from '@/views/DashboardView.vue'
+import EsgView from '@/views/EsgView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -29,13 +30,19 @@ const router = createRouter({
       component: DashboardView,
     },
     {
+<<<<<<< HEAD
       path: '/scores',
       name: 'scores',
       component: ScoresView,
+=======
+      path: '/esg/:id',
+      name: 'esg',
+      component: EsgView,
+      props: true,
+>>>>>>> 2da6043ba0ea81e65c91e4cc2e7c0c7546af2bf7
     },
   ],
 })
-
 router.beforeEach((to, from, next) => {
   const token = getToken()
   if (!token && to.path !== '/login') {
