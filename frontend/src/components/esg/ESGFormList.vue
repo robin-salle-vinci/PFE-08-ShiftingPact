@@ -84,6 +84,7 @@
   import type { SubChallenge } from '@/types/SubChallenge.ts'
   import axios from 'axios'
   import { computed, ref } from 'vue'
+  import router from '@/router'
   import ChallengeProgress from './ChallengeProgress.vue'
 
   const { questions, responses, isSubChallengeSelected, onSubChallengeSelected, idESG, canAnswer } =
@@ -144,8 +145,8 @@
           Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
       })
-      .then((response) => {
-        console.log(response)
+      .then(() => {
+        router.push('/')
       })
       .catch(() => {})
   }

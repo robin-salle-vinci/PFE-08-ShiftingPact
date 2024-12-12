@@ -465,6 +465,10 @@ onMounted(async () => {
 <style scoped>
   @import url('https://fonts.googleapis.com/css?family=Lobster+Two&display=swap');
 
+  * {
+    font-family: 'Arial', sans-serif;
+  }
+
   .container {
     padding-bottom: 50px; /* Ajoute de l'espace en bas du conteneur */
   }

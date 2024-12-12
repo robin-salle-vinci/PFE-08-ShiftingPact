@@ -61,6 +61,10 @@
 </script>
 
 <style scoped>
+  * {
+    font-family: 'Arial', sans-serif;
+  }
+
   .container {
     display: flex;
     flex-direction: column;
