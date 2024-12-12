@@ -155,7 +155,6 @@ def change_state(request, uuid_module_esg):
         questions_to_answer = Questions.objects.filter(template__in=filters_template).all()
         if len(module_esg.original_answers) != questions_to_answer.count():
             return HttpResponse("The client has not answered all questions", status=400)
-        #calculate ESG score
 
     # créer pacte d'engagement si validated
     if new_state == 'validated':
@@ -180,6 +179,8 @@ def change_state(request, uuid_module_esg):
             answers_commitments=answers_to_commitment,
             id_module_esg=module_esg.id,
         )
+
+        # Calculer score ESG
         global_esg_scores = calculate_global_esg_scores(module_esg)
         module_esg.update(calculated_score=global_esg_scores['total_percentage'])
         module_esg.save()
@@ -314,11 +315,6 @@ def add_modified_answers(request):
             list_modified_answers.append(new_answer.id)
             module_esg.update(modified_answers=list_modified_answers)
             module_esg.update(date_last_modification=datetime.today().date())
-
-        #calculate ESG score
-        global_esg_scores = calculate_global_esg_scores(module_esg)
-        module_esg.update(calculated_score=global_esg_scores['total_percentage'])
-        module_esg.save()
 
         return JsonResponse({'message': 'Answer modify successfully'}, status=200)
 
