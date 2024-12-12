@@ -114,212 +114,33 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
               {{ (category2.engagementScore / category2.engagementTotal).toFixed(1) }}%
             </td>
           </tr>
-          <!--
-    <tr class="bonus" v-for="(bonus, index) in bonusItems" :key="index">
-      <td>{{ bonus.name }}</td>
-      <td>{{ bonus.currentScore }}</td>
-       <td>/</td>
-       <td>/</td>
-      <td>{{ bonus.engagementScore }}</td>
-      <td>/</td>
-      <td>/</td>
-    </tr>
-    -->
+
+          <tr class="bonus" v-for="(bonus, index) in [bonusTransparence, bonusFormalisation]" :key="index">
+            <td>{{ bonus.name }}</td>
+            <td>{{ bonus.currentScore }}</td>
+              <td>/</td>
+              <td>/</td>
+            <td>{{ bonus.engagementScore }}</td>
+            <td>/</td>
+            <td>/</td>
+          </tr>
+
         </tbody>
       </table>
     </div>
   </div>
 </template>
 
-<!--
-  // eslint-disable-next-line vue/block-lang
-  <script lang="ts">
-  import HeaderElement from '@/components/structure/HeaderElement.vue';
-  export default {
-    components: {
-        HeaderElement
-    },
-    data() {
-      return {
-        categories: [
-          { name: 'Environnement', currentScore: 50, totalScore: 100, engagementScore: 40 },
-          { name: 'Social', currentScore: 60, totalScore: 100, engagementScore: 50 },
-          { name: 'Gouvernance', currentScore: 70, totalScore: 100, engagementScore: 60 },
-          { name: 'TOTAL', currentScore: 180, totalScore: 300, engagementScore: 150 }
-        ],
-        bonusItems: [
-        { name: 'BONUS Transparence', currentScore: 5, engagementScore : 0.111111 },
-        { name: 'BONUS Formalisation', currentScore: 7, engagementScore : 0.1234326}
-      ],
-        categories2: [
-            { name: 'Energie', currentScore: 50, totalScore: 100, engagementScore: 40 },
-            { name: 'empreinte carbone', currentScore: 60, totalScore: 100, engagementScore: 50 },
-            { name: 'eau', currentScore: 70, totalScore: 100, engagementScore: 60 },
-            { name: 'matières premières & fournitures', currentScore: 80, totalScore: 100, engagementScore: 70 },
-            { name: 'déchets', currentScore: 65, totalScore: 100, engagementScore: 55 },
-            { name: 'écosystèmes & biodiversités', currentScore: 75, totalScore: 100, engagementScore: 65 },
-            { name: 'diversité inclusion & équité', currentScore: 85, totalScore: 100, engagementScore: 75 },
-            { name: 'sécurité au travail', currentScore: 90, totalScore: 100, engagementScore: 80 },
-            { name: 'santé & bien-être', currentScore: 88, totalScore: 100, engagementScore: 78 },
-            { name: 'développement des compétences', currentScore: 95, totalScore: 100, engagementScore: 85 },
-            { name: 'engagement & satisfaction', currentScore: 70, totalScore: 100, engagementScore: 60 },
-            { name: 'engagement civique', currentScore: 60, totalScore: 100, engagementScore: 50 },
-            { name: 'structure de gouvernance', currentScore: 80, totalScore: 100, engagementScore: 70 },
-            { name: 'intégration des parties prenantes', currentScore: 85, totalScore: 100, engagementScore: 75 },
-            { name: 'gestion durable', currentScore: 90, totalScore: 100, engagementScore: 80 },
-            { name: 'éthique des affaires', currentScore: 75, totalScore: 100, engagementScore: 65 },
-            { name: 'protection des données', currentScore: 95, totalScore: 100, engagementScore: 85 },
-            { name: 'certifications', currentScore: 60, totalScore: 100, engagementScore: 50 },
-            ],
-          score_max_today: today.score_max,
-          score_max_engagement: future.score_max || today.score_max,
-      };
-    },
-  };
-  </script>
--->
+
+
 
 <script setup lang="ts">
-  import HeaderElement from '@/components/structure/HeaderElement.vue'
-  import { getToken } from '@/utils/localstorage'
-  import type { AxiosResponse } from 'axios'
-  import axios from 'axios'
-  import { onMounted, ref } from 'vue'
-  import { useRoute } from 'vue-router'
-
-  interface Category {
-    name: string
-    currentScore: number
-    currentTotal: number
-    currentPercentage: number
-    engagementScore: number
-    engagementTotal: number
-    engagementPercentage: number
-    total_esg_score_today: number
-    total_esg_score_in_two_years: number
-    total_esg_score: number
-  }
-
-  interface Category2 {
-    name: string
-    currentScore: number
-    currentTotal: number
-    currentPercentage: number
-    engagementScore: number
-    engagementTotal: number
-    engagementPercentage: number
-    totalScore: number
-  }
-
-  const categories = ref<Category[]>([])
-  const categories2 = ref<Category2[]>([])
-
-  const isLoading = ref(true) // État du loader
-
-  // Récupérer les données du backend
-  const fetchESGData = async () => {
-    const apiUrl = import.meta.env.VITE_API_URL
-
-    const route = useRoute()
-    const id = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
-
-    try {
-      const response: AxiosResponse = await axios.get(
-        `${apiUrl}/modules/score/${id}?t=${Date.now()}`,
-        {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        },
-      )
-
-      const moduleData = response.data
-      console.log("Données renvoyées par l'API :", response.data)
-
-      // Récupérer les sous-challenges
-      const todayScores = moduleData.sub_challenge_scores?.today || {}
-      const futureScores = moduleData.sub_challenge_scores?.in_two_years || {}
-      const total_esg_score_today = moduleData.total_esg_score_today || 0
-      const total_esg_score_in_two_years = moduleData.total_esg_score_in_two_years || 0
-      const total_esg_score = moduleData.total_esg_score || 0
-
-      // Fusionner les sous-challenges
-      const combinedScores = Object.keys(todayScores).map((id) => {
-        const today = todayScores[id]
-        const future = futureScores[id] || {}
-
-        const currentPercentage = today.score_max ? (today.score / today.score_max) * 100 : 0
-        const engagementPercentage = future.score_max ? (future.score / future.score_max) * 100 : 0
-
-        return {
-          name: today.name,
-          currentScore: today.score,
-          currentTotal: today.score_max,
-          currentPercentage,
-          engagementScore: future.score || 0,
-          engagementTotal: future.score_max || today.score_max,
-          engagementPercentage,
-          totalScore: total_esg_score,
-        }
-      })
-
-      // Récupérer les thèmes
-      const todayScoresTheme = moduleData.theme_scores?.today || {}
-      const futureScoresTheme = moduleData.theme_scores?.in_two_years || {}
-
-      const combinedScores2 = Object.keys(todayScoresTheme).map((key) => {
-        const today = todayScoresTheme[key]
-        const future = futureScoresTheme[key] || {}
-
-        const currentPercentage = today.score_max ? (today.score / today.score_max) * 100 : 0
-        const engagementPercentage = future.score_max ? (future.score / future.score_max) * 100 : 0
-
-        return {
-          name: today.name || key, // Prendre `name` ou la clé
-          currentScore: today.score,
-          currentTotal: today.score_max,
-          currentPercentage,
-          engagementScore: future.score || 0,
-          engagementTotal: future.score_max || today.score_max,
-          engagementPercentage,
-          totalScore: total_esg_score,
-        }
-      })
-
-      // Assigner les résultats
-      categories.value = combinedScores2.map((score) => ({
-        ...score,
-        total_esg_score_today,
-        total_esg_score_in_two_years,
-        total_esg_score,
-      }))
-
-      categories2.value = combinedScores
-
-      console.log('Catégories (Thèmes) :', categories.value)
-      console.log('Catégories2 (Sous-challenges) :', categories2.value)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Erreur Axios:', error.response ? error.response.data : error.message)
-      } else {
-        console.error('Erreur lors de la récupération des données ESG:', error)
-      }
-    }
-  }
-
-  // Charger les données et gérer le loader
-  onMounted(async () => {
-    await fetchESGData()
-    setTimeout(() => {
-      isLoading.value = false // Cache le loader après un délai
-    }, 4000) // Durée de l'animation
-  })
-</script>
-
-<!--
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
 import HeaderElement from '@/components/structure/HeaderElement.vue';
+import { getToken } from '@/utils/localstorage';
 import type { AxiosResponse } from 'axios';
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 interface Category {
   name: string;
@@ -342,125 +163,322 @@ interface Category2 {
   engagementScore: number;
   engagementTotal: number;
   engagementPercentage: number;
+  totalScore: number;
+}
+
+interface BonusTransparence {
+  name: string;
+  currentScore: number;
+  engagementScore: number;
+}
+
+interface BonusFormalisation {
+  name: string;
+  currentScore: number;
+  engagementScore: number;
+}
+
+const categories = ref<Category[]>([]);
+const categories2 = ref<Category2[]>([]);
+const isLoading = ref(true);
+const bonusTransparence = ref<BonusTransparence>({ name : "Bonus Transparence", currentScore: 0, engagementScore: 0 });
+const bonusFormalisation = ref<BonusFormalisation>({ name : "Bonus Formalisation", currentScore: 0, engagementScore: 0 });
+
+const fetchESGData = async () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const route = useRoute();
+  const id = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+
+  try {
+    const response: AxiosResponse = await axios.get(
+      `${apiUrl}/modules/score/${id}?t=${Date.now()}`,
+      {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      }
+    );
+
+    const moduleData = response.data;
+    console.log('Données renvoyées par l\'API :', moduleData);
+
+    // Récupérer et transformer les sous-défis
+    const todayChallenges = moduleData.challenges_score?.today || {};
+    const futureChallenges = moduleData.challenges_score?.in_two_years || {};
+
+    const combinedScores = Object.keys(todayChallenges).flatMap((challengeId) => {
+      const todayChallenge = todayChallenges[challengeId];
+      const futureChallenge = futureChallenges[challengeId] || {};
+
+      // Vérification pour TRANSPARENCE et FORMALISATION DES PRATIQUES
+      if (todayChallenge.sub_challenges.value === 'TRANSPARENCE') {
+        Object.keys(todayChallenge.sub_challenges.sub_challenges).forEach((subId) => {
+          const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
+          const futureSubChallenge =
+            futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
+
+          bonusTransparence.value.currentScore += todaySubChallenge.score || 0;
+          bonusTransparence.value.engagementScore += futureSubChallenge.score || 0;
+        });
+      }
+
+      if (todayChallenge.sub_challenges.value === 'FORMALISATION DES PRATIQUES') {
+        Object.keys(todayChallenge.sub_challenges.sub_challenges).forEach((subId) => {
+          const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
+          const futureSubChallenge =
+            futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
+
+          bonusFormalisation.value.currentScore += todaySubChallenge.score || 0;
+          bonusFormalisation.value.engagementScore += futureSubChallenge.score || 0;
+        });
+      }
+
+      return Object.keys(todayChallenge.sub_challenges.sub_challenges).map((subId) => {
+        const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
+        const futureSubChallenge =
+          futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
+
+        const currentPercentage = todaySubChallenge.score_max
+          ? (todaySubChallenge.score / todaySubChallenge.score_max) * 100
+          : 0;
+        const engagementPercentage = futureSubChallenge.score_max
+          ? (futureSubChallenge.score / futureSubChallenge.score_max) * 100
+          : 0;
+
+        return {
+          name: todaySubChallenge.value,
+          currentScore: todaySubChallenge.score,
+          currentTotal: todaySubChallenge.score_max,
+          currentPercentage,
+          engagementScore: futureSubChallenge.score || 0,
+          engagementTotal: futureSubChallenge.score_max || todaySubChallenge.score_max,
+          engagementPercentage,
+          totalScore: moduleData.combined_total || 0,
+        };
+      });
+    });
+
+    // Récupérer et transformer les thèmes
+    const todayThemes = moduleData.theme_scores?.today || {};
+    const futureThemes = moduleData.theme_scores?.in_two_years || {};
+
+    const combinedScores2 = Object.keys(todayThemes).map((themeKey) => {
+      const todayTheme = todayThemes[themeKey];
+      const futureTheme = futureThemes[themeKey] || {};
+
+      const currentPercentage = todayTheme.score_max
+        ? (todayTheme.score / todayTheme.score_max) * 100
+        : 0;
+      const engagementPercentage = futureTheme.score_max
+        ? (futureTheme.score / futureTheme.score_max) * 100
+        : 0;
+
+      return {
+        name: themeKey,
+        currentScore: todayTheme.score,
+        currentTotal: todayTheme.score_max,
+        currentPercentage,
+        engagementScore: futureTheme.score || 0,
+        engagementTotal: futureTheme.score_max || todayTheme.score_max,
+        engagementPercentage,
+        totalScore: moduleData.combined_total || 0,
+      };
+    });
+
+    // Assigner les résultats
+    categories.value = combinedScores2.map((score) => ({
+      ...score,
+      total_esg_score_today: moduleData.total_today || 0,
+      total_esg_score_in_two_years: moduleData.total_in_two_years || 0,
+      total_esg_score: moduleData.combined_total || 0,
+    }));
+
+    categories2.value = combinedScores;
+
+    console.log('Catégories (Thèmes) :', categories.value);
+    console.log('Catégories2 (Sous-challenges) :', categories2.value);
+    console.log('Bonus Transparence :', bonusTransparence.value);
+    console.log('Bonus Formalisation :', bonusFormalisation.value);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Erreur Axios:', error.response ? error.response.data : error.message);
+    } else {
+      console.error('Erreur lors de la récupération des données ESG:', error);
+    }
+  }
+};
+
+onMounted(async () => {
+  await fetchESGData();
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 4000);
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+<!--
+<script setup lang="ts">
+import HeaderElement from '@/components/structure/HeaderElement.vue';
+import { getToken } from '@/utils/localstorage';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+interface Category {
+  name: string;
+  currentScore: number;
+  currentTotal: number;
+  currentPercentage: number;
+  engagementScore: number;
+  engagementTotal: number;
+  engagementPercentage: number;
   total_esg_score_today: number;
   total_esg_score_in_two_years: number;
   total_esg_score: number;
 }
 
+interface Category2 {
+  name: string;
+  currentScore: number;
+  currentTotal: number;
+  currentPercentage: number;
+  engagementScore: number;
+  engagementTotal: number;
+  engagementPercentage: number;
+  totalScore: number;
+}
+
+interface bonusTransparence {
+  currentScore: number;
+  engagementScore: number;
+}
+
+interface bonusFormalisation {
+  currentScore: number;
+  engagementScore: number;
+}
+
 const categories = ref<Category[]>([]);
 const categories2 = ref<Category2[]>([]);
+const isLoading = ref(true);
 
-const isLoading = ref(true); // État du loader
-
-// Récupérer les données du backend
 const fetchESGData = async () => {
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const uuidModuleEsg = '550e8400-e29b-41d4-a716-446655440026';
-    const fullUrl = `${apiUrl}/modules/score/${uuidModuleEsg}?t=${Date.now()}`;
-    console.log("URL appelée :", fullUrl);
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const route = useRoute();
+  const id = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
 
-    const token = localStorage.getItem('token'); // Récupérer le token
-    if (!token) {
-        console.error('Token manquant');
-        return;
+  try {
+    const response: AxiosResponse = await axios.get(
+      `${apiUrl}/modules/score/${id}?t=${Date.now()}`,
+      {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      }
+    );
+
+    const moduleData = response.data;
+    console.log('Données renvoyées par l\'API :', moduleData);
+
+    // Récupérer et transformer les sous-défis
+    const todayChallenges = moduleData.challenges_score?.today || {};
+    const futureChallenges = moduleData.challenges_score?.in_two_years || {};
+
+    const combinedScores = Object.keys(todayChallenges).flatMap((challengeId) => {
+      const todayChallenge = todayChallenges[challengeId];
+      const futureChallenge = futureChallenges[challengeId] || {};
+
+      return Object.keys(todayChallenge.sub_challenges.sub_challenges).map((subId) => {
+        const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
+        const futureSubChallenge =
+          futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
+
+        const currentPercentage = todaySubChallenge.score_max
+          ? (todaySubChallenge.score / todaySubChallenge.score_max) * 100
+          : 0;
+        const engagementPercentage = futureSubChallenge.score_max
+          ? (futureSubChallenge.score / futureSubChallenge.score_max) * 100
+          : 0;
+
+        return {
+          name: todaySubChallenge.value,
+          currentScore: todaySubChallenge.score,
+          currentTotal: todaySubChallenge.score_max,
+          currentPercentage,
+          engagementScore: futureSubChallenge.score || 0,
+          engagementTotal: futureSubChallenge.score_max || todaySubChallenge.score_max,
+          engagementPercentage,
+          totalScore: moduleData.combined_total || 0,
+        };
+      });
+    });
+
+    // Récupérer et transformer les thèmes
+    const todayThemes = moduleData.theme_scores?.today || {};
+    const futureThemes = moduleData.theme_scores?.in_two_years || {};
+
+    const combinedScores2 = Object.keys(todayThemes).map((themeKey) => {
+      const todayTheme = todayThemes[themeKey];
+      const futureTheme = futureThemes[themeKey] || {};
+
+      const currentPercentage = todayTheme.score_max
+        ? (todayTheme.score / todayTheme.score_max) * 100
+        : 0;
+      const engagementPercentage = futureTheme.score_max
+        ? (futureTheme.score / futureTheme.score_max) * 100
+        : 0;
+
+      return {
+        name: themeKey,
+        currentScore: todayTheme.score,
+        currentTotal: todayTheme.score_max,
+        currentPercentage,
+        engagementScore: futureTheme.score || 0,
+        engagementTotal: futureTheme.score_max || todayTheme.score_max,
+        engagementPercentage,
+        totalScore: moduleData.combined_total || 0,
+      };
+    });
+
+    // Assigner les résultats
+    categories.value = combinedScores2.map((score) => ({
+      ...score,
+      total_esg_score_today: moduleData.total_today || 0,
+      total_esg_score_in_two_years: moduleData.total_in_two_years || 0,
+      total_esg_score: moduleData.combined_total || 0,
+    }));
+
+    categories2.value = combinedScores;
+
+    console.log('Catégories (Thèmes) :', categories.value);
+    console.log('Catégories2 (Sous-challenges) :', categories2.value);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Erreur Axios:', error.response ? error.response.data : error.message);
+    } else {
+      console.error('Erreur lors de la récupération des données ESG:', error);
     }
-
-    try {
-        const response: AxiosResponse = await axios.get(fullUrl, {
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
-
-        const moduleData = response.data;
-        console.log('Données renvoyées par l\'API :', response.data);
-
-        // Récupérer les sous-challenges
-        const todayScores = moduleData.sub_challenge_scores?.today || {};
-        const futureScores = moduleData.sub_challenge_scores?.in_two_years || {};
-
-        const total_esg_score_today = moduleData.total_today?.score || 0;
-        const total_esg_score_in_two_years = moduleData.total_in_two_years?.score || 0;
-        const total_esg_score = moduleData.combined_total?.score || 0;
-
-        // Fusionner les sous-challenges
-        const combinedScores2 = Object.keys(todayScores).map((id) => {
-            const today = todayScores[id];
-            const future = futureScores[id] || {};
-
-            const currentPercentage = today.score_max
-                ? (today.score / today.score_max) * 100
-                : 0;
-            const engagementPercentage = future.score_max
-                ? (future.score / future.score_max) * 100
-                : 0;
-
-            return {
-                name: today.name,
-                currentScore: today.score,
-                currentTotal: today.score_max,
-                currentPercentage,
-                engagementScore: future.score || 0,
-                engagementTotal: future.score_max || today.score_max,
-                engagementPercentage,
-                total_esg_score_today,
-                total_esg_score_in_two_years,
-                total_esg_score,
-            };
-        });
-
-        // Récupérer les thèmes
-        const todayScoresTheme = moduleData.theme_scores?.today || {};
-        const futureScoresTheme = moduleData.theme_scores?.in_two_years || {};
-
-        const combinedScores = Object.keys(todayScoresTheme).map((key) => {
-            const today = todayScoresTheme[key];
-            const future = futureScoresTheme[key] || {};
-
-            const currentPercentage = today.score_max
-                ? (today.score / today.score_max) * 100
-                : 0;
-            const engagementPercentage = future.score_max
-                ? (future.score / future.score_max) * 100
-                : 0;
-
-            return {
-                name: key, // Nom du thème
-                currentScore: today.score,
-                currentTotal: today.score_max,
-                currentPercentage,
-                engagementScore: future.score || 0,
-                engagementTotal: future.score_max || today.score_max,
-                engagementPercentage,
-                total_esg_score_today,
-                total_esg_score_in_two_years,
-                total_esg_score,
-            };
-        });
-
-        // Assigner les résultats
-        categories.value = combinedScores;
-        categories2.value = combinedScores2;
-
-        console.log("Catégories (Thèmes) :", categories.value);
-        console.log("Catégories2 (Sous-challenges) :", categories2.value);
-
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Erreur Axios:', error.response ? error.response.data : error.message);
-        } else {
-            console.error('Erreur lors de la récupération des données ESG:', error);
-        }
-    }
+  }
 };
 
-// Charger les données et gérer le loader
 onMounted(async () => {
   await fetchESGData();
   setTimeout(() => {
-    isLoading.value = false; // Cache le loader après un délai
-  }, 4000); // Durée de l'animation
+    isLoading.value = false;
+  }, 4000);
 });
 </script>
 -->
+
+
+
+
 
 <style scoped>
   .container {
