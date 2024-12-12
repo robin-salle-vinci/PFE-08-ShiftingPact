@@ -24,4 +24,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Command to run the Django application
-CMD ["sh", "-c", "dockerize -wait tcp://cassandra:9042 -timeout 120s  python manage.py sync_cassandra && python manage.py runserver"]
+CMD ["sh", "-c", "dockerize -wait tcp://cassandra:9042 -timeout 120s && python manage.py runserver"]
