@@ -30,6 +30,7 @@
     :esgElement="esgValidated"
     :handleSeeEditForm="handleSeeEditForm"
     :handleSeePactForm="handleSeePactForm"
+    :handleSeeScore="handleSeeScore"
     :seePact="true"
     :onlySee="true"
     :dontValidate="true"
@@ -78,10 +79,18 @@
       .catch((error) => {
         console.error(error)
       })
+      .finally(() => {
+        window.location.reload()
+      })
   }
   const handleSeePactForm = (event: MouseEvent, _esgId: string) => {
     event.preventDefault()
     router.push(`/pact/${_esgId}`)
+  }
+
+  const handleSeeScore = (event: MouseEvent, _esgId: string) => {
+    event.preventDefault()
+    router.push(`/scores/${_esgId}`)
   }
 </script>
 
