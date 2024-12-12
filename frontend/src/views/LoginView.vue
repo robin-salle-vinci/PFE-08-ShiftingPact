@@ -93,7 +93,7 @@
 
 <style scoped>
   * {
-    font-family: Arial, sans-serif; /* Replace with your desired font */
+    font-family: Arial, sans-serif;
   }
 
   .particles-background {

@@ -22,32 +22,36 @@
 
   username.value = getUser().username
   const handleLogout = () => {
-    // rerednder the page
+    // rerender the page
     clearStorage()
     router.push('/')
   }
 </script>
 
 <style scoped>
+  * {
+    font-family: Arial, sans-serif;
+  }
+
   .topbar {
     background-color: #013238;
     display: flex;
     justify-content: space-between;
-    height: 100px;
+    height: 15vh;
+    overflow: hidden;
     width: auto;
     padding: 1%;
+    box-sizing: border-box;
   }
 
-  /* topbar left part */
   .logo img {
     width: auto;
     height: 100%;
   }
 
-  /* topbar right part */
   .profil {
     display: flex;
-    justify-content: center;
+    justify-content: right;
 
     align-items: center;
     width: auto;
@@ -62,28 +66,28 @@
     display: flex;
     flex-direction: column;
     margin-left: 2%;
+    align-items: center;
   }
   .profils-info span {
-    color: #c5fddf;
+    color: white;
     font-size: 1.2em;
   }
 
   .profils-info button {
-    color: #013238; /* Text color */
-    background-color: #fde791; /* Background color */
+    color: #013238;
+    background-color: #ffffff;
     font-size: 0.8em;
     text-decoration: none;
     font-weight: 600;
-    border: 2px solid #013238;
     border-radius: 5px;
-    padding: 5px 10px; /* Add some padding for better appearance */
-    transition: all 0.3s ease; /* Smooth transition for hover effect */
+    padding: 5px 10px;
+    margin-top: 10px;
   }
 
-  /* Hover effect */
   .profils-info button:hover {
-    background-color: #c5fddf; /* New background color on hover */
-    color: #013238; /* Text color on hover */
-    border-color: #c5fddf; /* Border color matches background */
+    background-color: #d2d2d2;
+    color: #013238;
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
   }
 </style>

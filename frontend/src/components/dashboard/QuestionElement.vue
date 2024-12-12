@@ -16,6 +16,8 @@
               type="text"
               :disabled="props.state === 'validated' || !isModifying"
               v-model="answerToModify.value"
+              rows="5"
+              cols="40"
             />
             <select
               v-else
@@ -23,7 +25,12 @@
               @change="updateAnswerValue"
               :disabled="props.state === 'validated' || !isModifying"
             >
-              <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
+              <option
+                class="option"
+                v-for="choice in questionModel.choices"
+                :key="choice.id"
+                :value="choice.id"
+              >
                 {{ choice.value }}
               </option>
             </select>
@@ -48,9 +55,9 @@
           @click="isModifying == true ? (isModifying = false) : (isModifying = true)"
           v-if="!isModifying && props.state !== 'validated'"
         >
-          modifier
+          Modifier
         </button>
-        <button v-else-if="props.state !== 'validated'" @click="handleSave">sauvagarder</button>
+        <button v-else-if="props.state !== 'validated'" @click="handleSave">Sauvegarder</button>
       </div>
     </div>
 
@@ -88,7 +95,12 @@
             @change="updateAnswerValue"
             :disabled="props.state === 'validated'"
           >
-            <option v-for="choice in questionModel.choices" :key="choice.id" :value="choice.id">
+            <option
+              class="option"
+              v-for="choice in questionModel.choices"
+              :key="choice.id"
+              :value="choice.id"
+            >
               {{ choice.value }}
             </option>
           </select>
@@ -108,7 +120,7 @@
             :disabled="props.state === 'validated'"
           />
         </div>
-        <button @click="handleSave" v-if="props.state !== 'validated'">sauvagarder</button>
+        <button @click="handleSave" v-if="props.state !== 'validated'">Sauvegarder</button>
       </div>
     </div>
   </div>
@@ -179,6 +191,7 @@
     margin: 20px;
     padding: 20px;
     border-radius: 5px;
+    overflow: hidden;
   }
 
   .question h4 {
@@ -192,10 +205,60 @@
   }
 
   .each-answer {
-    background-color: #dfd4fb;
+    background-color: #e7e7e9;
     width: 100%;
     padding: 20px;
     border-radius: 10px;
     margin: 10px;
+  }
+
+  .answers input:disabled,
+  .answers textarea:disabled {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #6c757d;
+    cursor: not-allowed;
+    overflow: hidden;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  .answers textarea,
+  .answers select {
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: normal;
+    word-wrap: break-word;
+    border-radius: 4px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
+  }
+
+  .answers input {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 0px;
+  }
+
+  .option {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  label {
+    padding-top: 50px;
+  }
+
+  .answers input[type='checkbox'] {
+    display: block;
+  }
+
+  .answers textarea {
+    resize: none;
   }
 </style>

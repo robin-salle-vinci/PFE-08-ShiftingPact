@@ -28,6 +28,19 @@
 </script>
 
 <style scoped>
+  * {
+    font-family: Arial, sans-serif;
+  }
+
+  .particles-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+
   .menu {
     display: flex;
     flex-direction: row;
@@ -41,13 +54,17 @@
     font-size: 16px;
     border: none;
     border-radius: 5px;
-    background-color: #b5cdbf;
+    background-color: #013238;
+    border: 1px solid #b5cdbf;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s;
   }
 
   button:hover {
-    background-color: #dfd4fb;
+    border-color: #013238;
+    background-color: #01272c;
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
   }
 </style>
