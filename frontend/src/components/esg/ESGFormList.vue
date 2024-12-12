@@ -59,7 +59,7 @@
               class="subcategory"
               @click="onSubChallengeSelected(subChallenge.questions, challenge.id, subChallenge.id)"
             >
-              <h4>{{ subChallenge.value }}</h4>
+              <h4 class="challenge-title">{{ subChallenge.value }}</h4>
               <ChallengeProgress
                 type="subchallenge"
                 :responses="responses"
