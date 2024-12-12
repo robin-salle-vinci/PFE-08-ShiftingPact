@@ -17,7 +17,7 @@ services:
       - ./cqlshrc:/root/.cqlshrc
     entrypoint: ["/usr/local/bin/cassandra-entrypoint.sh"]
     healthcheck:
-      test: ["CMD-SHELL", "sh ./healthcheck.sh"]
+      test: ["CMD-SHELL", "cqlsh -e \"DESCRIBE KEYSPACE app;\""]
       interval: 30s
       timeout: 60s
       retries: 10
