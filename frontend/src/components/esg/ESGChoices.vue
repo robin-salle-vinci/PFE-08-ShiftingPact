@@ -1,5 +1,8 @@
 <template>
-  <div v-if="question.type_response === 'qcm' || question.type_response === '%'" class="group">
+  <div
+    v-if="question.type_response === 'qcm' || question.type_response === 'pourcentage'"
+    class="group"
+  >
     <div v-for="choice in question.choices" :key="choice.id" class="choice">
       <ESGRadioChoice
         v-if="choice.value != 'nan'"

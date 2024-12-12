@@ -101,7 +101,7 @@
       let idChoice = null
       let valueChoice = null
 
-      if (question.type_response === 'qcm' || question.type_response === '%') {
+      if (question.type_response === 'qcm' || question.type_response === 'pourcentage') {
         const selectedRadio = document.querySelector(`input[name="${question.id}"]:checked`)
         idChoice = selectedRadio?.getAttribute('id_choice')
         valueChoice = selectedRadio?.getAttribute('value')
