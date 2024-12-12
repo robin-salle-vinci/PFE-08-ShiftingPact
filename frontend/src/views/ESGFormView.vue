@@ -28,6 +28,7 @@
   import ESGFormList from '@/components/esg/ESGFormList.vue'
   import ESGFormQuestions from '@/components/esg/ESGFormQuestions.vue'
   import type { Answer } from '@/types/Answer.ts'
+  import type { Challenge } from '@/types/Challenge'
   import type { Question } from '@/types/Question.ts'
   import { getToken, getUser } from '@/utils/localstorage'
   import axios from 'axios'
@@ -51,7 +52,7 @@
       },
     })
 
-    questions.value = response.data
+    questions.value = sortAll(response.data)
   }
 
   async function getResponses() {
@@ -112,6 +113,24 @@
       default:
         return false
     }
+  }
+
+  function sortAll(data: { challenges: Challenge[] }) {
+    data.challenges.sort((a: Challenge, b: Challenge) => a.index_challenge - b.index_challenge)
+
+    data.challenges.forEach((challenge: Challenge) => {
+      challenge.sub_challenges.sort((a, b) => a.index_sub_challenge - b.index_sub_challenge)
+
+      challenge.sub_challenges.forEach((subChallenge) => {
+        subChallenge.questions.sort((a, b) => Number(a.index_question) - Number(b.index_question))
+
+        subChallenge.questions.forEach((question) => {
+          question.choices.sort((a, b) => Number(a.index_choice) - Number(b.index_choice))
+        })
+      })
+    })
+
+    return data
   }
 </script>
 
