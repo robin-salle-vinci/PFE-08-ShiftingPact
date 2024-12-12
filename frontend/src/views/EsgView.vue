@@ -102,7 +102,7 @@
         return Number(client.value?.number_workers) > 0
 
       case 'PRODUITS':
-        return client.value?.service_or_product == 'produit'
+        return client.value?.service_or_product == 'product'
 
       case 'SERVICES':
         return client.value?.service_or_product == 'service'

@@ -104,7 +104,7 @@
         return Number(client.numberWorkers) > 0
 
       case 'PRODUITS':
-        return client.serviceOrProduct == 'produit'
+        return client.serviceOrProduct == 'product'
 
       case 'SERVICES':
         return client.serviceOrProduct == 'service'
