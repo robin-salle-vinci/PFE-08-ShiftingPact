@@ -176,7 +176,8 @@ def change_state(request, uuid_module_esg):
         CommitmentPacts.objects.create(
             id_client=module_esg.id_client,
             creation_date=datetime.today().date(),
-            answers_commitments=answers_to_commitment
+            answers_commitments=answers_to_commitment,
+            id_module_esg=module_esg.id,
         )
 
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
