@@ -6,7 +6,7 @@
         :key="questionIndex"
         :class="['question', { 'question-disabled': !canAnswer(question) }]"
       >
-        <h4>{{ question.value }}</h4>
+        <h4>{{ question.value.replace('XXX', companyName) }}</h4>
         <ESGChoices
           :question="question"
           :responseId="responses[question.id]?.id_choice"
@@ -52,6 +52,8 @@
   import ESGRadioChoice from './ESGRadioChoice.vue'
 
   const apiUrl = import.meta.env.VITE_API_URL
+  const user = localStorage.getItem('user')
+  const companyName = user ? JSON.parse(user).username : 'N/A'
 
   const {
     responses,
@@ -99,7 +101,7 @@
       let idChoice = null
       let valueChoice = null
 
-      if (question.type_response === 'qcm' || question.type_response === 'pourcentage') {
+      if (question.type_response === 'qcm' || question.type_response === '%') {
         const selectedRadio = document.querySelector(`input[name="${question.id}"]:checked`)
         idChoice = selectedRadio?.getAttribute('id_choice')
         valueChoice = selectedRadio?.getAttribute('value')
