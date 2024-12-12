@@ -37,7 +37,6 @@ def calculate_question_score(answer, question, choices) -> Dict[str, float]:
         else:
             # Default max score logic
             score_max = round(sum(choice.score for choice in choices) / 2 if choices else 0.0, 2)
-            print(score_max)
 
         # Calculate the actual score
         selected_choice = next((choice for choice in choices if choice.id == answer.id_choice), None)
