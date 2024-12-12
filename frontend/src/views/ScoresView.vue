@@ -28,105 +28,187 @@ import HeaderElement from '@/components/structure/HeaderElement.vue'
     <h1 id="titre">Score ESG</h1>
 
     <div>
-      <table class="esg-table">
-        <thead>
-          <tr>
-            <th rowspan="2"></th>
-            <th colspan="3" class="bold-header">Score actuel</th>
-            <th colspan="3" class="bold-header">Score engagement</th>
-            <th colspan="3" class="bold-header">Score total</th>
-            <th rowspan="2" class="bold-header">Reste</th>
-            <th rowspan="2" class="bold-header">Score "futur"</th>
-          </tr>
-          <tr>
-            <th class="bold-header">Points</th>
-            <th class="bold-header">/ Total</th>
-            <th class="bold-header">%</th>
-            <th class="bold-header">Points</th>
-            <th class="bold-header">/ Total</th>
-            <th class="bold-header">%</th>
-            <th class="bold-header">Points</th>
-            <th class="bold-header">/ Total</th>
-            <th class="bold-header">%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            class="category"
-            v-for="(category, index) in categories"
-            :key="index"
-            :class="{
-              environment: category.name === 'Environnement',
-              social: category.name === 'Social',
-              gouvernance: category.name === 'Gouvernance',
-              total: category.name === 'TOTAL',
-            }"
-          >
-            <td>{{ category.name }}</td>
-            <td class="bold-cell">{{ category.currentScore.toFixed(1) }}</td>
-            <td class="bold-cell">/ {{ category.currentTotal.toFixed(1) }}</td>
-            <td class="bold-cell">{{ category.currentPercentage.toFixed(1) }}%</td>
-            <td class="bold-cell">{{ category.engagementScore.toFixed(1) }}</td>
-            <td class="bold-cell">/ {{ category.engagementTotal.toFixed(1) }}</td>
-            <td class="bold-cell">{{ category.engagementPercentage.toFixed(1) }}%</td>
-            <td class="bold-cell">{{ category.total_esg_score.toFixed(1) }}</td>
-            <td class="bold-cell">/ {{ 30 }}</td>
-            <td class="bold-cell">{{ (category.total_esg_score / 30).toFixed(1) }}%</td>
-            <td class="bold-cell">{{ (1 - category.total_esg_score / 30).toFixed(1) }}%</td>
-            <td class="bold-cell">
-              {{ ((category.currentScore + 4 * category.engagementScore) / 30).toFixed(1) }}%
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <table class="esg-table">
+    <thead>
+      <tr>
+        <th rowspan="2"></th>
+        <th colspan="3" class="bold-header">Score actuel</th>
+        <th colspan="3" class="bold-header">Score engagement</th>
+        <th colspan="3" class="bold-header">Score total</th>
+        <th rowspan="2" class="bold-header">Reste</th>
+        <th rowspan="2" class="bold-header">Score "futur"</th>
+      </tr>
+      <tr>
+        <th class="bold-header">Points</th>
+        <th class="bold-header">/ Total</th>
+        <th class="bold-header">%</th>
+        <th class="bold-header">Points</th>
+        <th class="bold-header">/ Total</th>
+        <th class="bold-header">%</th>
+        <th class="bold-header">Points</th>
+        <th class="bold-header">/ Total</th>
+        <th class="bold-header">%</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Dynamic rows for categories -->
+      <tr
+        class="category"
+        v-for="(category, index) in categories"
+        :key="index"
+        :class="{
+          environment: category.name === 'Environnement',
+          social: category.name === 'Social',
+          gouvernance: category.name === 'Gouvernance',
+        }"
+      >
+        <td>{{ category.name }}</td>
+        <td class="bold-cell">{{ category.currentScore.toFixed(1) }}</td>
+        <td class="bold-cell">/ {{ category.currentTotal.toFixed(1) }}</td>
+        <td class="bold-cell">{{ category.currentPercentage.toFixed(1) }}%</td>
+        <td class="bold-cell">{{ category.engagementScore.toFixed(1) }}</td>
+        <td class="bold-cell">/ {{ category.engagementTotal.toFixed(1) }}</td>
+        <td class="bold-cell">{{ category.engagementPercentage.toFixed(1) }}%</td>
+        <td class="bold-cell">{{ (category.currentScore + category.engagementScore).toFixed(1) }}</td>
+        <td class="bold-cell">{{ (category.currentTotal).toFixed(1) }}</td>
+        <td class="bold-cell">
+          {{ (((category.currentScore + category.engagementScore) / (category.currentTotal + category.engagementTotal)) * 100).toFixed(1) }}%
+        </td>
+        <td class="bold-cell">
+          {{ ((1 - (((category.currentScore + category.engagementScore) / (category.currentTotal + category.engagementTotal)))) * 100).toFixed(1) }}%
+        </td>
+        <td class="bold-cell">
+          {{ (((category.currentScore + 4 * category.engagementScore) / 30) * 100).toFixed(1) }}%
+        </td>
+      </tr>
+
+      <!-- Static row for Total -->
+      <tr class="category total">
+        <td>Total</td>
+        <td class="bold-cell">
+          {{ categories.reduce((sum, cat) => sum + cat.currentScore, 0).toFixed(1) }}
+        </td>
+        <td class="bold-cell">
+          / {{ categories.reduce((sum, cat) => sum + cat.currentTotal, 0).toFixed(1) }}
+        </td>
+        <td class="bold-cell">
+          {{
+            (
+              (categories.reduce((sum, cat) => sum + cat.currentScore, 0) /
+                categories.reduce((sum, cat) => sum + cat.currentTotal, 0)) *
+              100
+            ).toFixed(1)
+          }}%
+        </td>
+        <td class="bold-cell">
+          {{ categories.reduce((sum, cat) => sum + cat.engagementScore, 0).toFixed(1) }}
+        </td>
+        <td class="bold-cell">
+          / {{ categories.reduce((sum, cat) => sum + cat.engagementTotal, 0).toFixed(1) }}
+        </td>
+        <td class="bold-cell">
+          {{
+            (
+              (categories.reduce((sum, cat) => sum + cat.engagementScore, 0) /
+                categories.reduce((sum, cat) => sum + cat.engagementTotal, 0)) *
+              100
+            ).toFixed(1)
+          }}%
+        </td>
+        <td class="bold-cell">
+          {{
+            categories.reduce((sum, cat) => sum + cat.currentScore + cat.engagementScore, 0).toFixed(1)
+          }}
+        </td>
+        <td class="bold-cell">
+          {{
+            categories.reduce((sum, cat) => sum + cat.currentTotal, 0).toFixed(1)
+          }}
+
+        </td>
+        <td class="bold-cell">
+          {{
+            (
+              (categories.reduce((sum, cat) => sum + cat.currentScore + cat.engagementScore, 0) /
+                categories.reduce((sum, cat) => sum + cat.currentTotal + cat.engagementTotal, 0)) *
+              100
+            ).toFixed(1)
+          }}%
+        </td>
+        <td class="bold-cell">
+       {{
+        (
+        categories.reduce((sum, cat) => sum + cat.currentTotal + cat.engagementTotal, 0) /
+      (
+        (categories.reduce((sum, cat) => sum + cat.currentScore + cat.engagementScore, 0) /
+        categories.reduce((sum, cat) => sum + cat.currentTotal + cat.engagementTotal, 0)) * 100
+      )
+      ).toFixed(1)
+      }}%
+</td>
+
+        <td class="bold-cell">-</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
     <div class="container">
-      <table class="esg-table">
-        <thead>
-          <tr>
-            <th rowspan="2"></th>
-            <th colspan="3" class="bold-header">Score actuel</th>
-            <th colspan="3" class="bold-header">Score engagement</th>
-          </tr>
-          <tr>
-            <th class="bold-header">Points</th>
-            <th class="bold-header">/ Total</th>
-            <th class="bold-header">%</th>
-            <th class="bold-header">Points</th>
-            <th class="bold-header">/ Total</th>
-            <th class="bold-header">%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="category" v-for="(category2, index) in categories2" :key="index" :class="{}">
-            <td class="bold-cell">{{ category2.name }}</td>
+    <table class="esg-table">
+      <thead>
+        <tr>
+          <th rowspan="2"></th>
+          <th colspan="3" class="bold-header">Score actuel</th>
+          <th colspan="3" class="bold-header">Score engagement</th>
+        </tr>
+        <tr>
+          <th class="bold-header">Points</th>
+          <th class="bold-header">/ Total</th>
+          <th class="bold-header">%</th>
+          <th class="bold-header">Points</th>
+          <th class="bold-header">/ Total</th>
+          <th class="bold-header">%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Categories -->
+        <tr
+          class="category"
+          v-for="(category2, index) in categories2.filter(c => !excludedCategories.includes(c.name))"
+          :key="index"
+          :class="getCategoryClass(category2.name)"
+        >
+          <td class="bold-cell">{{ category2.name }}</td>
 
-            <td class="bold-cell">{{ category2.currentScore.toFixed(1) }}</td>
-            <td class="bold-cell">/ {{ category2.currentTotal.toFixed(1) }}</td>
-            <td class="bold-cell">
-              {{ (category2.currentScore / category2.currentTotal).toFixed(1) }}%
-            </td>
+          <td class="bold-cell">{{ category2.currentScore.toFixed(1) }}</td>
+          <td class="bold-cell">/ {{ category2.currentTotal.toFixed(1) }}</td>
+          <td class="bold-cell">
+            {{ ((category2.currentScore / category2.currentTotal) * 100).toFixed(1) }}%
+          </td>
 
-            <td class="bold-cell">{{ category2.engagementScore.toFixed(1) }}</td>
-            <td class="bold-cell">/ {{ category2.engagementTotal.toFixed(1) }}</td>
-            <td class="bold-cell">
-              {{ (category2.engagementScore / category2.engagementTotal).toFixed(1) }}%
-            </td>
-          </tr>
+          <td class="bold-cell">{{ category2.engagementScore.toFixed(1) }}</td>
+          <td class="bold-cell">/ {{ category2.engagementTotal.toFixed(1) }}</td>
+          <td class="bold-cell">
+            {{ ((category2.engagementScore / category2.engagementTotal) * 100).toFixed(1) }}%
+          </td>
+      </tr>
 
-          <tr class="bonus" v-for="(bonus, index) in [bonusTransparence, bonusFormalisation]" :key="index">
-            <td>{{ bonus.name }}</td>
-            <td>{{ bonus.currentScore }}</td>
-              <td>/</td>
-              <td>/</td>
-            <td>{{ bonus.engagementScore }}</td>
-            <td>/</td>
-            <td>/</td>
-          </tr>
-
-        </tbody>
-      </table>
+              <!-- Bonuses -->
+              <tr
+        class="bonus"
+        v-for="(bonus, index) in [bonusTransparence, bonusFormalisation].filter(b => !excludedCategories.includes(b.name))"
+        :key="index"
+      >
+        <td>{{ bonus.name }}</td>
+        <td>{{ bonus.currentScore }}</td>
+        <td>/</td>
+        <td>/</td>
+        <td>{{ bonus.engagementScore }}</td>
+        <td>/</td>
+        <td>/</td>
+      </tr>
+      </tbody>
+    </table>
     </div>
   </div>
 </template>
@@ -150,9 +232,6 @@ interface Category {
   engagementScore: number;
   engagementTotal: number;
   engagementPercentage: number;
-  total_esg_score_today: number;
-  total_esg_score_in_two_years: number;
-  total_esg_score: number;
 }
 
 interface Category2 {
@@ -166,13 +245,7 @@ interface Category2 {
   totalScore: number;
 }
 
-interface BonusTransparence {
-  name: string;
-  currentScore: number;
-  engagementScore: number;
-}
-
-interface BonusFormalisation {
+interface Bonus {
   name: string;
   currentScore: number;
   engagementScore: number;
@@ -181,8 +254,67 @@ interface BonusFormalisation {
 const categories = ref<Category[]>([]);
 const categories2 = ref<Category2[]>([]);
 const isLoading = ref(true);
-const bonusTransparence = ref<BonusTransparence>({ name : "Bonus Transparence", currentScore: 0, engagementScore: 0 });
-const bonusFormalisation = ref<BonusFormalisation>({ name : "Bonus Formalisation", currentScore: 0, engagementScore: 0 });
+const bonusTransparence = ref<Bonus>({
+  name: "Bonus Transparence",
+  currentScore: 0,
+  engagementScore: 0,
+});
+const bonusFormalisation = ref<Bonus>({
+  name: "Bonus Formalisation",
+  currentScore: 0,
+  engagementScore: 0,
+});
+
+const excludedCategories = [
+  "DIVERSITE",
+  "PHILANTHROPIE",
+  "TRANSPARENCE",
+  "FORMALISATION DES PRATIQUES",
+  "LUTTE CONTRE LA CORRUPTION FINANCIÈRE",
+  "DIVULGATION DES LITIGES",
+];
+
+/**
+ * Function to determine the CSS class for a given category name
+ */
+ function getCategoryClass(name: string): string {
+  const environmentCategories = [
+    "GESTION DE L'ENERGIE",
+    "EMPREINTE CARBONE",
+    "EAU",
+    "MATIERES PREMIERES ET FOURNITURES",
+    "DÉCHETS",
+    "ÉCOSYSTÈMES ET BIODIVERSITÉ",
+  ];
+  const socialCategories = [
+    "INCLUSION ET EQUITE",
+    "DIVERSITE",
+    "SECURITE AU TRAVAIL",
+    "SANTÉ ET BIEN-ÊTRE",
+    "DEVELOPPEMENT DES COMPETENCES",
+    "ENGAGEMENT ET SATISFACTION",
+    "ENGAGEMENT SOCIAL",
+    "PHILANTHROPIE"
+  ];
+  const governanceCategories = [
+    "STRUCTURE DE GOUVERNANCE",
+    "INTEGRATION DES PARTIES PRENANTES",
+    "GESTION DURABLE",
+    "LUTTE CONTRE LA CORRUPTION FINANCIÈRE",
+    "PROTECTION DE LA VIE PRIVEE",
+    "DIVULGATION DES LITIGES",
+    "SECURITE DES DONNEES",
+    "CERTIFICATIONS D'UN PRODUIT, D'UN SERVICE OU D'UNE PRATIQUE",
+    "CERTIFICATIONS DE L'ENTREPRISE",
+  ];
+
+  if (environmentCategories.includes(name)) return "environment";
+  if (socialCategories.includes(name)) return "social";
+  if (governanceCategories.includes(name)) return "gouvernance";
+
+  return "";
+}
+
 
 const fetchESGData = async () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -200,63 +332,55 @@ const fetchESGData = async () => {
     const moduleData = response.data;
     console.log('Données renvoyées par l\'API :', moduleData);
 
-    // Récupérer et transformer les sous-défis
     const todayChallenges = moduleData.challenges_score?.today || {};
     const futureChallenges = moduleData.challenges_score?.in_two_years || {};
 
-    const combinedScores = Object.keys(todayChallenges).flatMap((challengeId) => {
-      const todayChallenge = todayChallenges[challengeId];
-      const futureChallenge = futureChallenges[challengeId] || {};
+    // Transformation des sous-défis
+    const combinedScores = Object.keys(todayChallenges)
+  .flatMap((challengeId) => {
+    const todayChallenge = todayChallenges[challengeId];
+    const futureChallenge = futureChallenges[challengeId] || {};
 
-      // Vérification pour TRANSPARENCE et FORMALISATION DES PRATIQUES
-      if (todayChallenge.sub_challenges.value === 'TRANSPARENCE') {
-        Object.keys(todayChallenge.sub_challenges.sub_challenges).forEach((subId) => {
-          const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
-          const futureSubChallenge =
-            futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
+    // Vérification des valeurs TRANSPARENCE et FORMALISATION DES PRATIQUES
+    if (todayChallenge.sub_challenges?.value === "TRANSPARENCE") {
+      bonusTransparence.value.currentScore += todayChallenge.score_details?.score || 0;
+      bonusTransparence.value.engagementScore += futureChallenge.score_details?.score || 0;
+      return []; // Exclure TRANSPARENCE de categories2
+    }
 
-          bonusTransparence.value.currentScore += todaySubChallenge.score || 0;
-          bonusTransparence.value.engagementScore += futureSubChallenge.score || 0;
-        });
-      }
+    if (todayChallenge.sub_challenges?.value === "FORMALISATION DES PRATIQUES") {
+      bonusFormalisation.value.currentScore += todayChallenge.score_details?.score || 0;
+      bonusFormalisation.value.engagementScore += futureChallenge.score_details?.score || 0;
+      return []; // Exclure FORMALISATION DES PRATIQUES de categories2
+    }
 
-      if (todayChallenge.sub_challenges.value === 'FORMALISATION DES PRATIQUES') {
-        Object.keys(todayChallenge.sub_challenges.sub_challenges).forEach((subId) => {
-          const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
-          const futureSubChallenge =
-            futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
+    // Parcourir les sous-challenges
+    return Object.keys(todayChallenge.sub_challenges?.sub_challenges || {}).map((subId) => {
+      const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
+      const futureSubChallenge =
+        futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
 
-          bonusFormalisation.value.currentScore += todaySubChallenge.score || 0;
-          bonusFormalisation.value.engagementScore += futureSubChallenge.score || 0;
-        });
-      }
+      const currentPercentage = todaySubChallenge.score_max
+        ? (todaySubChallenge.score / todaySubChallenge.score_max) * 100
+        : 0;
+      const engagementPercentage = futureSubChallenge.score_max
+        ? (futureSubChallenge.score / futureSubChallenge.score_max) * 100
+        : 0;
 
-      return Object.keys(todayChallenge.sub_challenges.sub_challenges).map((subId) => {
-        const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
-        const futureSubChallenge =
-          futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
-
-        const currentPercentage = todaySubChallenge.score_max
-          ? (todaySubChallenge.score / todaySubChallenge.score_max) * 100
-          : 0;
-        const engagementPercentage = futureSubChallenge.score_max
-          ? (futureSubChallenge.score / futureSubChallenge.score_max) * 100
-          : 0;
-
-        return {
-          name: todaySubChallenge.value,
-          currentScore: todaySubChallenge.score,
-          currentTotal: todaySubChallenge.score_max,
-          currentPercentage,
-          engagementScore: futureSubChallenge.score || 0,
-          engagementTotal: futureSubChallenge.score_max || todaySubChallenge.score_max,
-          engagementPercentage,
-          totalScore: moduleData.combined_total || 0,
-        };
-      });
+      return {
+        name: todaySubChallenge.value,
+        currentScore: todaySubChallenge.score,
+        currentTotal: todaySubChallenge.score_max,
+        currentPercentage,
+        engagementScore: futureSubChallenge.score || 0,
+        engagementTotal: futureSubChallenge.score_max || todaySubChallenge.score_max,
+        engagementPercentage,
+        totalScore: moduleData.combined_total || 0,
+      };
     });
+  });
 
-    // Récupérer et transformer les thèmes
+    // Transformation des thèmes
     const todayThemes = moduleData.theme_scores?.today || {};
     const futureThemes = moduleData.theme_scores?.in_two_years || {};
 
@@ -279,19 +403,12 @@ const fetchESGData = async () => {
         engagementScore: futureTheme.score || 0,
         engagementTotal: futureTheme.score_max || todayTheme.score_max,
         engagementPercentage,
-        totalScore: moduleData.combined_total || 0,
       };
     });
 
     // Assigner les résultats
-    categories.value = combinedScores2.map((score) => ({
-      ...score,
-      total_esg_score_today: moduleData.total_today || 0,
-      total_esg_score_in_two_years: moduleData.total_in_two_years || 0,
-      total_esg_score: moduleData.combined_total || 0,
-    }));
-
-    categories2.value = combinedScores;
+    categories.value = combinedScores2;
+    categories2.value = combinedScores.flat();
 
     console.log('Catégories (Thèmes) :', categories.value);
     console.log('Catégories2 (Sous-challenges) :', categories2.value);
@@ -313,171 +430,6 @@ onMounted(async () => {
   }, 4000);
 });
 </script>
-
-
-
-
-
-
-
-
-
-
-<!--
-<script setup lang="ts">
-import HeaderElement from '@/components/structure/HeaderElement.vue';
-import { getToken } from '@/utils/localstorage';
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-
-interface Category {
-  name: string;
-  currentScore: number;
-  currentTotal: number;
-  currentPercentage: number;
-  engagementScore: number;
-  engagementTotal: number;
-  engagementPercentage: number;
-  total_esg_score_today: number;
-  total_esg_score_in_two_years: number;
-  total_esg_score: number;
-}
-
-interface Category2 {
-  name: string;
-  currentScore: number;
-  currentTotal: number;
-  currentPercentage: number;
-  engagementScore: number;
-  engagementTotal: number;
-  engagementPercentage: number;
-  totalScore: number;
-}
-
-interface bonusTransparence {
-  currentScore: number;
-  engagementScore: number;
-}
-
-interface bonusFormalisation {
-  currentScore: number;
-  engagementScore: number;
-}
-
-const categories = ref<Category[]>([]);
-const categories2 = ref<Category2[]>([]);
-const isLoading = ref(true);
-
-const fetchESGData = async () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const route = useRoute();
-  const id = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
-
-  try {
-    const response: AxiosResponse = await axios.get(
-      `${apiUrl}/modules/score/${id}?t=${Date.now()}`,
-      {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      }
-    );
-
-    const moduleData = response.data;
-    console.log('Données renvoyées par l\'API :', moduleData);
-
-    // Récupérer et transformer les sous-défis
-    const todayChallenges = moduleData.challenges_score?.today || {};
-    const futureChallenges = moduleData.challenges_score?.in_two_years || {};
-
-    const combinedScores = Object.keys(todayChallenges).flatMap((challengeId) => {
-      const todayChallenge = todayChallenges[challengeId];
-      const futureChallenge = futureChallenges[challengeId] || {};
-
-      return Object.keys(todayChallenge.sub_challenges.sub_challenges).map((subId) => {
-        const todaySubChallenge = todayChallenge.sub_challenges.sub_challenges[subId];
-        const futureSubChallenge =
-          futureChallenge.sub_challenges?.sub_challenges?.[subId] || {};
-
-        const currentPercentage = todaySubChallenge.score_max
-          ? (todaySubChallenge.score / todaySubChallenge.score_max) * 100
-          : 0;
-        const engagementPercentage = futureSubChallenge.score_max
-          ? (futureSubChallenge.score / futureSubChallenge.score_max) * 100
-          : 0;
-
-        return {
-          name: todaySubChallenge.value,
-          currentScore: todaySubChallenge.score,
-          currentTotal: todaySubChallenge.score_max,
-          currentPercentage,
-          engagementScore: futureSubChallenge.score || 0,
-          engagementTotal: futureSubChallenge.score_max || todaySubChallenge.score_max,
-          engagementPercentage,
-          totalScore: moduleData.combined_total || 0,
-        };
-      });
-    });
-
-    // Récupérer et transformer les thèmes
-    const todayThemes = moduleData.theme_scores?.today || {};
-    const futureThemes = moduleData.theme_scores?.in_two_years || {};
-
-    const combinedScores2 = Object.keys(todayThemes).map((themeKey) => {
-      const todayTheme = todayThemes[themeKey];
-      const futureTheme = futureThemes[themeKey] || {};
-
-      const currentPercentage = todayTheme.score_max
-        ? (todayTheme.score / todayTheme.score_max) * 100
-        : 0;
-      const engagementPercentage = futureTheme.score_max
-        ? (futureTheme.score / futureTheme.score_max) * 100
-        : 0;
-
-      return {
-        name: themeKey,
-        currentScore: todayTheme.score,
-        currentTotal: todayTheme.score_max,
-        currentPercentage,
-        engagementScore: futureTheme.score || 0,
-        engagementTotal: futureTheme.score_max || todayTheme.score_max,
-        engagementPercentage,
-        totalScore: moduleData.combined_total || 0,
-      };
-    });
-
-    // Assigner les résultats
-    categories.value = combinedScores2.map((score) => ({
-      ...score,
-      total_esg_score_today: moduleData.total_today || 0,
-      total_esg_score_in_two_years: moduleData.total_in_two_years || 0,
-      total_esg_score: moduleData.combined_total || 0,
-    }));
-
-    categories2.value = combinedScores;
-
-    console.log('Catégories (Thèmes) :', categories.value);
-    console.log('Catégories2 (Sous-challenges) :', categories2.value);
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Erreur Axios:', error.response ? error.response.data : error.message);
-    } else {
-      console.error('Erreur lors de la récupération des données ESG:', error);
-    }
-  }
-};
-
-onMounted(async () => {
-  await fetchESGData();
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 4000);
-});
-</script>
--->
-
-
-
 
 
 <style scoped>
@@ -543,9 +495,6 @@ onMounted(async () => {
     margin: 0;
     position: relative;
     z-index: 1;
-
-    /* Animation de pulsation sur le titre */
-    animation: pulseText 2s infinite cubic-bezier(0.5, 0.5, 0, 1);
   }
 
   .container {
@@ -557,33 +506,6 @@ onMounted(async () => {
     justify-content: center;
     min-height: 100vh;
     overflow: hidden;
-  }
-
-  .pulse {
-    z-index: -1;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 30rem;
-  }
-
-  .pulse circle {
-    fill: #ff5154;
-    transform: scale(0);
-    opacity: 0;
-    transform-origin: 50% 50%;
-    animation: pulse 2s cubic-bezier(0.5, 0.5, 0, 1);
-  }
-
-  .pulse circle:nth-child(2) {
-    fill: #7fc6a4;
-    animation: pulse 2s 0.75s cubic-bezier(0.5, 0.5, 0, 1);
-  }
-
-  .pulse circle:nth-child(3) {
-    fill: #e5f77d;
-    animation: pulse 2s 1.5s cubic-bezier(0.5, 0.5, 0, 1);
   }
 
   @keyframes pulse {
