@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Tuple, List
 from modules.models import Answers
 from questions.models import Choices, Challenges, SubChallenges, Questions
 
@@ -18,27 +18,39 @@ def stringify_keys(data):
 # Step 1: Calculate scores for a single question
 def calculate_question_score(answer, question, choices) -> Dict[str, float]:
     try:
+        if not isinstance(choices, list):
+            raise ValueError(
+                f"Expected a list for choices, got {type(choices).__name__}: {choices}")
+
         # Initialize scores
         score_today = 0.0
         score_in_two_years = 0.0
-        score_max = 0.0
 
-        if question.type_response == "%":
+        if question.type_response == '%':
             # Use the highest percentage value as the max score
-            max_percentage_value = max(choice.value for choice in choices if choice.value is not None)
-            score_max = max_percentage_value / 2.0  # Divide by 2 as per instruction
+            valid_scores = [choice.score for choice in choices if
+                            choice.value is not None]
+            if not valid_scores:
+                raise ValueError("No valid scores found in choices.")
+            max_percentage_value = max(valid_scores)
+            score_max = round(max_percentage_value / 2.0, 2)
         else:
             # Default max score logic
-            score_max = sum(choice.score for choice in choices) / 2 if choices else 0.0
+            score_max = round(sum(choice.score for choice in choices) / 2 if choices else 0.0, 2)
 
         # Calculate the actual score
         selected_choice = next((choice for choice in choices if choice.id == answer.id_choice), None)
         if selected_choice:
             if answer.is_commitment:
-                score_in_two_years = selected_choice.score * 0.25
+                score_in_two_years = round(selected_choice.score/4, 2)
+                # Ensure score_in_two_years does not exceed score_max
+                if score_in_two_years > score_max:
+                    score_in_two_years = score_max
             else:
-                score_today = selected_choice.score
-
+                score_today = round(selected_choice.score, 2)
+                # Ensure score_today does not exceed score_max
+                if score_today > score_max:
+                    score_today = score_max
         return {
             "score_today": score_today,
             "score_in_two_years": score_in_two_years,
@@ -48,30 +60,24 @@ def calculate_question_score(answer, question, choices) -> Dict[str, float]:
         raise ValueError(f"Error calculating question score: {e}")
 
 
-# Step 2: Aggregate scores for sub-challenges
 def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
-    sub_challenge_scores = {
-        "today": {},
-        "in_two_years": {},
-    }
-    # Récupérer toutes les réponses originales et modifiées pour le pacte d'engagement
-    original_answers = Answers.objects.filter(id__in=module_esg.original_answers)
-    modified_answers = Answers.objects.filter(id__in=module_esg.modified_answers)
+    # Initialize the dictionary to store sub-challenge scores
+    sub_challenge_scores = {"today": {}, "in_two_years": {}}
 
-    # Créer un dictionnaire basé sur id_question pour permettre un écrasement des réponses originales
-    answers_dict = {answer.id_question: answer for answer in original_answers}
+    # Retrieve all the original and modified answers in one query
+    original_answers = {answer.id_question: answer for answer in Answers.objects.filter(id__in=module_esg.original_answers)}
+    modified_answers = {answer.id_question: answer for answer in Answers.objects.filter(id__in=module_esg.modified_answers)}
 
-    # Remplacer ou ajouter les réponses modifiées
-    for answer in modified_answers:
-        answers_dict[answer.id_question] = answer
+    # Combine original and modified answers
+    answers_dict = {**original_answers, **modified_answers}
 
-    # Obtenir la liste des réponses finales
-    answers_to_commitment = [answer.id for answer in answers_dict.values()]
+    # List of answers to commit (no need to iterate twice)
+    answers_to_commitment = answers_dict.values()
 
-    for answer_id in answers_to_commitment:
+    # Iterate through all answers to calculate sub-challenge scores
+    for answer in answers_to_commitment:
         try:
             # Retrieve associated data
-            answer = Answers.get_by_id(answer_id)
             question = Questions.get_by_id(answer.id_question)
             sub_challenge = SubChallenges.get_by_id(answer.id_sub_challenge)
             choices = [Choices.get_by_id(choice_id) for choice_id in question.choices]
@@ -79,120 +85,176 @@ def calculate_sub_challenge_scores(module_esg) -> Dict[str, Dict[str, Any]]:
             # Calculate scores for the question
             question_scores = calculate_question_score(answer, question, choices)
 
-            # Aggregate scores for the sub-challenge
-            if sub_challenge.id not in sub_challenge_scores["today"]:
-                sub_challenge_scores["today"][sub_challenge.id] = {
-                    "name": sub_challenge.value,
-                    "score": 0.0,
-                    "score_max": 0.0,
-                }
-                sub_challenge_scores["in_two_years"][sub_challenge.id] = {
-                    "name": sub_challenge.value,
-                    "score": 0.0,
-                    "score_max": 0.0,
-                }
+            # Initialize sub-challenge scores if not already done
+            sub_challenge_scores["today"].setdefault(sub_challenge.id, {
+                "name": sub_challenge.value, "score": 0.0, "score_max": 0.0
+            })
+            sub_challenge_scores["in_two_years"].setdefault(sub_challenge.id, {
+                "name": sub_challenge.value, "score": 0.0, "score_max": 0.0
+            })
 
+            # Update scores
             sub_challenge_scores["today"][sub_challenge.id]["score"] += question_scores["score_today"]
             sub_challenge_scores["today"][sub_challenge.id]["score_max"] += question_scores["score_max"]
             sub_challenge_scores["in_two_years"][sub_challenge.id]["score"] += question_scores["score_in_two_years"]
             sub_challenge_scores["in_two_years"][sub_challenge.id]["score_max"] += question_scores["score_max"]
+
         except Exception as e:
-            print(f"Error processing answer {answer_id}: {e}")
+            print(f"Error processing answer {answer.id}: {e}")
 
-    return sub_challenge_scores
+    challenges_index = {"today": {}, "in_two_years": {}}
+    # Integrate the sub-challenge scores into the challenge index
+    for challenge in Challenges.get_all():
+        # Ensure sub-challenge scores are initialized in challenge index
+        challenges_index["today"].setdefault(challenge.index_challenge, {
+            "id": challenge.id,
+            "value": challenge.value,
+            "sub_challenges": {}
+        })
+        challenges_index["in_two_years"].setdefault(challenge.index_challenge, {
+            "id": challenge.id,
+            "value": challenge.value,
+            "sub_challenges": {}
+        })
 
+        for sub_challenge_id in challenge.sub_challenges:
+            sub_challenge_object = SubChallenges.get_by_id(sub_challenge_id)
 
-def calculate_challenge_scores(module_esg) -> tuple[dict[str, dict[str, Any]], dict[str, dict[Any, Any]]]:
-    challenge_scores = {"today": {}, "in_two_years": {}}
-    sub_challenge_scores = calculate_sub_challenge_scores(module_esg)
-
-    for sub_challenge_id, scores in sub_challenge_scores["today"].items():
-        try:
-            # Retrieve the parent challenge for the sub-challenge
-            parent_challenge = Challenges.objects.filter(
-                sub_challenges__contains=sub_challenge_id).first()
-            if not parent_challenge:
-                print(f"No parent challenge found for sub-challenge ID: {sub_challenge_id}")
-                continue
-
-            challenge_id = parent_challenge.id
-            if challenge_id not in challenge_scores["today"]:
-                challenge_scores["today"][challenge_id] = {
-                    "name": parent_challenge.value,
+            challenges_index["today"][challenge.index_challenge]["sub_challenges"].setdefault(
+                sub_challenge_object.index_sub_challenge, {
+                    "id": sub_challenge_object.id,
+                    "value": sub_challenge_object.value,
                     "score": 0.0,
                     "score_max": 0.0,
-                }
-                challenge_scores["in_two_years"][challenge_id] = {
-                    "name": parent_challenge.value,
+                })
+            challenges_index["in_two_years"][challenge.index_challenge]["sub_challenges"].setdefault(
+                sub_challenge_object.index_sub_challenge, {
+                    "id": sub_challenge_object.id,
+                    "value": sub_challenge_object.value,
                     "score": 0.0,
                     "score_max": 0.0,
-                }
+                })
 
-            # Add sub-challenge scores to the corresponding challenge
-            challenge_scores["today"][challenge_id]["score"] += scores["score"]
-            challenge_scores["today"][challenge_id]["score_max"] += scores["score_max"]
-            challenge_scores["in_two_years"][challenge_id]["score"] += \
-                sub_challenge_scores["in_two_years"][sub_challenge_id]["score"]
-            challenge_scores["in_two_years"][challenge_id]["score_max"] += \
-                sub_challenge_scores["in_two_years"][sub_challenge_id]["score_max"]
+            # Add scores from sub_challenge_scores to the challenges index
+            if sub_challenge_object.id in sub_challenge_scores["today"]:
+                challenges_index["today"][challenge.index_challenge]["sub_challenges"][sub_challenge_object.index_sub_challenge]["score"] = \
+                    sub_challenge_scores["today"][sub_challenge_object.id]["score"]
+                challenges_index["today"][challenge.index_challenge]["sub_challenges"][sub_challenge_object.index_sub_challenge]["score_max"] = \
+                    sub_challenge_scores["today"][sub_challenge_object.id]["score_max"]
 
-        except Exception as e:
-            print(f"Error processing sub-challenge {sub_challenge_id}: {e}")
+            if sub_challenge_object.id in sub_challenge_scores["in_two_years"]:
+                challenges_index["in_two_years"][challenge.index_challenge]["sub_challenges"][sub_challenge_object.index_sub_challenge]["score"] = \
+                    sub_challenge_scores["in_two_years"][sub_challenge_object.id]["score"]
+                challenges_index["in_two_years"][challenge.index_challenge]["sub_challenges"][sub_challenge_object.index_sub_challenge]["score_max"] = \
+                    sub_challenge_scores["in_two_years"][sub_challenge_object.id]["score_max"]
 
-    return sub_challenge_scores, challenge_scores
+        # Sort sub-challenges by index
+        challenges_index["today"][challenge.index_challenge]["sub_challenges"] = dict(
+            sorted(challenges_index["today"][challenge.index_challenge]["sub_challenges"].items(), key=lambda x: x[0])
+        )
+        challenges_index["in_two_years"][challenge.index_challenge]["sub_challenges"] = dict(
+            sorted(challenges_index["in_two_years"][challenge.index_challenge]["sub_challenges"].items(), key=lambda x: x[0])
+        )
+
+    # Sort challenges by index_challenge
+    challenges_index["today"] = dict(
+        sorted(challenges_index["today"].items(), key=lambda x: x[0])
+    )
+    challenges_index["in_two_years"] = dict(
+        sorted(challenges_index["in_two_years"].items(), key=lambda x: x[0])
+    )
+
+    return challenges_index
 
 
-def calculate_theme_scores(module_esg) -> tuple[dict[str, dict[str, Any]], dict[str, dict[Any, Any]], dict[str, dict[Any, Any]]]:
-    theme_scores = {"name": [], "today": {}, "in_two_years": {}}
-    sub_challenge_scores, challenge_scores = calculate_challenge_scores(module_esg)
+def calculate_challenge_scores(module_esg) -> dict[str, dict[str, Any]]:
+    # Calculate sub-challenge scores
+    challenges_index_1 = calculate_sub_challenge_scores(module_esg)
+    # Aggregate challenge scores
+    for index_challenge, sub_challenges in challenges_index_1["today"].items():
+        # Initialize dictionaries to hold scores
+        challenge_score_today = 0.0
+        challenge_score_max_today = 0.0
+        challenge_score_two_years = 0.0
+        challenge_score_max_two_years = 0.0
 
-    for challenge_id, scores in challenge_scores["today"].items():
-        try:
-            # Retrieve the theme for the challenge based on its color
-            challenge = Challenges.get_by_id(challenge_id)
-            theme = Challenges.get_theme_from_color(challenge.color)
+        # Store sub-challenge details and aggregate scores
+        for index_sub_challenge, sub_challenge_data in sub_challenges["sub_challenges"].items():
+            # Add to the score totals
+            challenge_score_today += sub_challenge_data["score"]
+            challenge_score_max_today += sub_challenge_data["score_max"]
+            challenge_score_two_years += challenges_index_1["in_two_years"][index_challenge]["sub_challenges"].get(index_sub_challenge, {}).get("score", 0.0)
+            challenge_score_max_two_years += challenges_index_1["in_two_years"][index_challenge]["sub_challenges"].get(index_sub_challenge, {}).get("score_max", 0.0)
 
-            if theme not in theme_scores["today"]:
-                theme_scores["today"][theme] = {"score": 0.0, "score_max": 0.0}
-                theme_scores["in_two_years"][theme] = {"score": 0.0, "score_max": 0.0}
-                theme_scores["name"].append(theme)
+        # Store the challenge scores
+        challenges_index_1["today"][index_challenge] = {
+            "score_details": {
+                "score": challenge_score_today,
+                "score_max": challenge_score_max_today
+            }
+        }
+        challenges_index_1["in_two_years"][index_challenge] = {
+            "score_details": {
+                "score": challenge_score_two_years,
+                "score_max": challenge_score_max_two_years
+            }
+        }
+        challenges_index_1["today"][index_challenge]["sub_challenges"] = sub_challenges
+        challenges_index_1["in_two_years"][index_challenge]["sub_challenges"] = sub_challenges
 
-            # Add challenge scores to the theme
-            theme_scores["today"][theme]["score"] += scores["score"]
-            theme_scores["today"][theme]["score_max"] += scores["score_max"]
-            theme_scores["in_two_years"][theme]["score"] += challenge_scores["in_two_years"][challenge_id]["score"]
-            theme_scores["in_two_years"][theme]["score_max"] += challenge_scores["in_two_years"][challenge_id]["score_max"]
+    return challenges_index_1
 
-        except Exception as e:
-            print(f"Error processing challenge {challenge_id}: {e}")
 
-    return sub_challenge_scores, challenge_scores, theme_scores
+
+
+def calculate_theme_scores(module_esg) -> tuple[
+    dict[str, dict[str, Any]], dict[str, list[Any] | dict[Any, Any]]]:
+    theme_scores = {"today": {}, "in_two_years": {}}
+    challenges_index_1 = calculate_challenge_scores(module_esg)
+    # Iterate over the 'today' and 'in_two_years' challenges to calculate theme scores
+    for period in ["today", "in_two_years"]:
+        for challenge_id, challenge_data in challenges_index_1[period].items():
+            try:
+                # Retrieve the challenge and its associated theme from color
+                challenge_uuid = challenges_index_1[period][challenge_id]["sub_challenges"]["id"]
+                challenge = Challenges.get_by_id(challenge_uuid)
+                theme = Challenges.get_theme_from_color(challenge.color)
+                # Ensure the theme exists in theme_scores structure
+                if theme not in theme_scores[period]:
+                    theme_scores[period][theme] = {"score": 0.0,"score_max": 0.0}
+                # Accumulate the scores for this theme
+                theme_scores[period][theme]["score"] += challenge_data["score_details"]["score"]
+                theme_scores[period][theme]["score_max"] += challenge_data["score_details"]["score_max"]
+
+            except Exception as e:
+                print(f"Error processing challenge {challenge_id}: {e}")
+    return challenges_index_1, theme_scores
 
 
 # Step 4: Calculate global ESG scores
 def calculate_global_esg_scores(module_esg) -> Dict[str, float]:
-    sub_challenge_scores, challenge_scores, theme_scores = calculate_theme_scores(module_esg)
+    challenges_scores, theme_scores_result = calculate_theme_scores(module_esg)
     try:
         # Initialize variables for total scores and max scores
         total_today = {"score": 0, "max_score": 0}
         total_in_two_years = {"score": 0, "max_score": 0}
 
         # Calculate the sum of scores and max scores for today
-        if theme_scores.get("today"):
-            for theme in theme_scores["today"].values():
+        if theme_scores_result.get("today"):
+            for theme in theme_scores_result["today"].values():
                 total_today["score"] += theme.get("score", 0)
                 total_today["max_score"] += theme.get("score_max", 0)
 
         # Calculate the sum of scores and max scores for in two years
-        if theme_scores.get("in_two_years"):
-            for theme in theme_scores["in_two_years"].values():
+        if theme_scores_result.get("in_two_years"):
+            for theme in theme_scores_result["in_two_years"].values():
                 total_in_two_years["score"] += theme.get("score", 0)
                 total_in_two_years["max_score"] += theme.get("score_max", 0)
 
         # Combine total scores for today and in two years
         combined_total = {
             "score": total_today["score"] + total_in_two_years["score"],
-            "max_score": total_today["max_score"] + total_in_two_years["max_score"]
+            "max_score": total_today["max_score"]
         }
 
         # Calculate total ESG percentages
@@ -203,9 +265,8 @@ def calculate_global_esg_scores(module_esg) -> Dict[str, float]:
 
         # Prepare combined scores for return
         combined_scores = stringify_keys({
-            "sub_challenge_scores": sub_challenge_scores,
-            "challenge_scores": challenge_scores,
-            "theme_scores": theme_scores,
+            "challenges_score" : challenges_scores,
+            "theme_scores": theme_scores_result,
             "total_today": total_today,
             "total_in_two_years": total_in_two_years,
             "combined_total": combined_total,
