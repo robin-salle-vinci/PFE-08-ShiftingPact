@@ -26,7 +26,7 @@ def calculate_question_score(answer, question, choices) -> Dict[str, float]:
         score_today = 0.0
         score_in_two_years = 0.0
 
-        if question.type_response == '%':
+        if question.type_response == 'pourcentage':
             # Use the highest percentage value as the max score
             valid_scores = [choice.score for choice in choices if
                             choice.value is not None]

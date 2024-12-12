@@ -151,7 +151,7 @@ def change_state(request, uuid_module_esg):
         filters_template = ['ALL']
         if client_infos.number_workers > 0: filters_template.append('WORKERS')
         if client_infos.owned_facility: filters_template.append('OWNED FACILITY')
-        if client_infos.service_or_product == 'produit': filters_template.append('PRODUITS')
+        if client_infos.service_or_product == 'product': filters_template.append('PRODUITS')
         questions_to_answer = Questions.objects.filter(template__in=filters_template).all()
         if len(module_esg.original_answers) != questions_to_answer.count():
             return HttpResponse("The client has not answered all questions", status=400)
