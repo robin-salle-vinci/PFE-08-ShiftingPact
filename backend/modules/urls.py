@@ -24,9 +24,6 @@ urlpatterns = [
     # Add answer  to the original list of answers
     path('add/answer/<str:uuid_module_esg>', views.add_original_answers, name='add_original_answers'),
 
-    # Add score to module
-    path('add/score/<str:uuid_module_esg>', views.add_score, name='add_score'),
-
     # Get all info about score of module
     path('score/<str:uuid_module_esg>', views.get_score, name='get_score'),
 ]
