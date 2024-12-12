@@ -180,6 +180,11 @@ def change_state(request, uuid_module_esg):
             id_module_esg=module_esg.id,
         )
 
+        # Calculer score ESG
+        global_esg_scores = calculate_global_esg_scores(module_esg)
+        module_esg.update(calculated_score=global_esg_scores['total_percentage'])
+        module_esg.save()
+
     ModulesESG.objects(id=uuid_module_esg).update(state=new_state)
     return HttpResponse("Successful modification of state", status=201)
 
@@ -315,58 +320,6 @@ def add_modified_answers(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-
-def stringify_keys(data):
-    """
-    Recursively convert all dictionary keys to strings.
-    """
-    if isinstance(data, dict):
-        return {str(key): stringify_keys(value) for key, value in data.items()}
-    elif isinstance(data, list):
-        return [stringify_keys(item) for item in data]
-    return data
-
-
-# Calculate ESG Module score
-@require_http_methods(["PATCH"])
-def add_score(request, uuid_module_esg):
-    # check authentication
-    authenticated_user = check_authenticated_user(request)
-    if isinstance(authenticated_user, HttpResponse):
-        return authenticated_user
-
-    # check if the user is an employee
-    if authenticated_user.role != 'employee':
-        return JsonResponse({'error': 'Only employees can access this endpoint'}, status=403)
-
-    try:
-        module_esg = ModulesESG.get_by_id(uuid_module_esg)
-    except ModulesESG.DoesNotExist:
-        return JsonResponse({'error': 'Module ESG not found'}, status=404)
-
-    # Check module state
-    if module_esg.state == 'open':
-        return JsonResponse(
-            {'error': 'Module ESG must be in verification or validated state'},
-            status=400)
-
-    # Calculate ESG scores
-    try:
-        global_esg_scores = calculate_global_esg_scores(module_esg)
-    except Exception as e:
-        return JsonResponse({'error': f'Error calculating ESG score: {str(e)}'},
-                            status=500)
-
-    try:
-        module_esg.update(calculated_score=global_esg_scores['total_percentage'])
-        module_esg.save()
-    except Exception as e:
-        return JsonResponse({'error': f'Error saving ESG score: {str(e)}'},
-                            status=500)
-
-    return JsonResponse({'score_total': global_esg_scores['total_percentage']}, status=200)
-
 
 @require_GET
 def get_score(request, uuid_module_esg):
