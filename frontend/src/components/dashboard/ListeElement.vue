@@ -10,6 +10,7 @@
     handleSeeEditForm: (payload: MouseEvent, id: string) => void
     handleValidate?: (payload: MouseEvent, id: string) => void
     handleSeePactForm?: (payload: MouseEvent, id: string) => void
+    handleSeeScore?: (payload: MouseEvent, id: string) => void
   }>()
 </script>
 
@@ -37,6 +38,12 @@
             @click="(event) => handleSeePactForm && handleSeePactForm(event, item.id)"
           >
             Voir Pacte
+          </button>
+          <button
+            v-if="seePact"
+            @click="(event) => handleSeeScore && handleSeeScore(event, item.id)"
+          >
+            Voir Score
           </button>
         </div>
       </div>
