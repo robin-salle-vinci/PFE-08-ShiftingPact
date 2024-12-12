@@ -16,11 +16,15 @@ class Challenges(DjangoCassandraModel):
         return cls.objects.get(pk=id_challenge)
 
     @classmethod
+    def get_all(cls):
+        return cls.objects.all()
+
+    @classmethod
     def get_theme_from_color(cls, color):
         color_to_theme = {
-            "#b5cdbf": "Environnement",
-            "#dfd4fb": "Social",
-            "#fde79": "Gouvernance",
+            "b5cdbf": "Environnement",
+            "dfd4fb": "Social",
+            "fde791": "Gouvernance",
         }
         return color_to_theme.get(color.lower(), "Inconnu")
 
@@ -34,6 +38,10 @@ class SubChallenges(DjangoCassandraModel):
     @classmethod
     def get_by_id(cls, id_sub_challenge):
         return cls.objects.get(pk=id_sub_challenge)
+
+    @classmethod
+    def get_all(cls):
+        return cls.objects.all()
 
 
 class Questions(DjangoCassandraModel):
