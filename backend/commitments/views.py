@@ -58,3 +58,22 @@ def get_one_by_module_id(request, id_module_esg):
 
    except Exception as e:
       return JsonResponse({'error': str(e)}, status=500)
+   
+
+
+@require_GET
+def get_all_for_client(request):
+   try:
+
+      authenticated_user = check_authenticated_user(request)
+      if isinstance(authenticated_user, HttpResponse):
+         return authenticated_user
+
+      commitments = CommitmentPacts.objects(id_client=authenticated_user.id)
+
+      commitments_data = [commitment_json(commitment) for commitment in commitments]
+
+      return JsonResponse(commitments_data, safe=False, status=200)
+
+   except Exception as e:
+      return JsonResponse({'error': str(e)}, status=500)

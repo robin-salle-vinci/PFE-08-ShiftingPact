@@ -4,27 +4,6 @@
       <div>
         <h2>Enregistrer une nouvelle entreprise</h2>
         <form @submit.prevent="handleCreate">
-          <!--<input type="text" name="firstname" placeholder="Prenom de l'employee" />
-          <input type="text" name="lastname" placeholder="Nom de l'employee" />
-          <input type="text" name="email" placeholder="Email de l'employee" v-model="email" />
-          <input
-            type="text"
-            name="employee-function"
-            id="employee-function"
-            placeholder="Fonction de l'employee"
-          />
-          <input type="text" name="company-name" placeholder="Nom de l'entreprise" />
-          <input type="text" name="adress" placeholder="N° d'entreprise" />
-          <input type="text" name="form-juridique" placeholder="Forme juridique" />
-          <input type="text" name="adress-social-siege" placeholder="Adresse du siège social" />
-          <input type="text" name="web-site-url" placeholder="Adresse de votre site web" />
-          <input type="text" name="code-nace" placeholder="Code Nace" />
-          <input
-            type="text"
-            name="chiffre-affaire-compatble"
-            id="Chiffre d'affaire du derrnier exercises comptable"
-          />
-          <input type="text" placeholder="Nombre de travailleurs" />-->
           <div class="input-element">
             <label for="company-name">Nom de l'entreprise</label>
             <input

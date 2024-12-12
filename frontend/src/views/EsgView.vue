@@ -77,9 +77,7 @@
       // Get the client and employee answers
       clientResponse.value = clientEsg.data.original_answers
       employeeResponse.value = clientEsg.data.modified_answers
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    }
+    } catch {}
   })
 
   const checkDisplayTemplate = (question: Question) => {
