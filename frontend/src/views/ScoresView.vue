@@ -463,6 +463,8 @@ onMounted(async () => {
 -->
 
 <style scoped>
+  @import url('https://fonts.googleapis.com/css?family=Lobster+Two&display=swap');
+
   .container {
     padding-bottom: 50px; /* Ajoute de l'espace en bas du conteneur */
   }
@@ -509,8 +511,6 @@ onMounted(async () => {
   .esg-table .bonus {
     font-style: italic;
   }
-
-  @import url('https://fonts.googleapis.com/css?family=Lobster+Two&display=swap');
 
   #titre {
     font-family: 'Lobster Two', cursive;

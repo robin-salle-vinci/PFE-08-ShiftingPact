@@ -19,57 +19,62 @@
     </div>
 
     <div class="form-container">
-      <div
-        v-for="(challenge, challengeIndex) in questions.challenges"
-        :key="challengeIndex"
-        class="category"
-      >
+      <div v-if="questions.challenges">
         <div
-          class="category-header"
-          :style="`background-color: #${challenge.color};`"
-          @click="toggleCategory(challengeIndex)"
+          v-for="(challenge, challengeIndex) in questions.challenges"
+          :key="challengeIndex"
+          class="category"
         >
-          <h3>{{ challenge.value }}</h3>
-          <div class="category-right-content">
-            <div class="category-progress">
+          <div
+            class="category-header"
+            :style="`background-color: #${challenge.color};`"
+            @click="toggleCategory(challengeIndex)"
+          >
+            <h3 class="challenge-title">{{ challenge.value }}</h3>
+            <div class="category-right-content">
+              <div class="category-progress">
+                <ChallengeProgress
+                  type="challenge"
+                  :responses="responses"
+                  :questions="
+                    challenge.sub_challenges.flatMap(
+                      (subChallenge: SubChallenge) => subChallenge.questions,
+                    )
+                  "
+                  :canAnswer="canAnswer"
+                />
+              </div>
+              <div class="separator"></div>
+              <i
+                class="fas fa-chevron-down toggle-arrow"
+                :class="{ open: categoryState[challengeIndex] }"
+              ></i>
+            </div>
+          </div>
+
+          <div v-show="categoryState[challengeIndex]" class="subcategories">
+            <div
+              v-for="(subChallenge, subChallengeIndex) in challenge.sub_challenges"
+              :key="subChallengeIndex"
+              class="subcategory"
+              @click="onSubChallengeSelected(subChallenge.questions, challenge.id, subChallenge.id)"
+            >
+              <h4>{{ subChallenge.value }}</h4>
               <ChallengeProgress
-                type="challenge"
+                type="subchallenge"
                 :responses="responses"
-                :questions="
-                  challenge.sub_challenges.flatMap(
-                    (subChallenge: SubChallenge) => subChallenge.questions,
-                  )
-                "
+                :questions="subChallenge.questions"
                 :canAnswer="canAnswer"
               />
             </div>
-            <div class="separator"></div>
-            <i
-              class="fas fa-chevron-down toggle-arrow"
-              :class="{ open: categoryState[challengeIndex] }"
-            ></i>
           </div>
         </div>
-
-        <div v-show="categoryState[challengeIndex]" class="subcategories">
-          <div
-            v-for="(subChallenge, subChallengeIndex) in challenge.sub_challenges"
-            :key="subChallengeIndex"
-            class="subcategory"
-            @click="onSubChallengeSelected(subChallenge.questions, challenge.id, subChallenge.id)"
-          >
-            <h4>{{ subChallenge.value }}</h4>
-            <ChallengeProgress
-              type="subchallenge"
-              :responses="responses"
-              :questions="subChallenge.questions"
-              :canAnswer="canAnswer"
-            />
-          </div>
+        <div class="container-btn" v-if="progress == 100">
+          <button @click="handleValidateForm" class="save-button">Envoye le formulaire</button>
         </div>
       </div>
-      <div class="container-btn" v-if="progress == 100">
-        <button @click="handleValidateForm" class="save-button">Envoye le formulaire</button>
+      <div v-else class="loading-container">
+        <div class="loading"></div>
       </div>
     </div>
   </div>
@@ -271,13 +276,17 @@
     transform: rotate(180deg);
   }
 
+  .challenge-title {
+    width: 100%;
+    padding-right: 10px;
+  }
+
   .category-right-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100px;
     height: 100%;
-    box-sizing: border-box;
   }
 
   .category-progress {
@@ -348,5 +357,30 @@
     display: flex;
     justify-content: center;
     margin-top: 5%;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .loading {
+    border: 15px solid #f3f3f3;
+    border-top: 15px solid #013238;
+    border-radius: 50%;
+    width: 125px;
+    height: 125px;
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 </style>

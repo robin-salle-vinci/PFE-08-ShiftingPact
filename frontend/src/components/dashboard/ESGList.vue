@@ -1,6 +1,7 @@
 <template>
   <ListElement
     v-if="esgVerification.length > 0"
+    class="title"
     :title="'Questionnaires ESG en attente de vérification'"
     :esgElement="esgVerification"
     :handleSeeEditForm="handleSeeEditForm"
@@ -12,6 +13,7 @@
 
   <ListElement
     v-if="esgOpen.length > 0"
+    class="title"
     :title="'Questionnaires ESG ouverts'"
     :esgElement="esgOpen"
     :handleSeeEditForm="handleSeeEditForm"
@@ -23,6 +25,7 @@
 
   <ListElement
     v-if="esgValidated.length > 0"
+    class="title"
     :title="'Questionnaires ESG validés'"
     :esgElement="esgValidated"
     :handleSeeEditForm="handleSeeEditForm"
@@ -82,4 +85,12 @@
   }
 </script>
 
-<style scoped></style>
+<style scoped>
+  * {
+    font-family: Arial, sans-serif;
+  }
+
+  .title {
+    color: #013238;
+  }
+</style>

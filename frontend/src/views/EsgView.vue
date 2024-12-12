@@ -2,27 +2,37 @@
   <HeaderElement />
   <button class="back-button" @click="handleBack"><span class="arrow-left"></span></button>
 
-  <div v-if="!esgForm || !client"></div>
-  <div v-else class="container">
-    <h1>Questionaires ESG de l'entreprise: {{ client.company_name }}</h1>
-    <div class="form challenge" v-for="challenge in esgForm.challenges" v-bind:key="challenge.id" c>
-      <h2>{{ challenge.value }}</h2>
-      <div
-        v-for="subChallenge in challenge.sub_challenges"
-        v-bind:key="subChallenge.id"
-        class="sub-challenge"
-      >
-        <h3>{{ subChallenge.value }}</h3>
-        <div v-for="question in subChallenge.questions" v-bind:key="question.id" class="question">
-          <QuestionElement
-            :idEsg="idEsg"
-            :state="stateEsg"
-            :question="question"
-            :clientAnswer="clientResponse[question.id]"
-            :employeeAnswer="employeeResponse ? employeeResponse[question.id] : undefined"
-            :companyName="client.company_name"
-            v-if="checkDisplayTemplate(question)"
-          />
+  <div class="container">
+    <div class="sub-container">
+      <div v-if="!esgForm || !client" class="loading-container">
+        <div class="loading"></div>
+      </div>
+      <div v-else>
+        <h1 class="title-white">Questionaires ESG de l'entreprise: {{ client.company_name }}</h1>
+        <div v-for="challenge in esgForm.challenges" v-bind:key="challenge.id" c>
+          <h2 class="title-white challenge-name">{{ challenge.value }}</h2>
+          <div
+            v-for="subChallenge in challenge.sub_challenges"
+            v-bind:key="subChallenge.id"
+            class="sub-challenge"
+          >
+            <h3>{{ subChallenge.value }}</h3>
+            <div
+              v-for="question in subChallenge.questions"
+              v-bind:key="question.id"
+              class="question"
+            >
+              <QuestionElement
+                :idEsg="idEsg"
+                :state="stateEsg"
+                :question="question"
+                :clientAnswer="clientResponse[question.id]"
+                :employeeAnswer="employeeResponse ? employeeResponse[question.id] : undefined"
+                :companyName="client.company_name"
+                v-if="checkDisplayTemplate(question)"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -107,15 +117,50 @@
 </script>
 
 <style scoped>
+  * {
+    font-family: 'Arial', sans-serif;
+  }
+
+  .container {
+    height: 85vh;
+    width: 100%;
+    overflow: hidden;
+    padding: 2% 12%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sub-container {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #013238;
+    border-radius: 4px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
   .container h1 {
     text-align: center;
   }
 
+  .title-white {
+    color: white;
+  }
+
+  .challenge-name {
+    margin-top: 5%;
+    margin-left: 2%;
+  }
+
   .back-button {
-    margin: 5%;
+    position: absolute;
+    margin: 2%;
     width: 50px;
     height: 50px;
-    background-color: #b5cdbf;
+    background-color: #013238;
     color: white;
     border: none;
     border-radius: 5px;
@@ -134,14 +179,6 @@
     border-right: 10px solid white;
   }
 
-  .challenge {
-    margin-left: 20%;
-    margin-right: 20%;
-    background-color: #013238;
-    border-radius: 10px;
-    padding: 30px;
-    margin-bottom: 5%;
-  }
   .challenge h2 {
     color: white;
   }
@@ -150,8 +187,34 @@
     margin-left: 2%;
     margin-right: 2%;
     margin-bottom: 2%;
-    background-color: #b5cdbf;
+    background-color: white;
     border-radius: 10px;
     padding: 30px;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+
+  .loading {
+    border: 15px solid white;
+    border-top: 15px solid #b5cdbf;
+    border-radius: 50%;
+    width: 125px;
+    height: 125px;
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 </style>

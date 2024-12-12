@@ -45,6 +45,10 @@
 </template>
 
 <style scoped>
+  * {
+    font-family: Arial, sans-serif;
+  }
+
   .container {
     display: flex;
     flex-direction: column;
@@ -68,7 +72,8 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: #dfd4fb;
+    background-color: #b5cdbf;
+    color: white;
     border-radius: 10px;
     padding: 10px;
     width: 100%;
@@ -96,9 +101,15 @@
     font-size: 16px;
     border: none;
     border-radius: 5px;
-    background-color: #b5cdbf;
-    color: white;
+    background-color: white;
+    color: #013238;
     cursor: pointer;
     transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: rgb(231, 231, 231);
+    transform: scale(1.03);
+    transition: transform 0.3s ease;
   }
 </style>
