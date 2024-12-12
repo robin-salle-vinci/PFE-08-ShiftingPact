@@ -29,7 +29,7 @@
 <template>
   <HeaderElement />
   <div class="container" v-if="allPacts.length > 0">
-    <h1>List Pacts</h1>
+    <h1>Liste des pactes</h1>
     <div class="list" v-for="item in allPacts" :key="item.id">
       <div class="item">
         <span class="company-name">{{ item.client_information.company_name }}</span>
@@ -37,7 +37,7 @@
           new Date(item.creation_date).toLocaleDateString('fr-FR')
         }}</span>
         <div class="actions">
-          <button @click="handleSeePact(item.id_module_esg)">Voir mais engangment</button>
+          <button @click="handleSeePact(item.id_module_esg)">Voir mes engagements</button>
           <button @click="handleSeeScore(item.id_module_esg)">Voir mon score</button>
         </div>
       </div>
@@ -64,6 +64,7 @@
     margin-top: 2%;
     margin-bottom: 0px;
     text-align: center;
+    color: #013238;
   }
 
   .list {
@@ -77,7 +78,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: #dfd4fb;
+    background-color: #b5cdbf;
     border-radius: 10px;
     padding: 10px;
     width: 100%;
@@ -105,9 +106,15 @@
     font-size: 16px;
     border: none;
     border-radius: 5px;
-    background-color: #b5cdbf;
-    color: white;
+    background-color: white;
+    color: #013238;
     cursor: pointer;
     transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: rgb(231, 231, 231);
+    transform: scale(1.03);
+    transition: transform 0.3s ease;
   }
 </style>
