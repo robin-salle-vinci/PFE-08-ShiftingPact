@@ -46,3 +46,13 @@
 ### Accéder à la page du frontend
 
 - Une fois les services démarrés, accédez à la page du frontend via l'URL suivante : http://localhost:3000
+
+### Ports utilisés
+
+- **Cassandra** : `9042`
+- **Frontend** : `3000`
+- **Backend** : `8000`
+
+### Remarques importantes
+
+- **Attention** : L'installation peut prendre un certain temps notamment à cause de la taille de la base de donnée.
